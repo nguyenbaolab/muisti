@@ -1,0 +1,80 @@
+# Cursor Rules — Muisti (Finnish Learning App)
+
+## Bước đầu tiên — LUÔN LUÔN
+
+Trước khi làm bất cứ việc gì, đọc theo thứ tự:
+
+1. `docs/CURRENT.md` — phase hiện tại; lấy path PLAN active từ đây
+2. `docs/project/WORKFLOW.md` — quy trình + 3 mức permission
+3. `docs/project/REQUIREMENTS.md` — business rules, features, schema
+4. `docs/project/CONTEXT.md` — tech context, conventions
+5. `docs/BLOCKERS.md` — tránh lặp lỗi / chờ quyết định
+6. PLAN phase active — path trong `CURRENT.md` (hiện tại: `docs/phases/phase-1/PLAN_1.md`)
+
+## Project
+
+Web app học tiếng Phần Lan (Suomen Mestari 1). Nội dung unit dùng chung; SRS / tiến độ ôn tập riêng từng người. Invite-only.
+
+Phân công: Claude thiết kế và viết prompt từng bước. Cursor thực thi code/data theo prompt đó. Không tự ý đổi kiến trúc đã chốt trong `docs/project/DECISIONS.md` nếu chưa được chủ dự án xác nhận.
+
+## Tech stack
+
+- Frontend: Vite + React + TypeScript (static SPA)
+- Data / Auth: Supabase (Postgres + Auth), client gọi `supabase-js`, RLS
+- Deploy: Cloudflare Pages
+- Không thêm framework / backend service mới nếu chưa bàn với Claude trước
+
+## Conventions
+
+- Comment code và commit message: tiếng Anh
+- Trao đổi với chủ dự án qua Claude: tiếng Việt, giọng thân mật (mình / bạn)
+- `npx tsc --noEmit` phải pass trước khi báo done
+- Mọi bảng có `user_id` phải bật RLS, policy giới hạn theo `auth.uid()`
+- Bảng content (`units` / `vocab_items` / `exercises`): client authenticated chỉ SELECT; ghi chỉ qua service role
+- WORKLOG: entry mới ở **đầu file** (sau tiêu đề)
+- Khi bí → ghi `docs/BLOCKERS.md`, dừng, hỏi user
+
+## 3 mức permission update (tóm tắt — đủ ở WORKFLOW.md)
+
+**Tự động:** `docs/project/CONTEXT.md`, `docs/WORKLOG.md`, `docs/KNOWN_ISSUES.md`, `PLAN_X.md` (chỉ trạng thái task)
+
+**Đề xuất, chờ confirm:** `docs/project/REQUIREMENTS.md`, `docs/project/DECISIONS.md`, `docs/project/PATTERNS.md`, `PLAN_X.md` (đổi scope)
+
+**Không bao giờ tự update:** `docs/project/WORKFLOW.md`, `docs/CURRENT.md` (trừ khi user yêu cầu rõ), `docs/USER_GUIDE.md`, `README.md`, `.cursorrules`
+
+## Quy tắc schema
+
+Mỗi khi tạo file migration mới trong `supabase/migrations/`, **bắt buộc** cập nhật `supabase/migrations/schema.sql` cùng lúc:
+
+1. Thêm thay đổi vào đúng bảng/section trong schema.sql
+2. Không tạo migration mà không cập nhật schema.sql
+
+## Sau mỗi task
+
+1. Update `CONTEXT.md` nếu đổi structure
+2. Update `WORKLOG.md` (entry mới ở đầu file)
+3. Update `PLAN_X.md` trạng thái task
+4. Nếu phát hiện bug → ghi `KNOWN_ISSUES.md`
+
+---
+
+## Nhắc nhở Project Knowledge
+
+Sau mỗi task hoàn thành, nếu có file tài liệu nào thay đổi quan trọng, thêm vào cuối response:
+
+> 📌 Nhắc upload lại lên Claude Project Knowledge:
+> - [tên file] — [lý do cụ thể]
+
+**Cần reupload khi đổi:**
+
+- `docs/project/REQUIREMENTS.md`
+- `docs/project/CONTEXT.md`
+- `docs/project/WORKFLOW.md`
+- `docs/project/DECISIONS.md`
+- `docs/KNOWN_ISSUES.md`
+
+**Không cần reupload** (đổi liên tục):
+
+- `docs/WORKLOG.md`
+- `docs/BLOCKERS.md`
+- `docs/CURRENT.md`
