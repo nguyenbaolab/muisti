@@ -4,6 +4,13 @@ Nhật ký thay đổi có ý nghĩa. Entry mới ở **đầu file** (sau tiêu
 
 ---
 
+## [2026-09-02] — docs(plan): full-extract Unit 1 xong mới được code (kể cả scaffold)
+
+- Cập nhật PLAN_1.md §2: bỏ ngoại lệ “không chặn scaffold / F-01”
+- Full-extract nội dung Unit 1 thật (đã soát) phải xong trước mọi task §3, kể cả T1.0
+
+---
+
 ## [2026-09-02] — docs(plan): sửa lại bullet PLAN_1.md §4 cho khớp out of scope
 
 - Lần sửa trước lạc ý (đọc như tham chiếu enum). Đổi thành: không tự ý thêm type ngoài core set 17 — chỉ mở rộng khi full-extract unit thật cần thiết
