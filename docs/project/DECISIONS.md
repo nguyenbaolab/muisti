@@ -4,6 +4,34 @@ Ghi theo thời gian, mới nhất ở trên. Mỗi entry: tên ngắn, ngày, q
 
 ---
 
+## Điểm bắt đầu: Suomen Mestari 2 (không phải 1)
+
+**Ngày:** 2026-09-02  
+**Quyết định:** App bắt đầu nội dung từ Suomen Mestari 2 (không phải cuốn 1) — quyết định có chủ đích, không phải nhầm lẫn. Cuốn 1 **không** bị loại khỏi scope: có thể retro-fit làm nội dung mở rộng trong tương lai, chỉ là chưa làm ở giai đoạn này.
+
+**Lý do:**
+- Nhu cầu học thực tế của chủ dự án bắt đầu từ cuốn 2
+
+**Phạm vi:** Toàn bộ nội dung content pipeline, schema `units`.
+
+**Không làm gì:** Không lấy Suomen Mestari 1 làm điểm bắt đầu v0.1. Không loại SM1 khỏi scope vĩnh viễn.
+
+---
+
+## Schema `units`: `book_code` + `unit_number` độc lập theo từng cuốn
+
+**Ngày:** 2026-09-02  
+**Quyết định:** Bảng `units` có cột `book_code` (text, ví dụ `'suomen_mestari_2'`) tách biệt với `unit_number` (int). `unit_number` là số thứ tự **độc lập theo từng cuốn** — Kappale 1 của Suomen Mestari 2 và Kappale 1 của Suomen Mestari 1 (nếu retro-fit sau) đều có thể là `unit_number = 1`, không tiếp nối số thứ tự giữa các cuốn. Unique phải là composite (`book_code`, `unit_number`), không unique toàn cục trên `unit_number`.
+
+**Lý do:**
+- Cho phép mở rộng thêm cuốn 1 trong tương lai (xem entry Điểm bắt đầu: Suomen Mestari 2) mà không phải đánh lại số thứ tự của cuốn 2 đã có
+
+**Phạm vi:** Schema bảng `units`.
+
+**Không làm gì:** Không unique toàn cục trên `unit_number`. Không đánh số unit tiếp nối xuyên cuốn.
+
+---
+
 ## Core set `exercises.type` + cột `scene_description` cho bài phụ thuộc tranh
 
 **Ngày:** 2026-09-02  
@@ -123,7 +151,7 @@ Ghi theo thời gian, mới nhất ở trên. Mỗi entry: tên ngắn, ngày, q
 **Quyết định:** Dùng cá nhân + nhóm bạn học chung. Không public / share nội dung đã convert ra ngoài nhóm. Ưu tiên chỉ mời người đã có sách thật.
 
 **Lý do:**
-- Giáo trình Suomen Mestari 1 là tài liệu có bản quyền
+- Giáo trình Suomen Mestari 2 (và Suomen Mestari 1, nếu mở rộng sau này) là tài liệu có bản quyền
 - Invite-only giúp giới hạn người thấy nội dung convert
 - Đây là ghi chú thực tế, không phải tư vấn pháp lý chính thức
 

@@ -7,7 +7,7 @@
 
 ## 1. Tổng quan
 
-Muisti là web app học tiếng Phần Lan theo giáo trình Suomen Mestari 1. Nội dung bài học dùng chung cho mọi người; tiến độ ôn tập từ vựng (SRS) thì riêng từng người. v0.1 phục vụ chủ dự án và nhóm bạn được mời — không public.
+Muisti là web app học tiếng Phần Lan theo giáo trình Suomen Mestari 2 (khả năng mở rộng thêm Suomen Mestari 1 trong tương lai — xem `DECISIONS.md`). Nội dung bài học dùng chung cho mọi người; tiến độ ôn tập từ vựng (SRS) thì riêng từng người. v0.1 phục vụ chủ dự án và nhóm bạn được mời — không public.
 
 ---
 
@@ -38,10 +38,12 @@ Muisti là web app học tiếng Phần Lan theo giáo trình Suomen Mestari 1. 
 
 **units**
 - id (uuid, pk)
-- number (int) — số thứ tự unit trong sách
+- book_code (text) — mã cuốn; ví dụ `'suomen_mestari_2'`
+- unit_number (int) — số thứ tự **độc lập theo từng cuốn** (Kappale 1 của SM2 và SM1 đều có thể là `1`)
 - title (text)
 - description (text, nullable)
 - created_at (timestamptz)
+- unique (`book_code`, `unit_number`) — composite theo cuốn; **không** unique toàn cục trên `unit_number`
 
 **vocab_items**
 - id (uuid, pk)

@@ -4,6 +4,32 @@ Nhật ký thay đổi có ý nghĩa. Entry mới ở **đầu file** (sau tiêu
 
 ---
 
+## [2026-09-03] — docs: đồng bộ README / .cursorrules / entry bản quyền theo SM2
+
+- README.md dòng 3: điểm bắt đầu SM2, SM1 để tương lai
+- `.cursorrules` dòng 16: cùng ý
+- DECISIONS.md entry bản quyền (2026-09-01): bổ sung SM2 (+ SM1 nếu mở rộng) vào bullet lý do — không tạo entry mới
+
+---
+
+## [2026-09-02] — docs(decisions): bổ sung 2 entry còn thiếu (SM2 + book_code)
+
+- Quyết định đã chốt trong chat Claude trước đó nhưng chưa được ghi vào DECISIONS.md
+- Entry A: điểm bắt đầu Suomen Mestari 2 (SM1 retro-fit sau, không loại khỏi scope)
+- Entry B: `units.book_code` + `unit_number` độc lập theo cuốn, unique composite
+- REQUIREMENTS.md không đổi (đã khớp)
+
+---
+
+## [2026-09-02] — docs(req): đồng bộ REQUIREMENTS.md với SM2 / book_code (bug đồng bộ)
+
+- §1: điểm bắt đầu là Suomen Mestari 2 (SM1 để tương lai) — schema cũ còn ghi SM1
+- Bảng `units`: `number` → `unit_number`; thêm `book_code`; unique composite (`book_code`, `unit_number`)
+- Không phải quyết định mới — REQUIREMENTS.md chưa được cập nhật khi đã chốt SM2 + đánh số độc lập theo cuốn
+- Chưa có migration/data thật trên Supabase
+
+---
+
 ## [2026-09-02] — docs(plan): full-extract Unit 1 xong mới được code (kể cả scaffold)
 
 - Cập nhật PLAN_1.md §2: bỏ ngoại lệ “không chặn scaffold / F-01”

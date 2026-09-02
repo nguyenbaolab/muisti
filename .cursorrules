@@ -13,7 +13,7 @@ Trước khi làm bất cứ việc gì, đọc theo thứ tự:
 
 ## Project
 
-Web app học tiếng Phần Lan (Suomen Mestari 1). Nội dung unit dùng chung; SRS / tiến độ ôn tập riêng từng người. Invite-only.
+Web app học tiếng Phần Lan (Suomen Mestari 2, có thể mở rộng SM1 sau). Nội dung unit dùng chung; SRS / tiến độ ôn tập riêng từng người. Invite-only.
 
 Phân công: Claude thiết kế và viết prompt từng bước. Cursor thực thi code/data theo prompt đó. Không tự ý đổi kiến trúc đã chốt trong `docs/project/DECISIONS.md` nếu chưa được chủ dự án xác nhận.
 
