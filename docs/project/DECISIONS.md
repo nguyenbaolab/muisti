@@ -4,6 +4,22 @@ Ghi theo thời gian, mới nhất ở trên. Mỗi entry: tên ngắn, ngày, q
 
 ---
 
+## Core set `exercises.type` + cột `scene_description` cho bài phụ thuộc tranh
+
+**Ngày:** 2026-09-02  
+**Quyết định:** Chốt enum `exercises.type` thành core set 17 type sau scan cấu trúc 3 unit đầu Suomen Mestari 2 (Kappale 1–3). Coi là bộ lõi — mở rộng dần khi full-extract unit sau phát hiện pattern lặp lại, không quét thêm unit chỉ để “hội tụ” enum cho đủ. Thêm cột `exercises.scene_description` (text, nullable), tách khỏi `prompt`, cho bài tập mà đề gốc phụ thuộc hoàn toàn vào tranh vẽ. Claude mô tả cảnh khách quan lúc authoring (người/vật/hành động quan sát được), không diễn giải ý định hay đáp án. UI hiện khung riêng; styling để ngỏ lúc scaffold.
+
+**Lý do:**
+- Scan 3 unit đầu đã đủ để có bộ type dùng được; quét thêm để “đóng băng” enum tốn effort, pattern mới vẫn có thể xuất hiện khi extract thật
+- Không tái tạo / hiển thị hình gốc từ sách (bản quyền)
+- Mô tả khách quan giữ độ khó: học viên vẫn phải tự hiểu cảnh, không bị lộ đáp án trong text
+
+**Phạm vi:** Schema bảng `exercises`, content pipeline (authoring), UI hiển thị đề bài có tranh.
+
+**Không làm gì:** Không scan thêm unit chỉ để hoàn thiện enum. Không lưu/hiển thị ảnh scan từ sách. Không gộp `scene_description` vào `prompt`.
+
+---
+
 ## Chung lịch trình unit, chỉ ôn tập (SRS) là riêng từng người
 
 **Ngày:** 2026-09-01  

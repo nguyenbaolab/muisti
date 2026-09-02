@@ -109,7 +109,7 @@ Scaffold web app (Vite + React + TS + Supabase + Cloudflare Pages) và ship MVP:
 - Cá nhân hoá pacing / unlock unit theo tốc độ riêng
 - Chấm bài tự luận bằng AI
 - App báo thức (dự án riêng)
-- Matching và các loại exercise khác — chỉ mở rộng sau recon sách thật
+- Tự ý thêm exercise type mới ngoài core set đã chốt (17 type, xem `docs/project/REQUIREMENTS.md`) — chỉ mở rộng khi full-extract unit thật cho thấy pattern mới cần thiết.
 - Form đăng ký công khai
 
 ## §5 Definition of done
