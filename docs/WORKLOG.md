@@ -4,6 +4,32 @@ Nhật ký thay đổi có ý nghĩa. Entry mới ở **đầu file** (sau tiêu
 
 ---
 
+## Reorganize supabase/ — migration convention
+**Ngày:** 2026-09-08
+**Trạng thái:** Done
+
+**Đã làm:**
+- Tạo supabase/schema.sql (full DDL, source of truth)
+- Tạo supabase/migrations/20260908_001_units.sql
+- Tạo supabase/migrations/20260908_002_vocab_exercises.sql
+- Xóa supabase/migrations/schema.sql (file cũ)
+- Cập nhật CONTEXT.md §2, DECISIONS.md
+
+---
+
+## T1.3-A — DDL vocab_items + exercises + RLS
+**Ngày:** 2026-09-08
+**Trạng thái:** File sẵn — chờ chạy incremental trên Supabase Dashboard
+
+**Đã làm:**
+- Append `vocab_items` + `exercises` vào `schema.sql` (giữ nguyên `units`)
+- RLS SELECT `authenticated` cả 2 bảng; ghi chỉ service role
+- Chưa chạy SQL trên project thật (chủ dự án chỉ dán block T1.3-A)
+
+**Phụ thuộc tiếp theo:** Xác nhận Table Editor + policy, rồi T1.3-B (UI học unit)
+
+---
+
 ## T1.2 — Danh sách unit (F-02)
 **Ngày:** 2026-09-08
 **Trạng thái:** Done

@@ -1,8 +1,6 @@
--- Muisti schema
--- Version: 0.1.0
+-- Migration: 20260908_001
+-- Task: T1.2-A — bảng units + RLS
 -- Date: 2026-09-08
--- Task: T1.2-A (F-02) — bảng units + RLS SELECT authenticated
--- Canonical DDL. Apply via Supabase SQL Editor on a fresh project.
 
 -- bảng units
 CREATE TABLE units (

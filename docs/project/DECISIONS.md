@@ -4,6 +4,24 @@ Ghi theo thời gian, mới nhất ở trên. Mỗi entry: tên ngắn, ngày, q
 
 ---
 
+## Convention: `supabase/schema.sql` + `supabase/migrations/`
+
+**Ngày:** 2026-09-08  
+**Quyết định:** Tách DDL thành 2 lớp:
+- `supabase/schema.sql` — full schema luôn up-to-date, dùng để setup project Supabase mới từ đầu
+- `supabase/migrations/<YYYYMMDD>_<seq>_<name>.sql` — file incremental riêng cho mỗi lần thay đổi DB, chạy theo thứ tự khi update DB đang có data
+
+**Lý do:**
+- Convention rõ ràng hơn
+- Dễ track lịch sử thay đổi schema
+- Tách biệt "setup mới" vs "update đang chạy"
+
+**Phạm vi:** Toàn bộ thay đổi DB từ đây về sau.
+
+**Không làm gì:** Không dùng Supabase CLI migration runner (vẫn apply thủ công qua SQL Editor).
+
+---
+
 ## Mở rộng enum `exercises.type`: thêm `dialogue`, `reading_passage` (lưu nguyên văn bài khoá)
 
 **Ngày:** 2026-09-07  

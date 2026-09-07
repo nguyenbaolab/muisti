@@ -33,8 +33,11 @@ src/
   types/
     database.ts         # interface Unit
 public/                 # static assets
-supabase/migrations/
-  schema.sql            # units + RLS SELECT authenticated
+supabase/
+  schema.sql              # full DDL — dùng setup project mới
+  migrations/
+    20260908_001_units.sql
+    20260908_002_vocab_exercises.sql
 .env.example            # VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY
 ```
 
