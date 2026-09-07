@@ -19,13 +19,16 @@ Tài liệu kỹ thuật cho Cursor khi đọc/ghi code. Business: `REQUIREMENTS
 
 ```
 src/
-  main.tsx              # entry point (Vite template)
-  App.tsx               # root component (Vite template)
+  main.tsx              # entry point
+  App.tsx               # BrowserRouter + session gate (onAuthStateChange)
   App.css
   index.css
   assets/               # vite.svg, react.svg, hero.png
   lib/
     supabase.ts         # Supabase client (createClient, requireEnv guard)
+  pages/
+    LoginPage.tsx       # email/password — signInWithPassword, không sign-up
+    AppShell.tsx        # placeholder sau login + Đăng xuất
 public/                 # static assets
 supabase/migrations/
   schema.sql            # DDL placeholder (chưa có bảng)
@@ -36,7 +39,10 @@ supabase/migrations/
 
 ## §3 Navigation skeleton
 
-Chưa có. Sau scaffold dự kiến: login → danh sách unit → học unit (vocab + exercises) → hàng đợi ôn SRS. Chi tiết UI nằm ở `REQUIREMENTS.md`, không ghi ở đây.
+- `/login` — `LoginPage` khi chưa có session; đã login thì redirect `/`
+- `/` — `AppShell` khi có session; chưa login thì redirect `/login`
+- Session: `getSession` + `onAuthStateChange` trong `App.tsx`; lần đầu hiện `Loading...`
+- Sau login (placeholder): `AppShell` — T1.2 sẽ thêm danh sách unit. Chi tiết UI nghiệp vụ ở `REQUIREMENTS.md`.
 
 ---
 

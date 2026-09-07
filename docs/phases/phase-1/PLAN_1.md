@@ -31,15 +31,15 @@ Scaffold web app (Vite + React + TS + Supabase + Cloudflare Pages) và ship MVP:
 
 ### T1.1 — Đăng nhập (F-01)
 
-**Trạng thái:** Pending  
+**Trạng thái:** Done  
 **Feature:** F-01
 
 **Acceptance:**
-- [ ] Màn login email/password qua Supabase Auth
-- [ ] User chưa invite: không tự đăng ký được (không có form sign-up; public sign-up tắt trên project)
-- [ ] Sai email/mật khẩu: báo lỗi rõ
-- [ ] Login thành công → vào app; refresh vẫn giữ session
-- [ ] Logout được
+- [x] Màn login email/password qua Supabase Auth
+- [x] User chưa invite: không tự đăng ký được (không có form sign-up; public sign-up tắt trên project)
+- [x] Sai email/mật khẩu: báo lỗi rõ
+- [x] Login thành công → vào app; refresh vẫn giữ session
+- [x] Logout được
 
 ---
 

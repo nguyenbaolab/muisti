@@ -4,6 +4,21 @@ Nhật ký thay đổi có ý nghĩa. Entry mới ở **đầu file** (sau tiêu
 
 ---
 
+## T1.1 — Đăng nhập (F-01)
+**Ngày:** 2026-09-07
+**Trạng thái:** Done
+
+**Đã làm:**
+- Cài react-router-dom ^7.18.3 (bundle types, không cần @types/react-router-dom)
+- Tạo src/pages/LoginPage.tsx: form email/password, supabase.auth.signInWithPassword, loading + error state
+- Tạo src/pages/AppShell.tsx: placeholder với logout
+- Sửa src/App.tsx: BrowserRouter + onAuthStateChange session tracking, redirect logic, loading state
+- npx tsc --noEmit pass
+
+**Phụ thuộc tiếp theo:** T1.2 (F-02: danh sách unit)
+
+---
+
 ## T1.0 — Scaffold Vite + React + TypeScript + Supabase client
 **Ngày:** 2026-09-07
 **Trạng thái:** Done
