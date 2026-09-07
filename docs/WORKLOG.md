@@ -4,6 +4,45 @@ Nhật ký thay đổi có ý nghĩa. Entry mới ở **đầu file** (sau tiêu
 
 ---
 
+## T1.0 — Scaffold Vite + React + TypeScript + Supabase client
+**Ngày:** 2026-09-07
+**Trạng thái:** Done
+
+**Đã làm:**
+- Khởi tạo Vite + React + TypeScript project vào root (scaffold vào thư mục tạm rồi copy để giữ docs/, .cursorrules, README.md)
+- Cài @supabase/supabase-js ^2.116.0
+- Tạo src/lib/supabase.ts: Supabase client với requireEnv guard (throw rõ tên biến thiếu)
+- Tạo .env.example (VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY)
+- Bổ sung .env vào .gitignore (Vite template mặc định chỉ ignore *.local)
+- Tạo supabase/migrations/schema.sql placeholder
+- npm run dev pass (Vite 8.2.2, React 19.2.8)
+- npx tsc --noEmit pass (TypeScript 6.0.2)
+
+**Phụ thuộc tiếp theo:** T1.1 (F-01: đăng nhập)
+
+---
+
+## [2026-09-07] — chore(scaffold): T1.0-B env + Supabase client
+
+- `.gitignore`: thêm `.env` (trước chỉ có `*.local`)
+- `.env.example`: `VITE_SUPABASE_URL` / `VITE_SUPABASE_ANON_KEY` (không tạo `.env`)
+- `src/lib/supabase.ts`: named export `supabase`; throw nếu thiếu biến — chưa wire UI
+- `npx tsc --noEmit` pass
+- T1.0 còn lại: `supabase/migrations/schema.sql`
+
+---
+
+## [2026-09-07] — chore(scaffold): T1.0-A Vite + React + TS
+
+- `npm create vite@latest` template `react-ts` (copy vào root, giữ docs/ `.cursorrules` README.md `.git/`)
+- `npm install` + `@supabase/supabase-js` (chưa wire client)
+- `npm run dev` → VITE 8.2.2 ready http://localhost:5173/ rồi dừng
+- `npx tsc --noEmit` pass
+- package.json name `muisti` (tránh `vite-tmp` từ folder tạm)
+- T1.0 còn lại: env, supabase client, schema.sql placeholder
+
+---
+
 ## [2026-09-07] — docs(plan): đồng bộ PLAN_1.md §2 + §4 với thực tế extract
 
 - §2: phụ thuộc full-extract PDF unit 1 **và** unit 2 trước mọi task §3 (kể cả T1.0)

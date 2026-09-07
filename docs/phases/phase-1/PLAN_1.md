@@ -17,15 +17,15 @@ Scaffold web app (Vite + React + TS + Supabase + Cloudflare Pages) và ship MVP:
 
 ### T1.0 — Scaffold Vite + React + TypeScript + Supabase client
 
-**Trạng thái:** Pending  
+**Trạng thái:** Done  
 **Feature:** (nền tảng, chưa có ID F-)
 
 **Acceptance:**
-- [ ] `npm run dev` chạy được, không lỗi build
-- [ ] `npx tsc --noEmit` pass
-- [ ] Supabase client khởi tạo từ `VITE_SUPABASE_URL` / `VITE_SUPABASE_ANON_KEY` (file `.env.example` có mặt, `.env` không commit)
-- [ ] Có chỗ đặt `supabase/migrations/schema.sql` (có thể chưa có bảng nếu migration đi kèm F-01/F-02)
-- [ ] `docs/project/CONTEXT.md` §2 module map được fill sau khi có cây thư mục thật
+- [x] `npm run dev` chạy được, không lỗi build
+- [x] `npx tsc --noEmit` pass
+- [x] Supabase client khởi tạo từ `VITE_SUPABASE_URL` / `VITE_SUPABASE_ANON_KEY` (file `.env.example` có mặt, `.env` không commit)
+- [x] Có chỗ đặt `supabase/migrations/schema.sql` (có thể chưa có bảng nếu migration đi kèm F-01/F-02)
+- [x] `docs/project/CONTEXT.md` §2 module map được fill sau khi có cây thư mục thật
 
 ---
 

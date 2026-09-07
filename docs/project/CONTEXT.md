@@ -17,7 +17,20 @@ Tài liệu kỹ thuật cho Cursor khi đọc/ghi code. Business: `REQUIREMENTS
 
 ## §2 Module map
 
-Chưa scaffold, sẽ fill khi có code.
+```
+src/
+  main.tsx              # entry point (Vite template)
+  App.tsx               # root component (Vite template)
+  App.css
+  index.css
+  assets/               # vite.svg, react.svg, hero.png
+  lib/
+    supabase.ts         # Supabase client (createClient, requireEnv guard)
+public/                 # static assets
+supabase/migrations/
+  schema.sql            # DDL placeholder (chưa có bảng)
+.env.example            # VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY
+```
 
 ---
 
@@ -51,4 +64,4 @@ Hướng đã chốt:
 
 ## §6 Store/API index
 
-Chưa có. Sẽ fill khi có store / client API sau scaffold.
+- `src/lib/supabase.ts`: `export const supabase` — Supabase client dùng chung toàn app; khởi tạo từ `VITE_SUPABASE_URL` + `VITE_SUPABASE_ANON_KEY`

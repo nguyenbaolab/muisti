@@ -1,0 +1,3 @@
+-- Muisti schema
+-- DDL sẽ được viết khi làm T1.2 (F-02: danh sách unit)
+-- Chưa có bảng nào ở bước scaffold này
