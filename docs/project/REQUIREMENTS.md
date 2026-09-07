@@ -1,7 +1,7 @@
 # REQUIREMENTS — Muisti (Finnish Learning App)
 
 **Phiên bản:** v0.1  
-**Cập nhật:** 2026-09-02
+**Cập nhật:** 2026-09-07
 
 ---
 
@@ -61,7 +61,7 @@ Muisti là web app học tiếng Phần Lan theo giáo trình Suomen Mestari 2 (
 - type (text) — enum chính thức, xem bảng `exercises.type` bên dưới
 - prompt (text) — câu hỏi / đề bài chữ; không chứa mô tả tranh
 - scene_description (text, nullable) — dùng cho bài tập mà đề gốc phụ thuộc hoàn toàn vào tranh vẽ (không có tranh thì đề vô nghĩa). Claude mô tả lại cảnh bằng chữ lúc authoring; mô tả phải khách quan (chỉ nêu người/vật/hành động quan sát được), **không** diễn giải sẵn ý định hoặc đáp án. Tách biệt với `prompt`. UI: hiển thị khung riêng, không gộp chung đoạn văn với câu hỏi — styling để ngỏ lúc scaffold.
-- correct_answer (jsonb) — linh hoạt theo type
+- correct_answer (jsonb) — linh hoạt theo type; `dialogue` / `reading_passage` xem ghi chú dưới bảng enum
 - options (jsonb, nullable) — cho mcq/matching
 - created_at (timestamptz)
 
@@ -86,8 +86,12 @@ Muisti là web app học tiếng Phần Lan theo giáo trình Suomen Mestari 2 (
 | `guided_composition` | Viết đoạn theo khung câu hỏi gợi ý, không chấm điểm tự động |
 | `free_practice` | Luyện nói/viết tự do, không chấm điểm |
 | `reference_table` | Bảng dữ liệu tham khảo, không phải bài chấm điểm |
+| `dialogue` | Bài khoá dạng hội thoại, ≥2 speaker phân vai rõ ràng |
+| `reading_passage` | Bài khoá dạng văn xuôi/kể chuyện, không phân vai (bài đọc chính, bài Luetaan!) |
 
-Enum này chốt từ scan cấu trúc 3 unit đầu (Suomen Mestari 2, Kappale 1–3), được coi là **core set** — có thể mở rộng thêm khi full-extract các unit sau phát hiện pattern mới lặp lại, không phải danh sách đóng băng vĩnh viễn.
+Enum này chốt từ scan cấu trúc 3 unit đầu (Suomen Mestari 2, Kappale 1–3), được coi là **core set** — có thể mở rộng thêm khi full-extract các unit sau phát hiện pattern mới lặp lại, không phải danh sách đóng băng vĩnh viễn. Mở rộng lần 1 (bổ sung `dialogue`, `reading_passage`): lưu nguyên văn bài khoá làm dữ liệu học tự nhiên (ngữ điệu, khẩu ngữ thật) — trước đó bài khoá chỉ được dùng làm nguồn rút từ vựng/câu hỏi đọc hiểu rồi bỏ qua nguyên văn. Cấu trúc `lines`/`speaker` mở đường cho tính năng tương lai: đọc theo vai, TTS phân biệt giọng, shadowing, sinh bài tập tự động từ nội dung có sẵn.
+
+Với type `dialogue` và `reading_passage`, cột `correct_answer` (jsonb) lưu cấu trúc: `{"lines": [{"speaker": "Tên hoặc null", "text": "câu thoại/câu văn"}, ...]}`. Với `reading_passage`, `speaker` luôn là `null` cho mọi dòng. Với `dialogue`, `speaker` là tên nhân vật đúng như sách ghi. Cột `prompt` giữ vai trò tiêu đề bài khoá. Cột `scene_description` dùng nếu bài khoá có hình minh hoạ kèm theo (theo đúng chính sách Phương án C đã chốt — mô tả khách quan, không diễn giải sẵn nội dung).
 
 ### Bảng theo từng user (progress — RLS theo `auth.uid()`)
 

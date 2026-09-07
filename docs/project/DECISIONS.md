@@ -4,6 +4,21 @@ Ghi theo thời gian, mới nhất ở trên. Mỗi entry: tên ngắn, ngày, q
 
 ---
 
+## Mở rộng enum `exercises.type`: thêm `dialogue`, `reading_passage` (lưu nguyên văn bài khoá)
+
+**Ngày:** 2026-09-07  
+**Quyết định:** Mở rộng core set `exercises.type` từ 17 lên 19, thêm `dialogue` (hội thoại có speaker) và `reading_passage` (văn xuôi không phân vai). Cả 2 dùng `correct_answer` để lưu cấu trúc `{lines: [{speaker, text}]}`. Áp dụng hồi tố cho Unit 1 đã full-extract trước đó (bổ sung thêm, không sửa nội dung cũ) và cho Unit 2 đang full-extract.
+
+**Lý do:**
+- Bài khoá (đoạn văn, hội thoại) trước đó chỉ dùng làm nguồn rút từ vựng/câu hỏi đọc hiểu rồi bị bỏ qua nguyên văn — lãng phí dữ liệu học tự nhiên có giá trị (ngữ điệu, khẩu ngữ thật)
+- Cấu trúc `lines`/`speaker` mở đường cho tính năng tương lai (đọc theo vai, TTS phân biệt giọng, shadowing, sinh bài tập tự động) mà không cần nhập liệu lại từ đầu
+
+**Phạm vi:** Schema cột `correct_answer` của bảng `exercises` (không đổi cấu trúc cột, chỉ mở rộng enum type và định nghĩa thêm 1 hình dạng jsonb mới cho `correct_answer`). Áp dụng cho toàn bộ unit đã/đang extract.
+
+**Không làm gì:** Không đổi tên/cấu trúc 17 type cũ đã có. Không thêm cột DB mới.
+
+---
+
 ## Điểm bắt đầu: Suomen Mestari 2 (không phải 1)
 
 **Ngày:** 2026-09-02  

@@ -4,6 +4,15 @@ Nhật ký thay đổi có ý nghĩa. Entry mới ở **đầu file** (sau tiêu
 
 ---
 
+## [2026-09-07] — docs: mở rộng exercises.type +2 (dialogue, reading_passage)
+
+- REQUIREMENTS.md: core set 17 → 19; ghi chú lines/speaker trong `correct_answer`
+- DECISIONS.md: prepend entry (lưu nguyên văn bài khoá; hồi tố Unit 1, áp Unit 2)
+- Chốt trong chat Claude lúc full-extract Unit 2 — ghi docs trước khi JSON Unit 1/2 áp dụng
+- Chưa có migration/data thật trên Supabase
+
+---
+
 ## [2026-09-03] — docs: đồng bộ README / .cursorrules / entry bản quyền theo SM2
 
 - README.md dòng 3: điểm bắt đầu SM2, SM1 để tương lai
