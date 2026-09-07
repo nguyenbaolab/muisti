@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import type { Unit } from '../types/database'
 
@@ -50,7 +51,9 @@ export function UnitListPage() {
       <ul>
         {units.map((unit) => (
           <li key={unit.id}>
-            <strong>{unit.title}</strong>
+            <strong>
+              <Link to={`/units/${unit.id}`}>{unit.title}</Link>
+            </strong>
             {unit.description ? <p>{unit.description}</p> : null}
           </li>
         ))}

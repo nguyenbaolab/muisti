@@ -57,13 +57,13 @@ Scaffold web app (Vite + React + TS + Supabase + Cloudflare Pages) và ship MVP:
 
 ### T1.3 — Học 1 unit (F-03)
 
-**Trạng thái:** Pending  
+**Trạng thái:** Done  
 **Feature:** F-03
 
 **Acceptance:**
-- [ ] Mở 1 unit: hiện từ vựng (`vocab_items`) của unit đó
-- [ ] Hiện exercises của unit đó
-- [ ] Unit không có vocab/exercise: empty state, không crash
+- [x] Mở 1 unit: hiện từ vựng (`vocab_items`) của unit đó
+- [x] Hiện exercises của unit đó
+- [x] Unit không có vocab/exercise: empty state, không crash
 
 ---
 

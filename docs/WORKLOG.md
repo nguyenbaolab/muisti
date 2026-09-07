@@ -4,6 +4,22 @@ Nhật ký thay đổi có ý nghĩa. Entry mới ở **đầu file** (sau tiêu
 
 ---
 
+## T1.3 — Học 1 unit (F-03)
+**Ngày:** 2026-09-08
+**Trạng thái:** Done
+
+**Đã làm:**
+- Thêm VocabItem, Exercise interfaces vào src/types/database.ts
+- Tạo src/pages/UnitDetailPage.tsx: Promise.all fetch unit +
+  vocab_items + exercises, loading/error/empty state, link back
+- Thêm Link to /units/:id trong UnitListPage
+- Thêm route /units/:id vào App.tsx
+- npx tsc --noEmit pass
+
+**Phụ thuộc tiếp theo:** T1.4 (F-04: đánh dấu từ chưa biết)
+
+---
+
 ## Reorganize supabase/ — migration convention
 **Ngày:** 2026-09-08
 **Trạng thái:** Done

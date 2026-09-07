@@ -4,6 +4,7 @@ import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { supabase } from './lib/supabase'
 import { AppShell } from './pages/AppShell'
 import { LoginPage } from './pages/LoginPage'
+import { UnitDetailPage } from './pages/UnitDetailPage'
 import { UnitListPage } from './pages/UnitListPage'
 
 function AuthRoutes() {
@@ -41,6 +42,7 @@ function AuthRoutes() {
       <Routes>
         <Route path="/" element={<AppShell />} />
         <Route path="/units" element={<UnitListPage />} />
+        <Route path="/units/:id" element={<UnitDetailPage />} />
         <Route path="/login" element={<Navigate to="/" replace />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

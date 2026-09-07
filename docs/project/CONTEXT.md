@@ -30,8 +30,9 @@ src/
     LoginPage.tsx       # email/password — signInWithPassword, không sign-up
     AppShell.tsx        # sau login + Link /units + Đăng xuất
     UnitListPage.tsx    # danh sách units (fetch Supabase)
+    UnitDetailPage.tsx  # 1 unit: vocab_items + exercises (chưa chấm bài)
   types/
-    database.ts         # interface Unit
+    database.ts         # Unit, VocabItem, Exercise
 public/                 # static assets
 supabase/
   schema.sql              # full DDL — dùng setup project mới
@@ -48,6 +49,7 @@ supabase/
 - `/login` — `LoginPage` khi chưa có session; đã login thì redirect `/`
 - `/` — `AppShell` khi có session; chưa login thì redirect `/login`
 - `/units` — `UnitListPage` khi có session; guest / chưa login → redirect `/login` (`*` không session)
+- `/units/:id` — `UnitDetailPage` khi có session; title unit + từ vựng + bài tập; guest → `/login`
 - Session: `getSession` + `onAuthStateChange` trong `App.tsx`; lần đầu hiện `Loading...`
 - Chi tiết UI nghiệp vụ ở `REQUIREMENTS.md`.
 
@@ -79,3 +81,4 @@ Hướng đã chốt:
 
 - `src/lib/supabase.ts`: `export const supabase` — Supabase client dùng chung toàn app; khởi tạo từ `VITE_SUPABASE_URL` + `VITE_SUPABASE_ANON_KEY`
 - Fetch units: `supabase.from('units').select('*').order('book_code', { ascending: true }).order('unit_number', { ascending: true })` — `UnitListPage`
+- Fetch unit detail: `Promise.all` — `units` `.eq('id', unitId).single()` + `vocab_items` / `exercises` `.eq('unit_id', unitId).order('created_at')` — `UnitDetailPage`
