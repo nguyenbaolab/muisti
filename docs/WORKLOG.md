@@ -4,6 +4,34 @@ Nhật ký thay đổi có ý nghĩa. Entry mới ở **đầu file** (sau tiêu
 
 ---
 
+## T1.2 — Danh sách unit (F-02)
+**Ngày:** 2026-09-08
+**Trạng thái:** Done
+
+**Đã làm:**
+- Chạy migration T1.2-A: tạo bảng units + RLS SELECT authenticated trên Supabase dashboard
+- Tạo src/types/database.ts: interface Unit
+- Tạo src/pages/UnitListPage.tsx: fetch + loading/error/empty state
+- Thêm route /units vào App.tsx
+- Thêm Link /units vào AppShell.tsx
+- npx tsc --noEmit pass
+
+**Phụ thuộc tiếp theo:** T1.3 (F-03: học 1 unit)
+
+---
+
+## T1.2-A — DDL bảng units + RLS
+**Ngày:** 2026-09-08
+**Trạng thái:** File sẵn — chờ chạy trên Supabase Dashboard
+
+**Đã làm:**
+- Thay placeholder `supabase/migrations/schema.sql` bằng DDL `units` + unique `(book_code, unit_number)` + RLS SELECT `authenticated`
+- Chưa chạy SQL trên project thật (chủ dự án chạy trong SQL Editor)
+
+**Phụ thuộc tiếp theo:** Xác nhận Table Editor + policy, rồi T1.2-B (UI danh sách unit)
+
+---
+
 ## T1.1 — Đăng nhập (F-01)
 **Ngày:** 2026-09-07
 **Trạng thái:** Done

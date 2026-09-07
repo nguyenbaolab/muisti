@@ -28,10 +28,13 @@ src/
     supabase.ts         # Supabase client (createClient, requireEnv guard)
   pages/
     LoginPage.tsx       # email/password — signInWithPassword, không sign-up
-    AppShell.tsx        # placeholder sau login + Đăng xuất
+    AppShell.tsx        # sau login + Link /units + Đăng xuất
+    UnitListPage.tsx    # danh sách units (fetch Supabase)
+  types/
+    database.ts         # interface Unit
 public/                 # static assets
 supabase/migrations/
-  schema.sql            # DDL placeholder (chưa có bảng)
+  schema.sql            # units + RLS SELECT authenticated
 .env.example            # VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY
 ```
 
@@ -41,8 +44,9 @@ supabase/migrations/
 
 - `/login` — `LoginPage` khi chưa có session; đã login thì redirect `/`
 - `/` — `AppShell` khi có session; chưa login thì redirect `/login`
+- `/units` — `UnitListPage` khi có session; guest / chưa login → redirect `/login` (`*` không session)
 - Session: `getSession` + `onAuthStateChange` trong `App.tsx`; lần đầu hiện `Loading...`
-- Sau login (placeholder): `AppShell` — T1.2 sẽ thêm danh sách unit. Chi tiết UI nghiệp vụ ở `REQUIREMENTS.md`.
+- Chi tiết UI nghiệp vụ ở `REQUIREMENTS.md`.
 
 ---
 
@@ -71,3 +75,4 @@ Hướng đã chốt:
 ## §6 Store/API index
 
 - `src/lib/supabase.ts`: `export const supabase` — Supabase client dùng chung toàn app; khởi tạo từ `VITE_SUPABASE_URL` + `VITE_SUPABASE_ANON_KEY`
+- Fetch units: `supabase.from('units').select('*').order('book_code', { ascending: true }).order('unit_number', { ascending: true })` — `UnitListPage`

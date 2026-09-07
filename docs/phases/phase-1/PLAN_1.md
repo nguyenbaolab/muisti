@@ -45,13 +45,13 @@ Scaffold web app (Vite + React + TS + Supabase + Cloudflare Pages) và ship MVP:
 
 ### T1.2 — Danh sách unit (F-02)
 
-**Trạng thái:** Pending  
+**Trạng thái:** Done  
 **Feature:** F-02
 
 **Acceptance:**
-- [ ] User authenticated thấy danh sách unit từ bảng `units` (cùng list cho mọi user)
-- [ ] Không có UI/logic khoá unit theo `user_unit_progress` của người khác hay của chính mình
-- [ ] Guest / chưa login không đọc được content (RLS)
+- [x] User authenticated thấy danh sách unit từ bảng `units` (cùng list cho mọi user)
+- [x] Không có UI/logic khoá unit theo `user_unit_progress` của người khác hay của chính mình
+- [x] Guest / chưa login không đọc được content (RLS)
 
 ---
 
