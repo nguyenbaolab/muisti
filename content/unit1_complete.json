@@ -1,0 +1,2730 @@
+{
+  "unit": {
+    "book_code": "suomen_mestari_2",
+    "unit_number": 1,
+    "title": "Viikonloppureissu",
+    "description": "Kappale 1: matkalla, Milloin?, positiivinen imperfekti, Mennään!, me mennään, sanatyypit as/äs/is ja in, Luetaan: Viisi syytä matkustaa junalla"
+  },
+  "vocab_items": [
+    {
+      "finnish_word": "reissu",
+      "translation": "chuyến đi (khẩu ngữ, thân mật hơn \"matka\")",
+      "part_of_speech": "danh từ",
+      "example_sentence": null,
+      "notes": null
+    },
+    {
+      "finnish_word": "olla tehtävänä",
+      "translation": "là bài tập/nhiệm vụ (của ai đó)",
+      "part_of_speech": "cụm động từ",
+      "example_sentence": "Suomen kurssilla oli tehtävänä kirjoittaa teksti viikonlopusta.",
+      "notes": "dùng với dạng \"X:llä oli tehtävänä\""
+    },
+    {
+      "finnish_word": "kirjoittaa",
+      "translation": "viết về (cái gì)",
+      "part_of_speech": "động từ nhóm 1",
+      "example_sentence": null,
+      "notes": "kirjoittaa + sta/stä (chi phối cách erosijainen/elatiivi)"
+    },
+    {
+      "finnish_word": "viime",
+      "translation": "vừa qua, trước",
+      "part_of_speech": "tính từ/trạng từ",
+      "example_sentence": "Viime perjantaina matkustin viikonlopuksi laivalla.",
+      "notes": null
+    },
+    {
+      "finnish_word": "viikonlopuksi",
+      "translation": "(đi) nghỉ cuối tuần",
+      "part_of_speech": "danh từ + hậu tố translatiivi",
+      "example_sentence": null,
+      "notes": "chỉ mục đích thời gian"
+    },
+    {
+      "finnish_word": "mukavasti",
+      "translation": "một cách dễ chịu, thoải mái",
+      "part_of_speech": "trạng từ",
+      "example_sentence": "Laivamatka kesti koko päivän, mutta se meni mukavasti.",
+      "notes": null
+    },
+    {
+      "finnish_word": "maisema",
+      "translation": "phong cảnh",
+      "part_of_speech": "danh từ",
+      "example_sentence": "Katselin maisemia.",
+      "notes": null
+    },
+    {
+      "finnish_word": "tehtävä",
+      "translation": "bài tập, nhiệm vụ",
+      "part_of_speech": "danh từ",
+      "example_sentence": null,
+      "notes": null
+    },
+    {
+      "finnish_word": "saapua",
+      "translation": "đến nơi, tới",
+      "part_of_speech": "động từ nhóm 1",
+      "example_sentence": "Saavuin illalla perille.",
+      "notes": "saapua + MIHIN"
+    },
+    {
+      "finnish_word": "hostelli",
+      "translation": "nhà nghỉ (hostel)",
+      "part_of_speech": "danh từ",
+      "example_sentence": null,
+      "notes": null
+    },
+    {
+      "finnish_word": "illallinen",
+      "translation": "bữa tối",
+      "part_of_speech": "danh từ",
+      "example_sentence": null,
+      "notes": null
+    },
+    {
+      "finnish_word": "upea",
+      "translation": "tuyệt đẹp, hoành tráng",
+      "part_of_speech": "tính từ",
+      "example_sentence": "Koska oli upea ilma, kävelin monta tuntia.",
+      "notes": null
+    },
+    {
+      "finnish_word": "ympäri",
+      "translation": "quanh, khắp",
+      "part_of_speech": "giới từ (chi phối cách partitiivi)",
+      "example_sentence": "Kävelin monta tuntia ympäri kaupunkia.",
+      "notes": "ympäri + P"
+    },
+    {
+      "finnish_word": "vielä",
+      "translation": "vẫn, còn, thêm nữa",
+      "part_of_speech": "trạng từ",
+      "example_sentence": "Sen jälkeen joimme vielä punaviiniä baarissa.",
+      "notes": null
+    },
+    {
+      "finnish_word": "tuliainen",
+      "translation": "quà lưu niệm (mang về từ chuyến đi)",
+      "part_of_speech": "danh từ",
+      "example_sentence": "Ostin tyttöystävälle suklaata tuliaisiksi.",
+      "notes": "thường dùng số nhiều: tuliaiset"
+    },
+    {
+      "finnish_word": "takaisin",
+      "translation": "trở lại, quay về",
+      "part_of_speech": "trạng từ",
+      "example_sentence": "Iltapäivällä lensin takaisin Helsinkiin.",
+      "notes": null
+    },
+    {
+      "finnish_word": "kuulla",
+      "translation": "nghe về (cái gì)",
+      "part_of_speech": "động từ nhóm 3",
+      "example_sentence": "Kun Olga ja Alex kuulivat Pedron matkasta, he innostuivat heti.",
+      "notes": "kuulla + sta/stä"
+    },
+    {
+      "finnish_word": "innostua",
+      "translation": "hào hứng, phấn khích lên",
+      "part_of_speech": "động từ nhóm 1",
+      "example_sentence": null,
+      "notes": null
+    },
+    {
+      "finnish_word": "heti",
+      "translation": "ngay lập tức",
+      "part_of_speech": "trạng từ",
+      "example_sentence": "Olga ja Alex innostuivat heti.",
+      "notes": null
+    },
+    {
+      "finnish_word": "keksiä",
+      "translation": "nghĩ ra, sáng kiến",
+      "part_of_speech": "động từ nhóm 1",
+      "example_sentence": "Alex keksi, että he voisivat mennä laivalla Tallinnaan.",
+      "notes": null
+    },
+    {
+      "finnish_word": "mielellään",
+      "translation": "sẵn lòng, vui vẻ (làm gì)",
+      "part_of_speech": "trạng từ",
+      "example_sentence": "Pedro lähtee mielellään mukaan.",
+      "notes": null
+    },
+    {
+      "finnish_word": "suunnitella",
+      "translation": "lên kế hoạch",
+      "part_of_speech": "động từ nhóm 3",
+      "example_sentence": "He alkoivat heti suunnitella matkaa.",
+      "notes": null
+    },
+    {
+      "finnish_word": "sopia",
+      "translation": "phù hợp, thích hợp (với ai/lịch trình)",
+      "part_of_speech": "động từ nhóm 1",
+      "example_sentence": "Kiva, että kaikille sopii lokakuun eka viikonloppu!",
+      "notes": null
+    },
+    {
+      "finnish_word": "eka",
+      "translation": "đầu tiên (khẩu ngữ, = ensimmäinen)",
+      "part_of_speech": "tính từ (khẩu ngữ)",
+      "example_sentence": "Kiva, että kaikille sopii lokakuun eka viikonloppu!",
+      "notes": "(khẩu ngữ) dạng nói của \"ensimmäinen\""
+    },
+    {
+      "finnish_word": "majoitus",
+      "translation": "chỗ ở, lưu trú",
+      "part_of_speech": "danh từ",
+      "example_sentence": null,
+      "notes": null
+    },
+    {
+      "finnish_word": "varata",
+      "translation": "đặt (chỗ, vé)",
+      "part_of_speech": "động từ nhóm 4",
+      "example_sentence": null,
+      "notes": null
+    },
+    {
+      "finnish_word": "Varataanks me?",
+      "translation": "(khẩu ngữ) Chúng ta đặt (chỗ) chứ? = Varaammeko?",
+      "part_of_speech": "cụm khẩu ngữ",
+      "example_sentence": null,
+      "notes": "(khẩu ngữ) dạng hỏi khẩu ngữ của passiivi"
+    },
+    {
+      "finnish_word": "jostain",
+      "translation": "từ đâu đó",
+      "part_of_speech": "đại từ/trạng từ",
+      "example_sentence": null,
+      "notes": null
+    },
+    {
+      "finnish_word": "kelvata",
+      "translation": "được, ổn, chấp nhận được",
+      "part_of_speech": "động từ nhóm 4",
+      "example_sentence": "Vai kelpaaks teille hostelli?",
+      "notes": null
+    },
+    {
+      "finnish_word": "vuokrata",
+      "translation": "cho thuê / thuê",
+      "part_of_speech": "động từ nhóm 4",
+      "example_sentence": "Mun ystävillä on Tallinnassa iso asunto, jota ne vuokraa turisteille.",
+      "notes": "2 chiều nghĩa tuỳ ngữ cảnh"
+    },
+    {
+      "finnish_word": "alue",
+      "translation": "khu vực",
+      "part_of_speech": "danh từ",
+      "example_sentence": "Se on kivalla alueella.",
+      "notes": null
+    },
+    {
+      "finnish_word": "päästä",
+      "translation": "đến được, tới được (đâu đó)",
+      "part_of_speech": "động từ nhóm 3",
+      "example_sentence": "Sieltä pääsee ratikalla helposti joka paikkaan.",
+      "notes": "päästä + MIHIN"
+    },
+    {
+      "finnish_word": "ratikka",
+      "translation": "tàu điện (tram, khẩu ngữ) = raitiovaunu",
+      "part_of_speech": "danh từ (khẩu ngữ)",
+      "example_sentence": null,
+      "notes": "(khẩu ngữ)"
+    },
+    {
+      "finnish_word": "helposti",
+      "translation": "dễ dàng",
+      "part_of_speech": "trạng từ",
+      "example_sentence": null,
+      "notes": null
+    },
+    {
+      "finnish_word": "joka paikkaan",
+      "translation": "đến mọi nơi",
+      "part_of_speech": "cụm từ",
+      "example_sentence": null,
+      "notes": null
+    },
+    {
+      "finnish_word": "hoitaa",
+      "translation": "lo liệu, xử lý (việc gì)",
+      "part_of_speech": "động từ nhóm 1",
+      "example_sentence": "Mä voin hoitaa liput.",
+      "notes": null
+    },
+    {
+      "finnish_word": "tarkistaa",
+      "translation": "kiểm tra",
+      "part_of_speech": "động từ nhóm 1",
+      "example_sentence": "Mä tarkistin äsken aikataulut netistä.",
+      "notes": null
+    },
+    {
+      "finnish_word": "äsken",
+      "translation": "vừa mới (lúc nãy)",
+      "part_of_speech": "trạng từ",
+      "example_sentence": "Tarkistin äsken aikataulut netistä.",
+      "notes": null
+    },
+    {
+      "finnish_word": "aikataulu",
+      "translation": "lịch trình",
+      "part_of_speech": "danh từ",
+      "example_sentence": null,
+      "notes": null
+    },
+    {
+      "finnish_word": "netti",
+      "translation": "mạng internet (khẩu ngữ)",
+      "part_of_speech": "danh từ (khẩu ngữ)",
+      "example_sentence": null,
+      "notes": "(khẩu ngữ) = internet"
+    },
+    {
+      "finnish_word": "ehtiä",
+      "translation": "kịp (giờ để đến/lên gì)",
+      "part_of_speech": "động từ nhóm 1",
+      "example_sentence": "Ehdittekste laivaan, joka lähtee perjantai-iltana kuudelta?",
+      "notes": "ehtiä + MIHIN"
+    },
+    {
+      "finnish_word": "tulla kiire",
+      "translation": "trở nên vội, gấp",
+      "part_of_speech": "cụm động từ",
+      "example_sentence": "Mulle tulee kyllä vähän kiire.",
+      "notes": null
+    },
+    {
+      "finnish_word": "heittää",
+      "translation": "chở/đưa đi (nghĩa bóng, khẩu ngữ) = viedä",
+      "part_of_speech": "động từ nhóm 1 (khẩu ngữ)",
+      "example_sentence": "Mun työkaveri voi ehkä heittää mut satamaan.",
+      "notes": "(khẩu ngữ) heittää + MIHIN"
+    },
+    {
+      "finnish_word": "mut",
+      "translation": "tôi (dạng đối cách, khẩu ngữ) = minut",
+      "part_of_speech": "đại từ (khẩu ngữ)",
+      "example_sentence": null,
+      "notes": "(khẩu ngữ)"
+    },
+    {
+      "finnish_word": "kestää",
+      "translation": "kéo dài (thời gian)",
+      "part_of_speech": "động từ nhóm 1",
+      "example_sentence": "Laivamatka kestää kolme tuntia.",
+      "notes": null
+    },
+    {
+      "finnish_word": "me ollaan",
+      "translation": "chúng ta là/có (khẩu ngữ) = olemme",
+      "part_of_speech": "cụm khẩu ngữ",
+      "example_sentence": "Eli me ollaan aika myöhään perillä.",
+      "notes": "(khẩu ngữ) passiivi thay ngôi 1 số nhiều"
+    },
+    {
+      "finnish_word": "olla perillä",
+      "translation": "đã đến nơi",
+      "part_of_speech": "cụm động từ",
+      "example_sentence": null,
+      "notes": null
+    },
+    {
+      "finnish_word": "kaveri",
+      "translation": "bạn (thân mật)",
+      "part_of_speech": "danh từ",
+      "example_sentence": null,
+      "notes": null
+    },
+    {
+      "finnish_word": "hakea",
+      "translation": "đón (ai) từ (đâu)",
+      "part_of_speech": "động từ nhóm 1",
+      "example_sentence": "Vai voiko sun kaverit hakea meiät satamasta?",
+      "notes": "hakea + MISTÄ"
+    },
+    {
+      "finnish_word": "meiät",
+      "translation": "chúng tôi (dạng đối cách, khẩu ngữ) = meidät",
+      "part_of_speech": "đại từ (khẩu ngữ)",
+      "example_sentence": null,
+      "notes": "(khẩu ngữ)"
+    },
+    {
+      "finnish_word": "ei me tarvita",
+      "translation": "chúng ta không cần (khẩu ngữ) = emme tarvitse",
+      "part_of_speech": "cụm khẩu ngữ",
+      "example_sentence": "Ei me tarvita autokyytiä.",
+      "notes": "(khẩu ngữ) passiivi phủ định thay ngôi 1 số nhiều"
+    },
+    {
+      "finnish_word": "kyyti",
+      "translation": "chuyến đi nhờ xe, được chở đi",
+      "part_of_speech": "danh từ",
+      "example_sentence": null,
+      "notes": null
+    },
+    {
+      "finnish_word": "vaan",
+      "translation": "chỉ, chỉ là (khẩu ngữ) = vain",
+      "part_of_speech": "trạng từ (khẩu ngữ)",
+      "example_sentence": "Satamasta on vaan vartin ratikkamatka asunnolle.",
+      "notes": "(khẩu ngữ)"
+    },
+    {
+      "finnish_word": "tietysti",
+      "translation": "tất nhiên",
+      "part_of_speech": "trạng từ",
+      "example_sentence": "Voi tietysti olla, että ne mun kaverit haluaa silti tulla vastaan.",
+      "notes": null
+    },
+    {
+      "finnish_word": "silti",
+      "translation": "tuy nhiên, dù vậy",
+      "part_of_speech": "trạng từ",
+      "example_sentence": null,
+      "notes": null
+    },
+    {
+      "finnish_word": "tulla vastaan",
+      "translation": "ra đón (ai đó)",
+      "part_of_speech": "cụm động từ nhóm 3",
+      "example_sentence": null,
+      "notes": null
+    },
+    {
+      "finnish_word": "joka tapauksessa",
+      "translation": "dù sao đi nữa, trong mọi trường hợp",
+      "part_of_speech": "cụm từ",
+      "example_sentence": "Meidän täytyy joka tapauksessa saada sen asunnon avaimet.",
+      "notes": null
+    },
+    {
+      "finnish_word": "aikaisin",
+      "translation": "sớm",
+      "part_of_speech": "trạng từ (Pikkusana)",
+      "example_sentence": "Lauantaina heräsin aikaisin.",
+      "notes": null
+    },
+    {
+      "finnish_word": "sitten",
+      "translation": "rồi, sau đó",
+      "part_of_speech": "trạng từ (Pikkusana)",
+      "example_sentence": "Okei, mennään sitten ratikalla.",
+      "notes": null
+    },
+    {
+      "finnish_word": "neljältä",
+      "translation": "lúc 4 giờ",
+      "part_of_speech": "trạng từ thời gian",
+      "example_sentence": null,
+      "notes": "hậu tố lta/ltä"
+    },
+    {
+      "finnish_word": "kahdeksalta",
+      "translation": "lúc 8 giờ",
+      "part_of_speech": "trạng từ thời gian",
+      "example_sentence": null,
+      "notes": "hậu tố lta/ltä"
+    },
+    {
+      "finnish_word": "puoli kahdeltatoista",
+      "translation": "11 giờ rưỡi",
+      "part_of_speech": "cụm từ thời gian",
+      "example_sentence": null,
+      "notes": "cách tính giờ kiểu Phần Lan - nửa trước giờ tới"
+    },
+    {
+      "finnish_word": "aamulla",
+      "translation": "vào buổi sáng",
+      "part_of_speech": "trạng từ thời gian",
+      "example_sentence": null,
+      "notes": "hậu tố lla/llä"
+    },
+    {
+      "finnish_word": "päivällä",
+      "translation": "vào ban ngày",
+      "part_of_speech": "trạng từ thời gian",
+      "example_sentence": null,
+      "notes": "hậu tố lla/llä"
+    },
+    {
+      "finnish_word": "illalla",
+      "translation": "vào buổi tối",
+      "part_of_speech": "trạng từ thời gian",
+      "example_sentence": null,
+      "notes": "hậu tố lla/llä"
+    },
+    {
+      "finnish_word": "yöllä",
+      "translation": "vào ban đêm",
+      "part_of_speech": "trạng từ thời gian",
+      "example_sentence": null,
+      "notes": "hậu tố lla/llä"
+    },
+    {
+      "finnish_word": "viime yönä",
+      "translation": "đêm qua",
+      "part_of_speech": "cụm từ thời gian",
+      "example_sentence": null,
+      "notes": "đổi sang hậu tố na/nä khi kết hợp viime/tänä/ensi"
+    },
+    {
+      "finnish_word": "tänä aamuna",
+      "translation": "sáng nay",
+      "part_of_speech": "cụm từ thời gian",
+      "example_sentence": null,
+      "notes": null
+    },
+    {
+      "finnish_word": "tänä iltana",
+      "translation": "tối nay",
+      "part_of_speech": "cụm từ thời gian",
+      "example_sentence": null,
+      "notes": null
+    },
+    {
+      "finnish_word": "tänä yönä",
+      "translation": "đêm nay",
+      "part_of_speech": "cụm từ thời gian",
+      "example_sentence": null,
+      "notes": null
+    },
+    {
+      "finnish_word": "ensi yönä",
+      "translation": "đêm mai/tới",
+      "part_of_speech": "cụm từ thời gian",
+      "example_sentence": null,
+      "notes": null
+    },
+    {
+      "finnish_word": "maanantaina",
+      "translation": "vào thứ Hai",
+      "part_of_speech": "trạng từ thời gian",
+      "example_sentence": null,
+      "notes": "hậu tố na/nä"
+    },
+    {
+      "finnish_word": "viikonloppuna",
+      "translation": "vào cuối tuần",
+      "part_of_speech": "trạng từ thời gian",
+      "example_sentence": null,
+      "notes": "hậu tố na/nä"
+    },
+    {
+      "finnish_word": "jouluna",
+      "translation": "vào dịp Giáng sinh",
+      "part_of_speech": "trạng từ thời gian",
+      "example_sentence": null,
+      "notes": "hậu tố na/nä"
+    },
+    {
+      "finnish_word": "eräänä päivänä",
+      "translation": "vào một ngày nào đó (khẩu ngữ = yhtenä päivänä)",
+      "part_of_speech": "cụm từ thời gian",
+      "example_sentence": null,
+      "notes": "(khẩu ngữ)"
+    },
+    {
+      "finnish_word": "viime lauantaina",
+      "translation": "thứ Bảy vừa rồi",
+      "part_of_speech": "cụm từ thời gian",
+      "example_sentence": null,
+      "notes": null
+    },
+    {
+      "finnish_word": "tänä sunnuntaina",
+      "translation": "Chủ nhật này",
+      "part_of_speech": "cụm từ thời gian",
+      "example_sentence": null,
+      "notes": null
+    },
+    {
+      "finnish_word": "ensi viikonloppuna",
+      "translation": "cuối tuần tới",
+      "part_of_speech": "cụm từ thời gian",
+      "example_sentence": null,
+      "notes": null
+    },
+    {
+      "finnish_word": "vrk",
+      "translation": "1 ngày đêm (24 giờ) = vuorokausi",
+      "part_of_speech": "danh từ viết tắt",
+      "example_sentence": null,
+      "notes": "vrk = vuorokausi = 24 tuntia"
+    },
+    {
+      "finnish_word": "seuraavalla viikolla",
+      "translation": "vào tuần tới/sau",
+      "part_of_speech": "cụm từ thời gian",
+      "example_sentence": null,
+      "notes": null
+    },
+    {
+      "finnish_word": "viime viikolla",
+      "translation": "tuần trước",
+      "part_of_speech": "cụm từ thời gian",
+      "example_sentence": null,
+      "notes": "hậu tố lla/llä"
+    },
+    {
+      "finnish_word": "tällä viikolla",
+      "translation": "tuần này",
+      "part_of_speech": "cụm từ thời gian",
+      "example_sentence": null,
+      "notes": null
+    },
+    {
+      "finnish_word": "ensi viikolla",
+      "translation": "tuần tới",
+      "part_of_speech": "cụm từ thời gian",
+      "example_sentence": null,
+      "notes": null
+    },
+    {
+      "finnish_word": "tammikuussa",
+      "translation": "vào tháng Một",
+      "part_of_speech": "trạng từ thời gian",
+      "example_sentence": null,
+      "notes": "hậu tố ssa/ssä"
+    },
+    {
+      "finnish_word": "viime kuussa",
+      "translation": "tháng trước",
+      "part_of_speech": "cụm từ thời gian",
+      "example_sentence": null,
+      "notes": null
+    },
+    {
+      "finnish_word": "tässä kuussa",
+      "translation": "tháng này",
+      "part_of_speech": "cụm từ thời gian",
+      "example_sentence": null,
+      "notes": null
+    },
+    {
+      "finnish_word": "ensi kuussa",
+      "translation": "tháng tới",
+      "part_of_speech": "cụm từ thời gian",
+      "example_sentence": null,
+      "notes": null
+    },
+    {
+      "finnish_word": "keväällä",
+      "translation": "vào mùa xuân",
+      "part_of_speech": "trạng từ thời gian",
+      "example_sentence": null,
+      "notes": "hậu tố lla/llä"
+    },
+    {
+      "finnish_word": "kesällä",
+      "translation": "vào mùa hè",
+      "part_of_speech": "trạng từ thời gian",
+      "example_sentence": null,
+      "notes": "hậu tố lla/llä"
+    },
+    {
+      "finnish_word": "syksyllä",
+      "translation": "vào mùa thu",
+      "part_of_speech": "trạng từ thời gian",
+      "example_sentence": null,
+      "notes": "hậu tố lla/llä"
+    },
+    {
+      "finnish_word": "talvella",
+      "translation": "vào mùa đông",
+      "part_of_speech": "trạng từ thời gian",
+      "example_sentence": null,
+      "notes": "hậu tố lla/llä"
+    },
+    {
+      "finnish_word": "viime kesänä",
+      "translation": "mùa hè vừa rồi",
+      "part_of_speech": "cụm từ thời gian",
+      "example_sentence": null,
+      "notes": "đổi hậu tố llä thành nä khi kết hợp viime/tänä/ensi"
+    },
+    {
+      "finnish_word": "tänä kesänä",
+      "translation": "mùa hè này",
+      "part_of_speech": "cụm từ thời gian",
+      "example_sentence": null,
+      "notes": null
+    },
+    {
+      "finnish_word": "ensi kesänä",
+      "translation": "mùa hè tới",
+      "part_of_speech": "cụm từ thời gian",
+      "example_sentence": null,
+      "notes": null
+    },
+    {
+      "finnish_word": "viime vuonna",
+      "translation": "năm ngoái",
+      "part_of_speech": "cụm từ thời gian",
+      "example_sentence": null,
+      "notes": "hậu tố na/nä"
+    },
+    {
+      "finnish_word": "tänä vuonna",
+      "translation": "năm nay",
+      "part_of_speech": "cụm từ thời gian",
+      "example_sentence": null,
+      "notes": null
+    },
+    {
+      "finnish_word": "ensi vuonna",
+      "translation": "năm tới",
+      "part_of_speech": "cụm từ thời gian",
+      "example_sentence": null,
+      "notes": null
+    },
+    {
+      "finnish_word": "kuluttua",
+      "translation": "sau ... nữa (tương lai)",
+      "part_of_speech": "hậu trí từ",
+      "example_sentence": "Parin kuukauden kuluttua on jo talvi.",
+      "notes": "G + kuluttua/päästä"
+    },
+    {
+      "finnish_word": "ajoissa",
+      "translation": "đúng giờ",
+      "part_of_speech": "trạng từ",
+      "example_sentence": "Muut tulivat ajoissa, mutta Jussi oli myöhässä.",
+      "notes": "đối lập với myöhässä"
+    },
+    {
+      "finnish_word": "myöhässä",
+      "translation": "trễ giờ",
+      "part_of_speech": "trạng từ",
+      "example_sentence": "Jussi oli myöhässä. Hän saapui vasta kello 9.15.",
+      "notes": "đối lập với ajoissa"
+    },
+    {
+      "finnish_word": "lähteä matkalle",
+      "translation": "lên đường đi chuyến đi (= lähteä reissuun, khẩu ngữ)",
+      "part_of_speech": "cụm động từ nhóm 1",
+      "example_sentence": null,
+      "notes": null
+    },
+    {
+      "finnish_word": "olla matkalla",
+      "translation": "đang đi chuyến đi (= olla reissussa, khẩu ngữ)",
+      "part_of_speech": "cụm động từ",
+      "example_sentence": null,
+      "notes": null
+    },
+    {
+      "finnish_word": "matkustaminen",
+      "translation": "việc đi lại/du lịch (danh động từ)",
+      "part_of_speech": "danh từ",
+      "example_sentence": null,
+      "notes": null
+    },
+    {
+      "finnish_word": "matkalippu",
+      "translation": "vé đi lại",
+      "part_of_speech": "danh từ",
+      "example_sentence": null,
+      "notes": null
+    },
+    {
+      "finnish_word": "meno",
+      "translation": "vé một chiều (đi)",
+      "part_of_speech": "danh từ",
+      "example_sentence": null,
+      "notes": null
+    },
+    {
+      "finnish_word": "paluu",
+      "translation": "vé một chiều (về)",
+      "part_of_speech": "danh từ",
+      "example_sentence": null,
+      "notes": null
+    },
+    {
+      "finnish_word": "meno-paluu",
+      "translation": "vé khứ hồi",
+      "part_of_speech": "danh từ",
+      "example_sentence": null,
+      "notes": null
+    },
+    {
+      "finnish_word": "vaihto",
+      "translation": "sự chuyển tuyến/đổi tàu xe",
+      "part_of_speech": "danh từ",
+      "example_sentence": null,
+      "notes": null
+    },
+    {
+      "finnish_word": "paikkavaraus",
+      "translation": "đặt chỗ ngồi",
+      "part_of_speech": "danh từ",
+      "example_sentence": null,
+      "notes": null
+    },
+    {
+      "finnish_word": "tehdä varaus",
+      "translation": "đặt trước (đồng nghĩa varata)",
+      "part_of_speech": "cụm động từ nhóm 2",
+      "example_sentence": null,
+      "notes": null
+    },
+    {
+      "finnish_word": "perua varaus",
+      "translation": "huỷ đặt chỗ",
+      "part_of_speech": "cụm động từ nhóm 1",
+      "example_sentence": null,
+      "notes": null
+    },
+    {
+      "finnish_word": "peruttu",
+      "translation": "đã bị huỷ",
+      "part_of_speech": "tính từ/quá khứ phân từ",
+      "example_sentence": null,
+      "notes": null
+    },
+    {
+      "finnish_word": "passi",
+      "translation": "hộ chiếu",
+      "part_of_speech": "danh từ",
+      "example_sentence": null,
+      "notes": null
+    },
+    {
+      "finnish_word": "viisumi",
+      "translation": "thị thực (visa)",
+      "part_of_speech": "danh từ",
+      "example_sentence": null,
+      "notes": null
+    },
+    {
+      "finnish_word": "matkavakuutus",
+      "translation": "bảo hiểm du lịch",
+      "part_of_speech": "danh từ",
+      "example_sentence": null,
+      "notes": null
+    },
+    {
+      "finnish_word": "tulli",
+      "translation": "hải quan",
+      "part_of_speech": "danh từ",
+      "example_sentence": null,
+      "notes": null
+    },
+    {
+      "finnish_word": "matkailu",
+      "translation": "du lịch (danh từ chung)",
+      "part_of_speech": "danh từ",
+      "example_sentence": null,
+      "notes": null
+    },
+    {
+      "finnish_word": "turisti",
+      "translation": "khách du lịch",
+      "part_of_speech": "danh từ",
+      "example_sentence": null,
+      "notes": null
+    },
+    {
+      "finnish_word": "opas",
+      "translation": "hướng dẫn viên",
+      "part_of_speech": "danh từ",
+      "example_sentence": null,
+      "notes": null
+    },
+    {
+      "finnish_word": "nähtävyys",
+      "translation": "điểm tham quan",
+      "part_of_speech": "danh từ",
+      "example_sentence": null,
+      "notes": null
+    },
+    {
+      "finnish_word": "kiertoajelu",
+      "translation": "tour tham quan bằng xe",
+      "part_of_speech": "danh từ",
+      "example_sentence": null,
+      "notes": null
+    },
+    {
+      "finnish_word": "retki",
+      "translation": "chuyến đi ngắn, chuyến dã ngoại",
+      "part_of_speech": "danh từ",
+      "example_sentence": null,
+      "notes": null
+    },
+    {
+      "finnish_word": "raide",
+      "translation": "đường ray, làn ray",
+      "part_of_speech": "danh từ",
+      "example_sentence": null,
+      "notes": "chủ đề: rautatieasemalla"
+    },
+    {
+      "finnish_word": "laituri",
+      "translation": "sân ga",
+      "part_of_speech": "danh từ",
+      "example_sentence": null,
+      "notes": "chủ đề: rautatieasemalla"
+    },
+    {
+      "finnish_word": "vaunu",
+      "translation": "toa tàu",
+      "part_of_speech": "danh từ",
+      "example_sentence": null,
+      "notes": "chủ đề: rautatieasemalla"
+    },
+    {
+      "finnish_word": "hytti",
+      "translation": "khoang riêng (trên tàu hoả hoặc tàu thuỷ)",
+      "part_of_speech": "danh từ",
+      "example_sentence": null,
+      "notes": "chủ đề: rautatieasemalla + satamassa (dùng chung)"
+    },
+    {
+      "finnish_word": "makuuhytti",
+      "translation": "khoang giường nằm",
+      "part_of_speech": "danh từ",
+      "example_sentence": null,
+      "notes": "chủ đề: rautatieasemalla"
+    },
+    {
+      "finnish_word": "pääteasema",
+      "translation": "ga cuối, ga chính",
+      "part_of_speech": "danh từ",
+      "example_sentence": null,
+      "notes": "chủ đề: rautatieasemalla"
+    },
+    {
+      "finnish_word": "lento",
+      "translation": "chuyến bay",
+      "part_of_speech": "danh từ",
+      "example_sentence": null,
+      "notes": "chủ đề: lentoasemalla"
+    },
+    {
+      "finnish_word": "lentolippu",
+      "translation": "vé máy bay",
+      "part_of_speech": "danh từ",
+      "example_sentence": null,
+      "notes": "chủ đề: lentoasemalla"
+    },
+    {
+      "finnish_word": "käsimatkatavara",
+      "translation": "hành lý xách tay",
+      "part_of_speech": "danh từ",
+      "example_sentence": null,
+      "notes": "chủ đề: lentoasemalla"
+    },
+    {
+      "finnish_word": "turvatarkastus",
+      "translation": "kiểm tra an ninh",
+      "part_of_speech": "danh từ",
+      "example_sentence": null,
+      "notes": "chủ đề: lentoasemalla"
+    },
+    {
+      "finnish_word": "lähtöportti",
+      "translation": "cửa ra máy bay (gate)",
+      "part_of_speech": "danh từ",
+      "example_sentence": null,
+      "notes": "chủ đề: lentoasemalla"
+    },
+    {
+      "finnish_word": "lähtevät",
+      "translation": "(các chuyến bay) khởi hành",
+      "part_of_speech": "động từ (số nhiều)",
+      "example_sentence": null,
+      "notes": "chủ đề: lentoasemalla"
+    },
+    {
+      "finnish_word": "saapuvat",
+      "translation": "(các chuyến bay) đến",
+      "part_of_speech": "động từ (số nhiều)",
+      "example_sentence": null,
+      "notes": "chủ đề: lentoasemalla"
+    },
+    {
+      "finnish_word": "laskeutua",
+      "translation": "hạ cánh",
+      "part_of_speech": "động từ nhóm 1",
+      "example_sentence": null,
+      "notes": "chủ đề: lentoasemalla"
+    },
+    {
+      "finnish_word": "terminaali",
+      "translation": "nhà ga cảng (terminal)",
+      "part_of_speech": "danh từ",
+      "example_sentence": null,
+      "notes": "chủ đề: satamassa"
+    },
+    {
+      "finnish_word": "kansi",
+      "translation": "boong tàu",
+      "part_of_speech": "danh từ",
+      "example_sentence": null,
+      "notes": "chủ đề: satamassa"
+    },
+    {
+      "finnish_word": "kauas",
+      "translation": "xa (Mihin?)",
+      "part_of_speech": "trạng từ khoảng cách",
+      "example_sentence": null,
+      "notes": "bộ 3: Mihin/Missä/Mistä"
+    },
+    {
+      "finnish_word": "kaukana",
+      "translation": "xa (Missä?)",
+      "part_of_speech": "trạng từ khoảng cách",
+      "example_sentence": null,
+      "notes": "bộ 3: Mihin/Missä/Mistä"
+    },
+    {
+      "finnish_word": "kaukaa",
+      "translation": "xa (Mistä?)",
+      "part_of_speech": "trạng từ khoảng cách",
+      "example_sentence": null,
+      "notes": "bộ 3: Mihin/Missä/Mistä"
+    },
+    {
+      "finnish_word": "lähelle",
+      "translation": "gần (Mihin?)",
+      "part_of_speech": "trạng từ khoảng cách",
+      "example_sentence": null,
+      "notes": "bộ 3: Mihin/Missä/Mistä"
+    },
+    {
+      "finnish_word": "lähellä",
+      "translation": "gần (Missä?)",
+      "part_of_speech": "trạng từ khoảng cách",
+      "example_sentence": null,
+      "notes": "bộ 3: Mihin/Missä/Mistä"
+    },
+    {
+      "finnish_word": "läheltä",
+      "translation": "gần (Mistä?)",
+      "part_of_speech": "trạng từ khoảng cách",
+      "example_sentence": null,
+      "notes": "bộ 3: Mihin/Missä/Mistä"
+    },
+    {
+      "finnish_word": "syy",
+      "translation": "lý do",
+      "part_of_speech": "danh từ",
+      "example_sentence": null,
+      "notes": "chủ đề: Luetaan - 5 syytä matkustaa junalla"
+    },
+    {
+      "finnish_word": "viimeksi",
+      "translation": "lần cuối cùng, gần đây nhất",
+      "part_of_speech": "trạng từ",
+      "example_sentence": "Milloin matkustit viimeksi junalla?",
+      "notes": null
+    },
+    {
+      "finnish_word": "kannattaa",
+      "translation": "đáng, nên (làm gì)",
+      "part_of_speech": "động từ nhóm 1",
+      "example_sentence": "Lue tästä, miksi se kannattaa!",
+      "notes": null
+    },
+    {
+      "finnish_word": "ympäristöystävällinen",
+      "translation": "thân thiện với môi trường",
+      "part_of_speech": "tính từ",
+      "example_sentence": "Junamatkailu on ympäristöystävällistä.",
+      "notes": null
+    },
+    {
+      "finnish_word": "pienentää",
+      "translation": "làm nhỏ đi, giảm bớt",
+      "part_of_speech": "động từ nhóm 1",
+      "example_sentence": "Jos haluat pienentää hiilijalanjälkeäsi...",
+      "notes": null
+    },
+    {
+      "finnish_word": "hiilijalanjälki",
+      "translation": "dấu chân carbon",
+      "part_of_speech": "danh từ",
+      "example_sentence": null,
+      "notes": "hiili (than/carbon) + jalanjälki (dấu chân)"
+    },
+    {
+      "finnish_word": "tapa",
+      "translation": "cách thức, phương pháp",
+      "part_of_speech": "danh từ",
+      "example_sentence": "Helppo tapa on vaihtaa lentokone junaan.",
+      "notes": null
+    },
+    {
+      "finnish_word": "kokea",
+      "translation": "trải nghiệm, cảm nhận",
+      "part_of_speech": "động từ nhóm 1",
+      "example_sentence": "Junassa koet enemmän.",
+      "notes": null
+    },
+    {
+      "finnish_word": "enemmän",
+      "translation": "nhiều hơn",
+      "part_of_speech": "trạng từ",
+      "example_sentence": null,
+      "notes": null
+    },
+    {
+      "finnish_word": "luonto",
+      "translation": "thiên nhiên",
+      "part_of_speech": "danh từ",
+      "example_sentence": "Junassa olet lähellä luontoa.",
+      "notes": null
+    },
+    {
+      "finnish_word": "paikallinen",
+      "translation": "(thuộc) địa phương",
+      "part_of_speech": "tính từ",
+      "example_sentence": null,
+      "notes": null
+    },
+    {
+      "finnish_word": "kätevästi",
+      "translation": "một cách tiện lợi",
+      "part_of_speech": "trạng từ",
+      "example_sentence": "Kun matkustat junalla, saavut kätevästi suoraan keskustaan.",
+      "notes": null
+    },
+    {
+      "finnish_word": "erinomainen",
+      "translation": "xuất sắc, tuyệt vời",
+      "part_of_speech": "tính từ",
+      "example_sentence": "Junassa on erinomaiset palvelut.",
+      "notes": null
+    },
+    {
+      "finnish_word": "palvelu",
+      "translation": "dịch vụ",
+      "part_of_speech": "danh từ",
+      "example_sentence": null,
+      "notes": null
+    },
+    {
+      "finnish_word": "jaloitella",
+      "translation": "duỗi chân, đi lại cho đỡ mỏi (khi ngồi lâu)",
+      "part_of_speech": "động từ nhóm 3",
+      "example_sentence": "Junassa voit jaloitella.",
+      "notes": null
+    },
+    {
+      "finnish_word": "nauttia",
+      "translation": "thưởng thức (cái gì)",
+      "part_of_speech": "động từ nhóm 1",
+      "example_sentence": "Voit nauttia ravintolavaunussa herkullisesta ruoasta.",
+      "notes": "nauttia + sta/stä"
+    },
+    {
+      "finnish_word": "ravintolavaunu",
+      "translation": "toa nhà hàng (trên tàu)",
+      "part_of_speech": "danh từ",
+      "example_sentence": null,
+      "notes": null
+    },
+    {
+      "finnish_word": "vaikka",
+      "translation": "hoặc là, ví dụ như (ở đây); cũng có nghĩa \"mặc dù\" tuỳ ngữ cảnh",
+      "part_of_speech": "liên từ",
+      "example_sentence": "Voit jaloitella ja nauttia... tai juoda vaikka lasin viiniä.",
+      "notes": null
+    },
+    {
+      "finnish_word": "kiireetön",
+      "translation": "không vội vã, thong thả",
+      "part_of_speech": "tính từ",
+      "example_sentence": "Junamatkailu on mukavaa ja kiireetöntä.",
+      "notes": null
+    },
+    {
+      "finnish_word": "rentoutua",
+      "translation": "thư giãn",
+      "part_of_speech": "động từ nhóm 1",
+      "example_sentence": "Pitkällä junamatkalla ehdit rentoutua.",
+      "notes": null
+    },
+    {
+      "finnish_word": "lisäksi",
+      "translation": "thêm vào đó, ngoài ra",
+      "part_of_speech": "trạng từ",
+      "example_sentence": "Matkalla voit lisäksi tutustua uusiin ihmisiin.",
+      "notes": null
+    },
+    {
+      "finnish_word": "maailma",
+      "translation": "thế giới",
+      "part_of_speech": "danh từ",
+      "example_sentence": "Junalla voit lähteä maailmalle.",
+      "notes": null
+    }
+  ],
+  "exercises": [
+    {
+      "type": "reference_table",
+      "prompt": "## Imperfekti (Thì quá khứ)\n\n**Cấu trúc gốc:** vartalo (gốc từ) + i (dấu hiệu imperfekti) + persoona (đuôi chia theo ngôi)\n\nVí dụ: kysy- + i + n → kysyin | sano- + i + tte → sanoitte\n\n**Bảng chia đầy đủ theo ngôi — ví dụ động từ \"nukkua\" (ngủ):**\n\n| Ngôi | Dạng imperfekti |\n|---|---|\n| minä | nukuin |\n| sinä | nukuit |\n| hän | nukkui |\n| me | nukuimme |\n| te | nukuitte |\n| he | nukkuivat |\n\n*Ghi chú: dạng ngôi \"hän\" (nukkui) không có nguyên âm dài, khác với các ngôi khác.*\n\n### Nhánh 1 — Nguyên âm o, ö, u, y: GIỮ NGUYÊN\n\n| Preesens | Imperfekti |\n|---|---|\n| sanon | sanoin |\n| säilön | säilöin |\n| puhun | puhuin |\n| kysyn | kysyin |\n\n### Nhánh 2 — Nguyên âm a, ä, e, i: MẤT ĐI\n\n| Preesens | Imperfekti |\n|---|---|\n| odotan | odotin |\n| pidän | pidin |\n| opiskelen | opiskelin |\n| uin | uin |\n\n### Nhánh 3 — a → o (áp dụng khi: động từ có 2 âm tiết VÀ âm tiết đầu tiên chứa \"a\")\n\n| Preesens | Imperfekti |\n|---|---|\n| alan | aloin |\n| laulan | lauloin |\n\n*Lưu ý: quy tắc này CHỈ áp dụng cho động từ 2 âm tiết. Động từ 3 âm tiết trở lên (ví dụ: ratsastan) giữ nguyên theo Nhánh 2 (ratsastin, không phải ratsastoin).*\n\n### Nhánh 4 — Nguyên âm đầu tiên trong cụm đôi mất đi + i (uo→oi, yö→öi, ie→ei, VV→Vi)\n\n| Preesens | Imperfekti |\n|---|---|\n| juon | join |\n| syön | söin |\n| vien | vein |\n| saan | sain |\n| myyn | myin |\n| jään | jäin |\n\n### Trường hợp ngoại lệ đặc biệt — käydä (đi/ghé qua)\n\n| Ngôi | Dạng imperfekti |\n|---|---|\n| minä | kävin |\n| sinä | kävit |\n| hän | kävi |\n| me | kävimme |\n| te | kävitte |\n| he | kävivät |\n\n### Nhóm dùng đuôi \"si\" thay vì \"i\"\n\n**Verbityyppi 4 — nguyên âm a, ä ở cuối MẤT ĐI trước khi thêm \"si\":**\n\n| Preesens | Imperfekti |\n|---|---|\n| herään | heräsin |\n| haluan | halusin |\n| vastaan | vastasin |\n\n**Verbityyppi 1, đôi khi — phụ âm đôi la/lä, na/nä, ra/rä MẤT ĐI trước khi thêm \"si\":**\n\n| Preesens | Imperfekti |\n|---|---|\n| lennän | lensin |\n| ymmärrän | ymmärsin |\n\n**Nhóm động từ cố định dùng \"si\":**\n- Đuôi ltaa/ltää, ntaa/ntää, rtaa/rtää: kieltää, kääntää, rakentaa, työntää, siirtää, piirtää...\n- Nhóm khác: huutaa, löytää, pyytää, tuntea, tietää, taitaa",
+      "correct_answer": null,
+      "options": null,
+      "scene_description": null,
+      "source_harjoitus": null,
+      "notes": null
+    },
+    {
+      "type": "reference_table",
+      "prompt": "## Sanatyypit (Kiểu biến cách danh từ)\n\n### Bảng tổng quát các nhóm\n\n| Nhóm | N (chủ cách) | P (riêng phần) | V (gốc) |\n|---|---|---|---|\n| in | puhelin | puhelinta | puhelime- |\n| as/äs/is | rikas / kaunis | rikasta / kaunista | rikkaa- / kaunii- |\n| us/ys/os/ös/es | kokous | kokousta | kokoukse- |\n| i → i | taksi | taksia | taksi- |\n| i → e | kieli | kieltä | kiele- |\n| i → e (nhóm phụ) | järvi | järveä | järve- |\n| si | uusi | uutta | uude- |\n| nen | suomalainen | suomalaista | suomalaise- |\n| e | huone | huonetta | huonee- |\n| từ thường (mặc định) | tyttö, koulu, ihana, kuu | (không có quy tắc riêng) | |\n\n*Ghi chú: Unit 1 chỉ đào sâu (bảng chia đầy đủ 12 cách) vào 2 nhóm as/äs/is và in. Các nhóm còn lại sẽ được học chi tiết ở các unit sau.*\n\n### Chi tiết nhóm as/äs/is — ví dụ: lounas (bữa trưa)\n\n| Cách | Dạng |\n|---|---|\n| N (chủ cách) | lounas |\n| P (riêng phần) | lounasta |\n| V (gốc) | lounaa- |\n| G (sở hữu cách) | lounaan |\n| S-MIHIN (nội cách - đến đâu) | lounaaseen |\n| S-MISSÄ (nội cách - ở đâu) | lounaassa |\n| S-MISTÄ (nội cách - từ đâu) | lounaasta |\n| L-MIHIN (ngoại cách - đến đâu) | lounaalle |\n| L-MISSÄ (ngoại cách - ở đâu) | lounaalla |\n| L-MISTÄ (ngoại cách - từ đâu) | lounaalta |\n| MON (số nhiều) | lounaat |\n\nVí dụ câu: *Pedro kävi taas lounaalla siinä kalliissa ravintolassa!*\n\n**Danh sách từ cùng nhóm as/äs/is:** eräs, eväs, kallis, kaunis, oppilas, patsas, pensas, potilas, sairas, taivas, valmis, vieras, viisas...\n\n### Chi tiết nhóm in — ví dụ: puhelin (điện thoại)\n\n| Cách | Dạng |\n|---|---|\n| N (chủ cách) | puhelin |\n| P (riêng phần) | puhelinta |\n| V (gốc) | puhelime- |\n| G (sở hữu cách) | puhelimen |\n| S-MIHIN | puhelimeen |\n| S-MISSÄ | puhelimessa |\n| S-MISTÄ | puhelimesta |\n| L-MIHIN | puhelimelle |\n| L-MISSÄ | puhelimella |\n| L-MISTÄ | puhelimelta |\n| MON | puhelimet |\n\nVí dụ câu: *Odota hetki, olen puhelimessa!*\n\n**Danh sách từ cùng nhóm in:** avain, heijastin, kirjain, laskin, pakastin, teroitin, tulostin, eläin, valaisin...",
+      "correct_answer": null,
+      "options": null,
+      "scene_description": null,
+      "source_harjoitus": null,
+      "notes": null
+    },
+    {
+      "type": "reference_table",
+      "prompt": "## Mennään! / Me mennään\n\n### Phần 1: \"Mennään!\" — Passiivi dùng làm lời rủ rê\n\nDạng passiivi được dùng như một cách rủ ai đó cùng làm gì, tương đương \"Chúng ta cùng... đi!\" / \"Let's...!\"\n\nVí dụ: *Mennään kotiin!* — *Joo, mennään vaan!* — *Ei mennä!*\n\n**Cách chia — Verbityyppi 1:** minä-vartalo (gốc dạng ngôi \"tôi\") + taan/tään\n\n| Preesens (tôi làm) | Dạng Mennään! |\n|---|---|\n| minä puhu-n | puhutaan |\n| minä kysy-n | kysytään |\n| minä ota-n | otetaan (a→e) |\n| minä kirjoita-n | kirjoitetaan (a→e) |\n\n*Quy tắc: khi gốc kết thúc bằng a/ä, phải đổi thành e trước khi thêm taan/tään.*\n\n**Cách chia — Verbityyppi 2, 3, 4, 5:** infinitiivi (dạng nguyên mẫu) + an/än\n\n| Infinitiivi | Dạng Mennään! |\n|---|---|\n| juoda (verbityyppi 2) | juodaan |\n| kävellä (verbityyppi 3) | kävellään |\n| tavata (verbityyppi 4) | tavataan |\n| valita (verbityyppi 5) | valitaan |\n\n**Dạng phủ định:** mennään → ei mennä (bỏ hậu tố, dùng \"ei\" + dạng gốc infinitiivi rút gọn)\n\nVí dụ: ei puhuta, ei oteta, ei juoda, ei kävellä, ei tavata, ei valita\n\n### Phần 2: \"Me mennään\" — Passiivi thay ngôi \"chúng ta\" trong khẩu ngữ\n\nTrong khẩu ngữ (puhekieli), người Phần Lan thường dùng dạng passiivi (giống hệt cấu trúc \"Mennään!\") để thay cho cách chia động từ chuẩn ở ngôi \"me\" (chúng ta).\n\n| Kirjakieli (văn viết chuẩn) | Puhekieli (khẩu ngữ) |\n|---|---|\n| Menemme kotiin. | Me mennään kotiin. |\n\n**Bảng đối chiếu Positiivinen/Negatiivinen:**\n\n| Động từ | Kirjakieli POS. | Kirjakieli NEG. | Puhekieli POS. | Puhekieli NEG. |\n|---|---|---|---|---|\n| olla | olemme | emme ole | me ollaan | me ei olla |\n| tavata | tapaamme | emme tapaa | me tavataan | me ei tavata |\n\n**Áp dụng cả cho thì Imperfekti:**\n\n| Kirjakieli (imperfekti) | Puhekieli (imperfekti) |\n|---|---|\n| asuimme | me asuttiin |\n\n*Cấu trúc \"me + passiivi\" không chỉ dùng cho thì hiện tại mà còn áp dụng được cho thì quá khứ (imperfekti).*",
+      "correct_answer": null,
+      "options": null,
+      "scene_description": null,
+      "source_harjoitus": null,
+      "notes": null
+    },
+    {
+      "type": "true_false_correction",
+      "prompt": "Lue Pedron teksti Viikonloppureissu. Valitse, onko lause oikein (O) vai väärin (V). Jos lause on väärin, kirjoita lause oikein.",
+      "correct_answer": {
+        "items": [
+          {
+            "statement": "Pedro oli Tukholmassa perjantaista sunnuntaihin.",
+            "is_correct": true,
+            "corrected": null
+          },
+          {
+            "statement": "Matka laivalla meni hyvin.",
+            "is_correct": true,
+            "corrected": null
+          },
+          {
+            "statement": "Pedron laiva oli Tukholmassa iltapäivällä.",
+            "is_correct": false,
+            "corrected": "Pedron laiva oli Tukholmassa illalla."
+          },
+          {
+            "statement": "Pedro söi illallista ystävän luona.",
+            "is_correct": false,
+            "corrected": "Pedro söi illallista ravintolassa."
+          },
+          {
+            "statement": "Pedro yöpyi hotellissa.",
+            "is_correct": false,
+            "corrected": "Pedro yöpyi hostellissa."
+          },
+          {
+            "statement": "Lauantaina oli hyvä sää.",
+            "is_correct": true,
+            "corrected": null
+          },
+          {
+            "statement": "Pedrolla on ruotsalainen ystävä Tukholmassa.",
+            "is_correct": false,
+            "corrected": "Pedrolla on brasilialainen ystävä Tukholmassa."
+          },
+          {
+            "statement": "Ennen kotiinlähtöä Pedro osti tuliaisia.",
+            "is_correct": true,
+            "corrected": null
+          }
+        ]
+      },
+      "options": null,
+      "scene_description": null,
+      "source_harjoitus": 1,
+      "notes": "Đáp án chính thức từ sách (Harjoitusten ratkaisut)"
+    },
+    {
+      "type": "sentence_correction",
+      "prompt": "Lue Viikonloppureissu-tekstin rivit 17-33. Nämä lauseet ovat väärin. Korjaa lauseet.",
+      "correct_answer": {
+        "items": [
+          {
+            "wrong": "Olgan ystävillä on pieni asunto kivalla alueella.",
+            "corrected": "Olgan ystävillä on iso asunto kivalla alueella."
+          },
+          {
+            "wrong": "Olgan ystävät myyvät asunnon turisteille.",
+            "corrected": "Olgan ystävät vuokraavat asuntoa turisteille."
+          },
+          {
+            "wrong": "Olgan ystävien asunnolta pääsee bussilla joka paikkaan.",
+            "corrected": "Olgan ystävien asunnolta pääsee ratikalla joka paikkaan."
+          },
+          {
+            "wrong": "Alex varaa laivaliput.",
+            "corrected": "Pedro varaa laivaliput."
+          },
+          {
+            "wrong": "Alex aikoo tulla satamaan taksilla.",
+            "corrected": "Alex aikoo tulla satamaan työkaverin kyydillä."
+          },
+          {
+            "wrong": "Laivamatka Tallinnaan kestää kaksi ja puoli tuntia.",
+            "corrected": "Laivamatka Tallinnaan kestää kolme tuntia."
+          },
+          {
+            "wrong": "Asunto on sataman vieressä.",
+            "corrected": "Asunto on vartin ratikkamatkan päässä satamasta."
+          }
+        ]
+      },
+      "options": null,
+      "scene_description": null,
+      "source_harjoitus": 2,
+      "notes": "Đáp án chính thức từ sách"
+    },
+    {
+      "type": "fill_blank",
+      "prompt": "Pikkusanat. Valitse oikea sana ja kirjoita. Nhóm 1: äsken/takaisin/mielellään/tietysti. Nhóm 2: vielä/aikaisin/joka tapauksessa/heti.",
+      "correct_answer": {
+        "items": [
+          {
+            "dialogue": 1,
+            "blanks": [
+              "takaisin",
+              "tietysti"
+            ]
+          },
+          {
+            "dialogue": 2,
+            "blanks": [
+              "äsken",
+              "mielellään"
+            ]
+          },
+          {
+            "dialogue": 3,
+            "blanks": [
+              "aikaisin",
+              "vielä"
+            ]
+          },
+          {
+            "dialogue": 4,
+            "blanks": [
+              "heti",
+              "joka tapauksessa"
+            ]
+          }
+        ]
+      },
+      "options": {
+        "group1": [
+          "äsken",
+          "takaisin",
+          "mielellään",
+          "tietysti"
+        ],
+        "group2": [
+          "vielä",
+          "aikaisin",
+          "joka tapauksessa",
+          "heti"
+        ]
+      },
+      "scene_description": null,
+      "source_harjoitus": 3,
+      "notes": "Đáp án chính thức từ sách, đã sửa lại thứ tự so với bản đoán ban đầu"
+    },
+    {
+      "type": "matching",
+      "prompt": "Matkalla. Yhdistä sana ja selitys.",
+      "correct_answer": {
+        "pairs": [
+          {
+            "left": "Paikka, jossa seisot, kun odotat junaa rautatieasemalla.",
+            "right": "laituri"
+          },
+          {
+            "left": "Paikka, rakennus tai muu asia, jonka monet turistit haluavat nähdä.",
+            "right": "nähtävyys"
+          },
+          {
+            "left": "Paikka, jossa matkustajat siirtyvät lentokentältä lentokoneeseen.",
+            "right": "lähtöportti"
+          },
+          {
+            "left": "Viranomainen, joka valvoo esimerkiksi lentokentällä ja satamassa, mitä matkustajat tuovat mukanaan.",
+            "right": "tulli"
+          },
+          {
+            "left": "Matkalipussa lukee, millä paikalla sinä istut esimerkiksi junassa.",
+            "right": "paikkavaraus"
+          },
+          {
+            "left": "Matkalla vaihdat kulkuvälinettä.",
+            "right": "vaihto"
+          }
+        ]
+      },
+      "options": null,
+      "scene_description": null,
+      "source_harjoitus": 4,
+      "notes": "Đáp án chính thức từ sách: 1.e 2.c 3.b 4.a 5.d 6.f"
+    },
+    {
+      "type": "reading_comprehension_qa",
+      "prompt": "Matkalla. Kysy ja vastaa! Vastaukset ovat kuvassa. Đọc 2 bảng dữ liệu (giờ tàu, giờ bay) và trả lời câu hỏi.",
+      "correct_answer": {
+        "table_A_train_schedule": {
+          "header": [
+            "Giờ",
+            "Toa",
+            "Chuyến",
+            "Điểm đến"
+          ],
+          "rows": [
+            [
+              "06:25→10:25",
+              "3",
+              "P269",
+              "Kolari"
+            ],
+            [
+              "07:43→09:29",
+              "3",
+              "IC 273",
+              "Oulu"
+            ],
+            [
+              "08:05",
+              "3",
+              "Pendolino 175",
+              "Turku"
+            ],
+            [
+              "08:33",
+              "4",
+              "IC 22",
+              "Helsinki"
+            ],
+            [
+              "10:00",
+              "1",
+              "IC 147",
+              "Kuopio"
+            ],
+            [
+              "11:55",
+              "2",
+              "IC 273",
+              "Tampere"
+            ],
+            [
+              "12:27",
+              "2",
+              "Pendolino 155",
+              "Vaasa"
+            ]
+          ]
+        },
+        "table_A_answers": [
+          "Juna Kuopioon lähtee kello 10:00.",
+          "Juna P269 on neljä tuntia myöhässä.",
+          "Oulun junan uusi lähtöaika on 09:29.",
+          "Pendolino 155 menee Vaasaan.",
+          "Juna Tampereelle lähtee raiteelta 2.",
+          "Seuraava juna Turkuun lähtee kello 08:05."
+        ],
+        "table_B_flight_schedule": {
+          "header": [
+            "Aika",
+            "Lento",
+            "Mihin",
+            "Terminaali",
+            "Portti",
+            "Tila"
+          ],
+          "rows": [
+            [
+              "16:20",
+              "LH855",
+              "Köln",
+              "T2",
+              "12",
+              "lähdössä"
+            ],
+            [
+              "16:25",
+              "AY351",
+              "Joensuu",
+              "T1",
+              "19B",
+              "peruttu"
+            ],
+            [
+              "16:30",
+              "SK705",
+              "Tukholma",
+              "T1",
+              "27",
+              "lähdössä"
+            ],
+            [
+              "16:30",
+              "AY1751",
+              "Milano",
+              "T2",
+              "23",
+              "portti suljettu"
+            ],
+            [
+              "16:35",
+              "FZ1784",
+              "Dubai",
+              "T2",
+              "44",
+              "portti suljettu"
+            ],
+            [
+              "16:40",
+              "AY005",
+              "Sofia",
+              "T2",
+              "14",
+              "viimeinen kutsu"
+            ],
+            [
+              "16:40",
+              "FI450",
+              "Reykjavik",
+              "T2",
+              "25",
+              "viimeinen kutsu"
+            ],
+            [
+              "16:45",
+              "AY015",
+              "Seattle",
+              "T2",
+              "46",
+              "arvioitu aika"
+            ],
+            [
+              "16:50",
+              "AY1476",
+              "Wien",
+              "T2",
+              "2A",
+              "mene portille"
+            ]
+          ]
+        },
+        "table_B_answers": [
+          "Lento Milanoon lähtee kello 16:30.",
+          "Lento FZ1784 menee Dubaihin.",
+          "Lento Wieniin lähtee portilta 2A.",
+          "Kello 16:40 lähtee kaksi lentoa: AY005 Sofiaan ja FI450 Reykjavikiin.",
+          "Kyllä, Reykjavikiin matkustavilla on kiire, koska lento on 'viimeinen kutsu' -tilassa.",
+          "Lento AY351 Joensuuhun on peruttu.",
+          "Seattlen lennon arvioitu lähtöaika on 16:45."
+        ]
+      },
+      "options": null,
+      "scene_description": null,
+      "source_harjoitus": 5,
+      "notes": "⚠️ Double-check: câu B.4 có 2 chuyến bay cùng giờ 16:40 (Sofia và Reykjavik) - cần xác nhận ý định câu hỏi khi build UI, đáp án tạm liệt kê cả 2"
+    },
+    {
+      "type": "fill_blank",
+      "prompt": "Matkalla. Valitse sopiva sana ja kirjoita.",
+      "correct_answer": {
+        "items": [
+          "viisumi",
+          "vuokrata",
+          "Opas",
+          "Kiertoajelu",
+          "käsimatkatavarat",
+          "Lento",
+          "meno-paluu",
+          "matkavakuutus",
+          "majoitus",
+          "turvatarkastus"
+        ]
+      },
+      "options": [
+        "matkavakuutus",
+        "käsimatkatavarat",
+        "lento",
+        "vuokrata",
+        "majoitus",
+        "opas",
+        "meno-paluu",
+        "viisumi",
+        "kiertoajelu",
+        "turvatarkastus"
+      ],
+      "scene_description": null,
+      "source_harjoitus": 7,
+      "notes": "Đáp án chính thức từ sách"
+    },
+    {
+      "type": "free_practice",
+      "prompt": "Imperfekti. Kysy ja vastaa. Hỏi-đáp cặp dùng imperfekti, không chấm điểm cụ thể (câu trả lời cá nhân). Ví dụ mẫu: Urheilitko eilen? — Urheilin. Olin kuntosalilla. / En.",
+      "correct_answer": null,
+      "options": {
+        "questions": [
+          "Katsoitko televisiota eilen illalla?",
+          "Luitko kirjaa viime viikonloppuna?",
+          "Kävitkö kaupassa maanantaina? Mitä ostit?",
+          "Tapasitko ystävän viime viikolla? Missä?",
+          "Puhuitko viime viikolla paljon suomea? Kenen kanssa?",
+          "Teitkö suomen kurssin kotitehtävät heti kurssin jälkeen?",
+          "Nukuitko hyvin viime yönä?",
+          "Joitko kahvia aamulla?"
+        ]
+      },
+      "scene_description": null,
+      "source_harjoitus": 10,
+      "notes": null
+    },
+    {
+      "type": "conjugation_drill",
+      "prompt": "Kirjoita imperfekti. Mieti, mikä on imperfektin sääntö.",
+      "correct_answer": {
+        "pairs": [
+          {
+            "preesens": "nukun",
+            "imperfekti": "nukuin"
+          },
+          {
+            "preesens": "leivon",
+            "imperfekti": "leivoin"
+          },
+          {
+            "preesens": "kirjoitan",
+            "imperfekti": "kirjoitin"
+          },
+          {
+            "preesens": "tarvitsen",
+            "imperfekti": "tarvitsin"
+          },
+          {
+            "preesens": "autan",
+            "imperfekti": "autoin"
+          },
+          {
+            "preesens": "kannan",
+            "imperfekti": "kannoin"
+          },
+          {
+            "preesens": "syön",
+            "imperfekti": "söin"
+          },
+          {
+            "preesens": "vien",
+            "imperfekti": "vein"
+          },
+          {
+            "preesens": "saan",
+            "imperfekti": "sain"
+          },
+          {
+            "preesens": "juon",
+            "imperfekti": "join"
+          },
+          {
+            "preesens": "jään",
+            "imperfekti": "jäin"
+          },
+          {
+            "preesens": "tapaan",
+            "imperfekti": "tapasin"
+          },
+          {
+            "preesens": "pelaan",
+            "imperfekti": "pelasin"
+          },
+          {
+            "preesens": "käännän",
+            "imperfekti": "käänsin"
+          },
+          {
+            "preesens": "piirrän",
+            "imperfekti": "piirsin"
+          }
+        ]
+      },
+      "options": null,
+      "scene_description": null,
+      "source_harjoitus": 11,
+      "notes": "Đáp án chính thức từ sách, đã sửa lại cấu trúc cho đúng 6 cặp (bản đoán ban đầu bị trùng lặp nhầm lẫn)"
+    },
+    {
+      "type": "conjugation_drill",
+      "prompt": "Kirjoita imperfekti. 4 nhóm quy tắc: (1) o,ö,u,y vai a,ä,e,i; (2) a,ä,e,i vai a→o; (3) uo,yö,ie vai VV; (4) si.",
+      "correct_answer": {
+        "column1": [
+          {
+            "preesens": "itken",
+            "imperfekti": "itkin"
+          },
+          {
+            "preesens": "istun",
+            "imperfekti": "istuin"
+          },
+          {
+            "preesens": "matkustan",
+            "imperfekti": "matkustin"
+          },
+          {
+            "preesens": "uin",
+            "imperfekti": "uin"
+          },
+          {
+            "preesens": "uskon",
+            "imperfekti": "uskoin"
+          },
+          {
+            "preesens": "kävelen",
+            "imperfekti": "kävelin"
+          }
+        ],
+        "column2": [
+          {
+            "preesens": "autan",
+            "imperfekti": "autoin"
+          },
+          {
+            "preesens": "soitan",
+            "imperfekti": "soitin"
+          },
+          {
+            "preesens": "tarkastan",
+            "imperfekti": "tarkastin"
+          },
+          {
+            "preesens": "ratsastan",
+            "imperfekti": "ratsastin"
+          },
+          {
+            "preesens": "laulan",
+            "imperfekti": "lauloin"
+          },
+          {
+            "preesens": "laitan",
+            "imperfekti": "laitoin"
+          }
+        ],
+        "column3": [
+          {
+            "preesens": "myyn",
+            "imperfekti": "myin"
+          },
+          {
+            "preesens": "tuon",
+            "imperfekti": "toin"
+          },
+          {
+            "preesens": "saan",
+            "imperfekti": "sain"
+          },
+          {
+            "preesens": "vien",
+            "imperfekti": "vein"
+          },
+          {
+            "preesens": "lyön",
+            "imperfekti": "löin"
+          },
+          {
+            "preesens": "jään",
+            "imperfekti": "jäin"
+          }
+        ],
+        "column4": [
+          {
+            "preesens": "tilaan",
+            "imperfekti": "tilasin"
+          },
+          {
+            "preesens": "avaan",
+            "imperfekti": "avasin"
+          },
+          {
+            "preesens": "herään",
+            "imperfekti": "heräsin"
+          },
+          {
+            "preesens": "lennän",
+            "imperfekti": "lensin"
+          },
+          {
+            "preesens": "pyydän",
+            "imperfekti": "pyysin"
+          },
+          {
+            "preesens": "tiedän",
+            "imperfekti": "tiesin"
+          }
+        ]
+      },
+      "options": null,
+      "scene_description": null,
+      "source_harjoitus": 12,
+      "notes": "Đáp án chính thức từ sách. Double-check xác nhận: ratsastan→ratsastin (3 âm tiết nên KHÔNG áp dụng quy tắc a→o, dù nằm ở cột 2 cùng nhóm với autan/soitan)"
+    },
+    {
+      "type": "sentence_transform",
+      "prompt": "Kirjoita lauseet imperfektissä. 5 nhóm quy tắc, mỗi nhóm 3 câu.",
+      "correct_answer": {
+        "group1_o_ö_u_y": [
+          "Me asuimme Helsingissä.",
+          "Hän uskoi minua.",
+          "Lapset eksyivät metsään."
+        ],
+        "group2_a_ä_e_i": [
+          "Soititte kauniisti.",
+          "Pidin opettajasta.",
+          "Opit nopeasti suomea."
+        ],
+        "group3_a_to_o": [
+          "Annoitko hänelle rahaa?",
+          "Pedro auttoi Hannaa.",
+          "Me lauloimme juhlissa."
+        ],
+        "group4_vv_to_vi": [
+          "Myitkö auton?",
+          "He veivät lapsen kouluun.",
+          "Söittekö te lihaa?"
+        ],
+        "group5_si": [
+          "Alex heräsi kello 8.",
+          "Lensimme New Yorkiin.",
+          "Tapasin vanhan ystävän."
+        ]
+      },
+      "options": {
+        "original_sentences": {
+          "group1": [
+            "Me asumme Helsingissä.",
+            "Hän uskoo minua.",
+            "Lapset eksyvät metsään."
+          ],
+          "group2": [
+            "Soitatte kauniisti.",
+            "Pidän opettajasta.",
+            "Opit nopeasti suomea."
+          ],
+          "group3": [
+            "Annatko hänelle rahaa?",
+            "Pedro auttaa Hannaa.",
+            "Me laulamme juhlissa."
+          ],
+          "group4": [
+            "Myytkö auton?",
+            "He vievät lapsen kouluun.",
+            "Syöttekö te lihaa?"
+          ],
+          "group5": [
+            "Alex herää kello 8.",
+            "Lennämme New Yorkiin.",
+            "Tapaan vanhan ystävän."
+          ]
+        }
+      },
+      "scene_description": null,
+      "source_harjoitus": 13,
+      "notes": "Đáp án chính thức từ sách, khớp hoàn toàn với bản extract ban đầu"
+    },
+    {
+      "type": "conjugation_drill",
+      "prompt": "Kirjoita imperfekti.",
+      "correct_answer": {
+        "pairs": [
+          {
+            "preesens": "asutte",
+            "imperfekti": "asuitte"
+          },
+          {
+            "preesens": "itken",
+            "imperfekti": "itkin"
+          },
+          {
+            "preesens": "pidätte",
+            "imperfekti": "piditte"
+          },
+          {
+            "preesens": "auttaa",
+            "imperfekti": "auttoi"
+          },
+          {
+            "preesens": "menevät",
+            "imperfekti": "menivät"
+          },
+          {
+            "preesens": "myyt",
+            "imperfekti": "myit"
+          },
+          {
+            "preesens": "herää",
+            "imperfekti": "heräsi"
+          },
+          {
+            "preesens": "lennämme",
+            "imperfekti": "lensimme"
+          },
+          {
+            "preesens": "tuotte",
+            "imperfekti": "toitte"
+          },
+          {
+            "preesens": "laulat",
+            "imperfekti": "lauloit"
+          },
+          {
+            "preesens": "uskoo",
+            "imperfekti": "uskoi"
+          },
+          {
+            "preesens": "eksymme",
+            "imperfekti": "eksyimme"
+          },
+          {
+            "preesens": "opimme",
+            "imperfekti": "opimme"
+          },
+          {
+            "preesens": "häiritset",
+            "imperfekti": "häiritsit"
+          },
+          {
+            "preesens": "pyydän",
+            "imperfekti": "pyysin"
+          },
+          {
+            "preesens": "avaavat",
+            "imperfekti": "avasivat"
+          },
+          {
+            "preesens": "tilaat",
+            "imperfekti": "tilasit"
+          },
+          {
+            "preesens": "lyövät",
+            "imperfekti": "löivät"
+          }
+        ]
+      },
+      "options": null,
+      "scene_description": null,
+      "source_harjoitus": 14,
+      "notes": "Đáp án chính thức từ sách. Double-check xác nhận: opimme→opimme (giữ nguyên không đổi hình giữa preesens và imperfekti, dễ gây nhầm khi build UI - cần lưu ý)"
+    },
+    {
+      "type": "free_practice",
+      "prompt": "Imperfekti. A: Valitse 10 verbiä ja kerro parille, mitä teit eilen. Verbit ovat listassa preesensissä. Käytä niitä imperfektissä. B: Kirjoita, mitä teit eilen.",
+      "correct_answer": null,
+      "options": {
+        "verb_list_morning": [
+          "herään kello X",
+          "käyn suihkussa",
+          "harjaan/kampaan hiukset",
+          "puen vaatteet päälle",
+          "keitän kahvia",
+          "syön aamupalaa",
+          "juon kahvia/teetä",
+          "luen uutiset",
+          "herätän lapset",
+          "vien koiran ulos",
+          "lähden töihin/kouluun/kurssille"
+        ],
+        "verb_list_day": [
+          "ajan pyörällä/autolla",
+          "menen kävellen/bussilla/metrolla/junalla",
+          "opiskelen / olen töissä koko päivän",
+          "käyn lounaalla/kahvilla/tupakalla...",
+          "syön eväät",
+          "juttelen työkaverin/opiskelukaverin kanssa",
+          "kello X pääsen töistä/koulusta/kurssilta",
+          "käyn kotimatkalla kaupassa",
+          "tulen kotiin",
+          "riisun takin ja kengät",
+          "teen ruokaa ja syön (perheen kanssa)"
+        ],
+        "verb_list_evening": [
+          "makaan sohvalla",
+          "olen somessa",
+          "katson elokuvaa/televisiota...",
+          "luen kirjaa/lehteä...",
+          "kuuntelen musiikkia/podcastia/äänikirjaa",
+          "käyn lenkillä/kuntosalilla/kirjastossa...",
+          "soitan kaverille/äidille/veljelle...",
+          "tapaan ystävän",
+          "pesen pyykkiä",
+          "vien roskat",
+          "menen nukkumaan kello X"
+        ]
+      },
+      "scene_description": null,
+      "source_harjoitus": 15,
+      "notes": null
+    },
+    {
+      "type": "cloze_passage",
+      "prompt": "Kirjoita tarina imperfektissä. Đoạn văn kể chuyện đi Đức cùng bạn trai Hans, chuyển toàn bộ động từ từ preesens sang imperfekti.",
+      "correct_answer": {
+        "blanks": [
+          "Matkustin",
+          "Lähdimme",
+          "ajoi",
+          "menimme",
+          "odotti",
+          "ajoimme",
+          "veimme",
+          "halusi",
+          "kävimme",
+          "katselimme",
+          "saapui",
+          "Olimme",
+          "asuimme",
+          "oli",
+          "tapasi",
+          "olin",
+          "tutustuin",
+          "vietimme",
+          "pelasin",
+          "veivät",
+          "puhuivat",
+          "meni",
+          "ymmärsin",
+          "Palasimme"
+        ]
+      },
+      "options": {
+        "passage_template": "___(1) poikaystäväni Hansin kanssa Saksaan. ___(2) matkalle sunnuntaina. Ensin Hans ___(3) autolla Tampereelta Helsinkiin ja sieltä ___(4) laivalla Travemündeen, Saksaan. Laivalla matkustaminen oli helppoa: laiva ___(5) satamassa, ___(6) auton laivaan ja ___(7) laukut hyttiin. Hans ___(8) käydä heti laivan pubissa oluella. Illalla ___(9) syömässä buffet-pöydässä. Ennen nukkumaanmenoa ___(10) hetken merta kannella. Seuraavana päivänä laiva ___(11) Travemündeen. ___(12) Saksassa neljä viikkoa ja ___(13) Hampurissa Hansin perheen luona. Hans ___(14) työmatkalla ja ___(15) saksalaiset työkaverinsa. Minä ___(16) lomalla ja ___(17) kaupungin nähtävyyksiin. Iltaisin ___(18) usein aikaa Hansin perheen kanssa. Pari kertaa ___(19) tennistä Hansin siskon kanssa. Viikonloppuisin Hansin isä ja äiti ___(20) meidät usein autolla retkelle. He ___(21) minulle koko kuukauden vain saksaa! Aika ___(22) nopeasti ja minä ___(23) saksaa päivä päivältä paremmin! ___(24) Suomeen neljän viikon jälkeen."
+      },
+      "scene_description": null,
+      "source_harjoitus": 16,
+      "notes": "Đáp án chính thức từ sách, khớp hoàn toàn với bản extract ban đầu"
+    },
+    {
+      "type": "sentence_transform",
+      "prompt": "Sano imperfektissä. Pari tarkistaa. A aloittaa. Luyện nói cặp, chuyển đổi 2 chiều preesens↔imperfekti (A đọc câu, B chuyển đổi thì, rồi ngược lại).",
+      "correct_answer": {
+        "A_to_B": [
+          {
+            "A_says_preesens": "Ulkona sataa.",
+            "B_answers_imperfekti": "Ulkona satoi."
+          },
+          {
+            "A_says_imperfekti": "(Lapset halusivat lähteä kylpylään.)",
+            "B_answers_preesens": "Lapset haluavat lähteä kylpylään."
+          },
+          {
+            "A_says_preesens": "Lähdemme Delfiiniin Vantaalle.",
+            "B_answers_imperfekti": "Lähdimme Delfiiniin Vantaalle."
+          },
+          {
+            "A_says_imperfekti": "(Matka kesti tunnin.)",
+            "B_answers_preesens": "Matka kestää tunnin."
+          },
+          {
+            "A_says_preesens": "Lapset uivat monta tuntia.",
+            "B_answers_imperfekti": "(Lapset uivat monta tuntia.)",
+            "note": "Dạng động từ không đổi hình giữa 2 thì - đây là trường hợp đặc biệt xác nhận qua đáp án sách, không phải lỗi"
+          },
+          {
+            "A_says_imperfekti": "(Vietimme kylpylässä koko päivän.)",
+            "B_answers_preesens": "Vietämme kylpylässä koko päivän."
+          },
+          {
+            "A_says_preesens": "Käymme ravintolassa syömässä.",
+            "B_answers_imperfekti": "(Kävimme ravintolassa syömässä.)"
+          },
+          {
+            "A_says_imperfekti": "(Olimme hotellissa yhden yön.)",
+            "B_answers_preesens": "Olemme hotellissa yhden yön."
+          },
+          {
+            "A_says_preesens": "Syömme aamiaista.",
+            "B_answers_imperfekti": "(Söimme aamiaista.)"
+          },
+          {
+            "A_says_imperfekti": "(Lähdimme kotiin aamiaisen jälkeen.)",
+            "B_answers_preesens": "Lähdemme kotiin aamiaisen jälkeen."
+          }
+        ]
+      },
+      "options": null,
+      "scene_description": null,
+      "source_harjoitus": 17,
+      "notes": "Không có trong ảnh đáp án - giữ nguyên bản Claude tự làm theo cấu trúc đối chiếu A/B in sẵn trong sách"
+    },
+    {
+      "type": "guided_composition",
+      "prompt": "Milloin? Valitse aika ja kirjoita lauseet. Ghép cụm 'viime/tämä/ensi' + đơn vị thời gian (kuukausi, talvi, yö, viikko, tiistai, kesäkuu, vuosi, syksy, joulu, viikonloppu) thành câu tự do. Không có đáp án cố định duy nhất.",
+      "correct_answer": null,
+      "options": {
+        "time_prefix": [
+          "viime",
+          "tämä",
+          "ensi"
+        ],
+        "time_units": [
+          "kuukausi",
+          "talvi",
+          "yö",
+          "viikko",
+          "tiistai",
+          "kesäkuu",
+          "vuosi",
+          "syksy",
+          "joulu",
+          "viikonloppu"
+        ],
+        "example": "Ihanaa! Minulla on kolme lomapäivää tässä kuussa!"
+      },
+      "scene_description": null,
+      "source_harjoitus": 19,
+      "notes": "Không có đáp án cố định trong sách (bài mở, sáng tạo câu) - type đổi từ dự kiến ban đầu sang guided_composition"
+    },
+    {
+      "type": "mcq",
+      "prompt": "Milloin? Kuinka kauan? Valitse oikea aika.",
+      "correct_answer": {
+        "items": [
+          {
+            "sentence": "Tapasin Siljan ___ , kun olin Tampereella kesätöissä.",
+            "answer": "neljä vuotta sitten"
+          },
+          {
+            "sentence": "Kurssi loppuu ___.",
+            "answer": "kolmen viikon päästä"
+          },
+          {
+            "sentence": "Asuimme Tukholmassa ___ 90-luvulla.",
+            "answer": "kaksi vuotta"
+          },
+          {
+            "sentence": "Mehmet opiskeli suomea ___. Sitten hän aloitti työt kodinkoneliikkeessä.",
+            "answer": "kahdeksan kuukautta"
+          },
+          {
+            "sentence": "Petri lähtee huomenna ___ mökille Puumalaan.",
+            "answer": "kahdeksi viikoksi"
+          },
+          {
+            "sentence": "Pirjo-täti tulee jouluna Helsinkiin ___.",
+            "answer": "kahdeksi päiväksi"
+          }
+        ]
+      },
+      "options": {
+        "item1": [
+          "neljä vuotta sitten",
+          "neljän vuoden päästä",
+          "neljä vuotta"
+        ],
+        "item2": [
+          "kolme viikkoa sitten",
+          "kolmen viikon päästä",
+          "kolmeksi viikoksi"
+        ],
+        "item3": [
+          "kahdeksi vuodeksi",
+          "kaksi vuotta",
+          "kahden vuoden kuluttua"
+        ],
+        "item4": [
+          "kahdeksaksi kuukaudeksi",
+          "kahdeksan kuukauden kuluttua",
+          "kahdeksan kuukautta"
+        ],
+        "item5": [
+          "kaksi viikkoa",
+          "kahdeksi viikoksi",
+          "kaksi viikkoa sitten"
+        ],
+        "item6": [
+          "kaksi päivää",
+          "kaksi päivää sitten",
+          "kahdeksi päiväksi"
+        ]
+      },
+      "scene_description": null,
+      "source_harjoitus": 20,
+      "notes": "Đáp án chính thức từ sách, khớp hoàn toàn với bản extract ban đầu"
+    },
+    {
+      "type": "reading_comprehension_qa",
+      "prompt": "Milloin? Kuinka kauan? Đọc bảng lịch trình tour Kreikka, trả lời câu hỏi về thời lượng (phần A). Phần B: hỏi-đáp cặp dựa trên bảng, không chấm điểm cố định.",
+      "correct_answer": {
+        "schedule_table": {
+          "title": "PAKETTIMATKA KREIKKAAN",
+          "note": "Lähtö la 25.9., paluu la 2.10.",
+          "items": [
+            "Lento Helsinki-Ateena la 25.9. klo 6.30-10.30",
+            "Hotel Diana, Ateena, 1 vrk",
+            "Laivamatka Ateena-Áigina su klo 12.30-13.30",
+            "Hotel Central, Áigina, 6 vrk",
+            "Päiväretki vuoristoon ke klo 9.00-18.00",
+            "Lento Ateena-Helsinki la 2.10. klo 11.00-15.00"
+          ]
+        },
+        "part_A_answers": [
+          "Lentomatka kestää neljä tuntia.",
+          "Ryhmä on Ateenassa yhden päivän/vuorokauden.",
+          "Ryhmä on Áiginan saarella kuusi päivää/vuorokautta.",
+          "Laivamatka Ateenasta Áiginan saarelle kestää tunnin.",
+          "Päiväretki kestää seitsemän päivää eli viikon.",
+          "Koko matka kestää yhdeksän tuntia."
+        ]
+      },
+      "options": {
+        "part_B_question_starters": [
+          "Missä kuussa...?",
+          "Minä päivänä...?",
+          "Minä viikonpäivänä...?",
+          "Monelta...?",
+          "Mistä mihin...?",
+          "Milloin...?",
+          "Kuinka kauan...?"
+        ]
+      },
+      "scene_description": null,
+      "source_harjoitus": 21,
+      "notes": "⚠️ Đã sửa lại theo đáp án chính thức - bản extract ban đầu bị lệch thứ tự câu 5, 6 hoàn toàn. Lưu ý câu 5 'seitsemän päivää eli viikon' nghe hơi lạ về logic (Päiväretki thường là 1 ngày) nhưng đây là đáp án in trong sách - giữ nguyên theo sách"
+    },
+    {
+      "type": "sentence_transform",
+      "prompt": "Mennään! Kirjoita Mennään!-muodot, jotka sopivat kuvaan. 3 tình huống: (1) Mitä opettaja sanoo kurssilla? (2) Mitä vanhemmat sanovat siivouspäivänä? (3) Mitä nuoret sanovat viikonloppuna? Dùng từ gợi ý: nukkua pitkään, opiskella imperfekti, käydä sirkuksessa, pitää tauko, tiskata astiat, pestä ikkunat, lukea teksti, imuroida lattiat, ostaa karkkia.",
+      "correct_answer": {
+        "situation1_teacher": [
+          "Opiskellaan imperfekti!",
+          "Pidetään tauko!",
+          "Luetaan teksti!"
+        ],
+        "situation2_parents": [
+          "Tiskataan astiat!",
+          "Pestään ikkunat!",
+          "Imuroidaan lattiat!"
+        ],
+        "situation3_youth": [
+          "Nukutaan pitkään!",
+          "Käydään sirkuksessa!",
+          "Ostetaan karkkia!"
+        ]
+      },
+      "options": {
+        "word_bank": [
+          "nukkua pitkään",
+          "pitää tauko",
+          "lukea teksti",
+          "opiskella imperfekti",
+          "tiskata astiat",
+          "imuroida lattiat",
+          "käydä sirkuksessa",
+          "pestä ikkunat",
+          "ostaa karkkia"
+        ],
+        "example_mẫu": [
+          "Tehdään harjoitus!",
+          "Siivotaan koti!",
+          "Mennään elokuviin!"
+        ]
+      },
+      "scene_description": null,
+      "source_harjoitus": 22,
+      "notes": "Bổ sung đáp án mẫu chính thức từ sách - type đổi từ guided_composition sang sentence_transform vì có đáp án cụ thể (dù chấp nhận thứ tự khác nhau)"
+    },
+    {
+      "type": "sentence_transform",
+      "prompt": "Me mennään. Sano puhekielellä. Chuyển câu chuẩn (kirjakieli, ngôi 'me') sang dạng khẩu ngữ (puhekieli, 'me' + passiivi). Mẫu: Menemme viikonloppuna mökille. → Me mennään viikonloppuna mökille.",
+      "correct_answer": {
+        "items": [
+          {
+            "kirjakieli": "Ensin käymme kaupassa.",
+            "puhekieli": "Ensin me käydään kaupassa."
+          },
+          {
+            "kirjakieli": "Tarvitsemme paljon ruokaa.",
+            "puhekieli": "Me tarvitaan paljon ruokaa."
+          },
+          {
+            "kirjakieli": "Ostamme myös jäätelöt.",
+            "puhekieli": "Me ostetaan myös jäätelöt."
+          },
+          {
+            "kirjakieli": "Ajamme mökille omalla autolla.",
+            "puhekieli": "Me ajetaan mökille omalla autolla."
+          },
+          {
+            "kirjakieli": "Illalla saunomme ja uimme.",
+            "puhekieli": "Illalla me saunotaan ja uidaan."
+          },
+          {
+            "kirjakieli": "Pelaamme myös jalkapalloa.",
+            "puhekieli": "Me pelataan myös jalkapalloa."
+          },
+          {
+            "kirjakieli": "Olemme mökillä kaksi yötä.",
+            "puhekieli": "Me ollaan mökillä kaksi yötä."
+          },
+          {
+            "kirjakieli": "Lähdemme takaisin kotiin sunnuntaina.",
+            "puhekieli": "Me lähdetään takaisin kotiin sunnuntaina."
+          }
+        ]
+      },
+      "options": null,
+      "scene_description": null,
+      "source_harjoitus": 24,
+      "notes": "Không có trong ảnh đáp án - giữ nguyên bản Claude tự làm theo quy tắc Mennään!/Me mennään đã học. Lưu ý câu 5 có 2 động từ trong 1 câu (saunomme→saunotaan, uimme→uidaan), cần soát kỹ"
+    },
+    {
+      "type": "case_fill",
+      "prompt": "Sanatyypit as/äs/is ja in. Kirjoita sanat (biến cách N/P/V) rồi điền vào câu.",
+      "correct_answer": {
+        "as_äs_is_table": {
+          "sairas": {
+            "P": "sairasta",
+            "V": "sairaa-"
+          },
+          "pensas": {
+            "P": "pensasta",
+            "V": "pensaa-"
+          },
+          "eväs": {
+            "P": "evästä",
+            "V": "evää-"
+          },
+          "valmis": {
+            "P": "valmista",
+            "V": "valmii-"
+          }
+        },
+        "as_äs_is_sentences": [
+          "sairaalle",
+          "pensaassa",
+          "eväät",
+          "valmiin"
+        ],
+        "in_table": {
+          "heijastin": {
+            "P": "heijastinta",
+            "V": "heijastime-"
+          },
+          "avain": {
+            "P": "avainta",
+            "V": "avaime-"
+          },
+          "pakastin": {
+            "P": "pakastinta",
+            "V": "pakastime-"
+          },
+          "tulostin": {
+            "P": "tulostinta",
+            "V": "tulostime-"
+          }
+        },
+        "in_sentences": [
+          "heijastimen",
+          "avaimet",
+          "pakastimessa",
+          "tulostinta"
+        ]
+      },
+      "options": null,
+      "scene_description": null,
+      "source_harjoitus": 25,
+      "notes": "⚠️ Đã sửa câu 3 nhóm as/äs/is theo đáp án chính thức: 'eväät' (không phải 'evään' như bản đoán ban đầu)"
+    },
+    {
+      "type": "cloze_passage",
+      "prompt": "Sanatyypit as/äs/is ja in. Kirjoita sanat. Đoạn văn kể về lớp học của Emma đi dã ngoại rừng, điền biến cách đúng cho các từ trong ngoặc.",
+      "correct_answer": {
+        "blanks": [
+          "oppilasta",
+          "Oppilaat",
+          "puhelimet",
+          "taivaalla",
+          "kauriin",
+          "pensaan",
+          "eläimet",
+          "lounasta",
+          "eväät",
+          "Lounaan",
+          "valmiit"
+        ]
+      },
+      "options": {
+        "passage_template": "Emman luokalla oli eilen erilainen koulupäivä. Opettaja ja 24 ___(1) [OPPILAS] lähtivät jo heti aamulla lähimetsään retkelle. ___(2) [OPPILAS] olivat iloisia! He ottivat myös ___(3) [PUHELIN, mon.] mukaan, koska he halusivat ottaa valokuvia metsässä. Sää oli kaunis: oli lämmintä ja sinisellä ___(4) [TAIVAS] oli isoja valkoisia pilviä. Metsässä lapset näkivät pienen ___(5) [KAURIS], joka seisoi ___(6) [PENSAS] takana syömässä. Yleensä ___(7) [ELÄIN] pelkäävät ihmisiä, mutta tämä kauris vain jatkoi syömistä. Lapset eivät syöneet ___(8) [LOUNAS] koulussa, vaan heillä oli omat ___(9) [EVÄS] mukana. ___(10) [LOUNAS] jälkeen he tekivät ryhmätöitä metsässä. Kun kaikki tehtävät olivat ___(11) [VALMIS], lapset ja opettaja lähtivät takaisin kouluun."
+      },
+      "scene_description": null,
+      "source_harjoitus": 26,
+      "notes": "Đáp án chính thức từ sách, khớp với bản extract ban đầu"
+    },
+    {
+      "type": "mcq",
+      "prompt": "Kaikki sanatyypit. Valitse oikea sana ja kirjoita.",
+      "correct_answer": {
+        "items": [
+          {
+            "choice": "ILOINEN / SURULLINEN",
+            "sentence": "Minä kerron nyt ___ päivästä.",
+            "answer": "iloisesta"
+          },
+          {
+            "choice": "UUSI / VUOSI",
+            "sentence": "Minulla oli eilen syntymäpäivä. Täytin 15 ___.",
+            "answer": "vuotta"
+          },
+          {
+            "choice": "SAIRAS / VIERAS",
+            "sentence": "Meillä oli isot juhlat illalla: 20 ___!",
+            "answer": "vierasta"
+          },
+          {
+            "choice": "OSTOS / KERROS",
+            "sentence": "Aamupäivällä teimme ensin isot ___ X-Marketissa.",
+            "answer": "ostokset"
+          },
+          {
+            "choice": "OLOHUONE / LENTOKONE",
+            "sentence": "Päivällä siivosimme koko kodin. Isä imuroi ___ ja pesi vessan.",
+            "answer": "olohuoneen"
+          },
+          {
+            "choice": "VUORI / PIENI",
+            "sentence": "Äiti leipoi monta ___ mustikkapiirakkaa.",
+            "answer": "pientä"
+          },
+          {
+            "choice": "VIHANNES / KYSYMYS",
+            "sentence": "Minä tein lihapullia ja leikkasin tomaatit ja muut ___ salaattiin.",
+            "answer": "vihannekset"
+          },
+          {
+            "choice": "ETEINEN / ONNELLINEN",
+            "sentence": "Meidän pienessä ___ oli monta takkia naulakossa ja kenkiä lattialla.",
+            "answer": "eteisessä"
+          },
+          {
+            "choice": "SAARI / SUURI",
+            "sentence": "Minä panin takit ___ vaatekaappiin.",
+            "answer": "suureen"
+          },
+          {
+            "choice": "PUHDAS / VALMIS",
+            "sentence": "Äiti ja minä kannoimme ___ ruoat pöytään.",
+            "answer": "valmiit"
+          },
+          {
+            "choice": "VESI / VIISI",
+            "sentence": "Minä hain jääkaapista juomat: mehua, limua ja ___.",
+            "answer": "vettä"
+          },
+          {
+            "choice": "OVI / TALVI",
+            "sentence": "Vieraat olivat jo ___ takana, kun menin viemään roskat.",
+            "answer": "oven"
+          },
+          {
+            "choice": "JOKI / ONNI",
+            "sentence": "He huusivat 'Paljon ___!'",
+            "answer": "onnea"
+          },
+          {
+            "choice": "PUHELIN / PAKASTIN",
+            "sentence": "Sain monta lahjaa. Isä ja äiti antoivat minulle uuden ___.",
+            "answer": "puhelimen"
+          }
+        ]
+      },
+      "options": null,
+      "scene_description": null,
+      "source_harjoitus": 27,
+      "notes": "⚠️ Đã sửa câu 3 (vierasta, không phải 'vieras'), câu 9 (suureen, không phải 'suuriin'), câu 11 (vettä, không phải 'viisi' - mình từng nhầm hoàn toàn câu này) theo đáp án chính thức"
+    },
+    {
+      "type": "sentence_transform",
+      "prompt": "Imperfekti ja milloin. Tee sanoista lauseet ja kirjoita ne imperfektissä. Ráp từ rời thành câu hoàn chỉnh, chia đúng imperfekti.",
+      "correct_answer": {
+        "items": [
+          {
+            "words": "Viime vuosi - minä - asua - vielä - Bulgaria.",
+            "sentence": "Viime vuonna minä asuin vielä Bulgariassa."
+          },
+          {
+            "words": "Minä - muuttaa - Suomi - viime - talvi.",
+            "sentence": "Minä muutin Suomeen viime talvena."
+          },
+          {
+            "words": "Minä - aloittaa - työ - maaliskuu - eräs - suomalainen - yritys.",
+            "sentence": "Minä aloitin työn maaliskuussa eräässä suomalaisessa yrityksessä."
+          },
+          {
+            "words": "Minun vaimoni Katja - alkaa - jo - kevät - opiskella - suomi - kielikurssi.",
+            "sentence": "Minun vaimoni Katja alkoi jo keväällä opiskella suomen kielikurssia."
+          },
+          {
+            "words": "Lapset - oppia - suomi - koulu, - koska - muu oppilas (MON.) - puhua - vain - suomi.",
+            "sentence": "Lapset oppivat suomea koulussa, koska muut oppilaat puhuivat vain suomea."
+          },
+          {
+            "words": "Katja - tavata - kaksi - kuukausi - sitten - puhelias - suomalainen - nainen - Sari.",
+            "sentence": "Katja tapasi kaksi kuukautta sitten puheliaan suomalaisen naisen Sarin."
+          },
+          {
+            "words": "Viime - yö - Katja ja Sari - jutella - puhelin - tunti!",
+            "sentence": "Viime yönä Katja ja Sari juttelivat puhelimessa tunnin!"
+          },
+          {
+            "words": "Katja - olla - kielikurssi - vuosi - ja - viime - kuukausi - hän - löytää - työpaikka.",
+            "sentence": "Katja oli kielikurssilla vuoden ja viime kuukautena hän löysi työpaikan."
+          }
+        ]
+      },
+      "options": null,
+      "scene_description": null,
+      "source_harjoitus": 28,
+      "notes": "Đáp án chính thức từ sách, khớp hoàn toàn với bản extract ban đầu"
+    },
+    {
+      "type": "free_practice",
+      "prompt": "Matkalla ja imperfekti. A: Kirjoita tähän, millaisella matkalla sinä olit. Sitten pari kysyy ja sinä kerrot matkasta (theo sơ đồ 5 câu hỏi: Mitä teit matkalla? Milloin olit matkalla? Kuinka kauan olit matkalla? Mihin matkustit? Miksi? Millä matkustit? Kenen kanssa?). B: Kirjoita matkasta päivitys sosiaaliseen mediaan. Kerro, millainen matka oli ja mitä teit. Käytä imperfektiä.",
+      "correct_answer": null,
+      "options": {
+        "part_A_questions": [
+          "Mitä teit matkalla?",
+          "Milloin olit matkalla?",
+          "Kuinka kauan olit matkalla?",
+          "Mihin matkustit? Miksi?",
+          "Millä matkustit?",
+          "Kenen kanssa?"
+        ]
+      },
+      "scene_description": null,
+      "source_harjoitus": 29,
+      "notes": "Không chấm điểm, nội dung cá nhân tự do"
+    },
+    {
+      "type": "mcq",
+      "prompt": "Luetaan! Lue teksti 5 syytä matkustaa junalla. Valitse sitten lauseeseen sopiva sana.",
+      "correct_answer": {
+        "items": [
+          {
+            "sentence": "Juna on herkullinen / tuulinen / ympäristöystävällinen tapa matkustaa.",
+            "answer": "ympäristöystävällinen"
+          },
+          {
+            "sentence": "Junan ikkunasta näkee hyvin matkaliput / maisemat / makuuhytit.",
+            "answer": "maisemat"
+          },
+          {
+            "sentence": "Junalla pääsee äsken / myöhään / helposti kaupungin keskustaan.",
+            "answer": "helposti"
+          },
+          {
+            "sentence": "Junassa on hyvät / huonot / hitaat palvelut.",
+            "answer": "hyvät"
+          },
+          {
+            "sentence": "Junassa voi jaloitella / lenkkeillä / kelvata.",
+            "answer": "jaloitella"
+          },
+          {
+            "sentence": "Voit varata oman makuuhytin, kun matkustat lähijunalla / päiväjunalla / yöjunalla.",
+            "answer": "yöjunalla"
+          },
+          {
+            "sentence": "Junamatkalla on rahaa / aikaa / ruokaa myös rentoutua.",
+            "answer": "aikaa"
+          }
+        ]
+      },
+      "options": null,
+      "scene_description": null,
+      "source_harjoitus": 30,
+      "notes": "Đáp án chính thức từ sách, khớp hoàn toàn với bản extract ban đầu"
+    },
+    {
+      "type": "matching",
+      "prompt": "Luetaan! Valitse, mitkä lauseet kuuluvat yhteen.",
+      "correct_answer": {
+        "pairs": [
+          {
+            "left": "Junamatkailu on ympäristöystävällistä.",
+            "right": "Junamatkan hiilijalanjälki on pienempi kuin lentomatkan."
+          },
+          {
+            "left": "Junassa koet enemmän.",
+            "right": "Junan ikkunasta näet maisemia, ja juna saapuu usein kaupungin keskustaan."
+          },
+          {
+            "left": "Junassa on erinomaiset palvelut.",
+            "right": "Junassa on usein ravintolavaunu ja yöjunassa on makuuhyttejä."
+          },
+          {
+            "left": "Junamatkailu on mukavaa ja kiireetöntä.",
+            "right": "Junassa voit rentoutua ja jutella muiden matkustajien kanssa."
+          },
+          {
+            "left": "Junalla pääset myös kauas.",
+            "right": "Junalla voit matkustaa Euroopasta Aasiaan asti."
+          }
+        ]
+      },
+      "options": null,
+      "scene_description": null,
+      "source_harjoitus": 31,
+      "notes": "Đáp án chính thức từ sách: 1.b 2.d 3.a 4.e 5.c, khớp hoàn toàn với bản extract ban đầu"
+    },
+    {
+      "type": "reading_passage",
+      "prompt": "Viikonloppureissu (Pedron teksti)",
+      "correct_answer": {
+        "lines": [
+          {
+            "speaker": null,
+            "text": "Viime perjantaina matkustin viikonlopuksi laivalla Turusta Tukholmaan. Laivamatka kesti koko päivän, mutta se meni mukavasti. Luin kirjaa, katselin maisemia ja tein suomen kurssin tehtäviä."
+          },
+          {
+            "speaker": null,
+            "text": "Saavuin illalla perille. Matkalla hostellille löysin kivan ravintolan ja söin siellä illallista."
+          },
+          {
+            "speaker": null,
+            "text": "Lauantaina heräsin aikaisin. Koska oli upea ilma, kävelin monta tuntia ympäri kaupunkia. Illalla tapasin brasilialaisen ystävän, joka on töissä Tukholmassa. Menimme yhdessä teatteriin ja sen jälkeen joimme vielä punaviiniä baarissa."
+          },
+          {
+            "speaker": null,
+            "text": "Sunnuntaina kävin valokuvamuseossa ja ostin tyttöystävälle suklaata tuliaisiksi. Iltapäivällä lensin takaisin Helsinkiin."
+          }
+        ]
+      },
+      "options": null,
+      "scene_description": null,
+      "source_harjoitus": null,
+      "notes": "Bài đọc chính Kappale 1, trang 11. Ngôi thứ nhất, Pedro kể chuyện đi Tukholma cuối tuần. Câu dẫn trong sách: 'Suomen kurssilla oli tehtävänä kirjoittaa teksti viikonlopusta. Pedro kirjoitti Tukholman-matkasta.' Đây là nguồn cho Harjoitus 1, 2. Chia lines theo 4 đoạn văn gốc trong sách (mỗi đoạn cách nhau 1 dòng trắng trong bản in)."
+    },
+    {
+      "type": "dialogue",
+      "prompt": "Viikonloppureissu — Pedro, Olga ja Alex suunnittelevat matkaa Tallinnaan",
+      "correct_answer": {
+        "lines": [
+          {
+            "speaker": null,
+            "text": "Kun Olga ja Alex kuulivat Pedron matkasta, he innostuivat heti. Hekin halusivat lähteä viikonloppureissulle. Alex keksi, että he voisivat mennä laivalla Tallinnaan, koska se on niin lähellä. Pedro sanoi, että hänkin lähtee mielellään Tallinnaan. He alkoivat heti suunnitella matkaa."
+          },
+          {
+            "speaker": "Pedro",
+            "text": "Kiva, että kaikille sopii lokakuun eka viikonloppu!"
+          },
+          {
+            "speaker": "Alex",
+            "text": "Mites majoitus? Varataanks me huoneet jostain hienosta hotellista vai kelpaaks teille hostelli?"
+          },
+          {
+            "speaker": "Olga",
+            "text": "Mun ystävillä on Tallinnassa iso asunto, jota ne vuokraa turisteille. Se on kivalla alueella ja sieltä pääsee ratikalla helposti joka paikkaan."
+          },
+          {
+            "speaker": "Alex",
+            "text": "Kuulostaa hyvältä! Kysytään sitä. Entä laivaliput? Kuka varaa ne?"
+          },
+          {
+            "speaker": "Pedro",
+            "text": "Mä voin hoitaa liput. Mä tarkistin äsken aikataulut netistä. Ehditteks te laivaan, joka lähtee perjantai-iltana kuudelta?"
+          },
+          {
+            "speaker": "Olga",
+            "text": "Joo, mä ehdin hyvin."
+          },
+          {
+            "speaker": "Alex",
+            "text": "Mulle tulee kyllä vähän kiire, mutta mun työkaveri voi ehkä heittää mut satamaan."
+          },
+          {
+            "speaker": "Pedro",
+            "text": "Laivamatka kestää kolme tuntia eli me ollaan aika myöhään perillä. Olga, kuinka kaukana se asunto on satamasta? Täytyykö meidän mennä taksilla? Vai voiko sun kaverit hakea meiät satamasta?"
+          },
+          {
+            "speaker": "Olga",
+            "text": "Ei me tarvita autokyytiä. Satamasta on vaan vartin ratikkamatka asunnolle."
+          },
+          {
+            "speaker": "Pedro",
+            "text": "Okei, mennään sitten ratikalla."
+          },
+          {
+            "speaker": "Olga",
+            "text": "Voi tietysti olla, että ne mun kaverit haluaa silti tulla vastaan. Meidän täytyy joka tapauksessa saada sen asunnon avaimet."
+          }
+        ]
+      },
+      "options": null,
+      "scene_description": null,
+      "source_harjoitus": null,
+      "notes": "Hội thoại Kappale 1, trang 12. 3 speaker: Pedro, Alex, Olga (KHÔNG phải 4 người, không có Jari - Jari là nhân vật của Unit 3, đã tự sửa nhầm lẫn ban đầu khi double-check). Dòng đầu tiên (speaker: null) là phần dẫn narrative trước khi vào hội thoại thật. Đây là nguồn cho Harjoitus 2."
+    },
+    {
+      "type": "reading_passage",
+      "prompt": "5 syytä matkustaa junalla",
+      "correct_answer": {
+        "lines": [
+          {
+            "speaker": null,
+            "text": "Milloin matkustit viimeksi junalla? Lue tästä, miksi se kannattaa!"
+          },
+          {
+            "speaker": null,
+            "text": "1. Junamatkailu on ympäristöystävällistä. Jos haluat pienentää hiilijalanjälkeäsi, helppo tapa on vaihtaa lentokone junaan."
+          },
+          {
+            "speaker": null,
+            "text": "2. Junassa koet enemmän. Junassa olet lähellä luontoa ja paikallista elämää: ikkunasta näet, kun maisemat vaihtuvat, ja kun matkustat junalla, saavut kätevästi suoraan keskustaan. Olet siis heti keskellä uutta kaupunkia!"
+          },
+          {
+            "speaker": null,
+            "text": "3. Junassa on erinomaiset palvelut. Junassa voit jaloitella ja nauttia ravintolavaunussa herkullisesta ruoasta tai juoda vaikka lasin viiniä. Jos valitset yöjunan, oma makuuhytti on kuin hotellihuone raiteilla."
+          },
+          {
+            "speaker": null,
+            "text": "4. Junamatkailu on mukavaa ja kiireetöntä. Pitkällä junamatkalla ehdit rentoutua: voit nukkua, lukea ja ajatella rauhassa. Matkalla voit lisäksi tutustua uusiin ihmisiin."
+          },
+          {
+            "speaker": null,
+            "text": "5. Junalla pääsee myös kauas. Junalla voit lähteä maailmalle laivamatkan jälkeen esimerkiksi Tukholmasta tai Tallinnasta."
+          }
+        ]
+      },
+      "options": null,
+      "scene_description": null,
+      "source_harjoitus": null,
+      "notes": "Bài Luetaan! Kappale 1, trang 17. 5 mục đánh số, không phân vai (speaker null hết). Dòng đầu là phần mở đầu/dẫn nhập trước 5 mục. Đây là nguồn cho Harjoitus 30, 31."
+    }
+  ],
+  "metadata": {
+    "excluded_harjoitukset": {
+      "6": "audio (Kuuntele) - loại khỏi scope, đáp án tham khảo: xem WORKLOG/ghi chú riêng nếu cần",
+      "8": "audio (Kuuntele) - loại khỏi scope",
+      "9": "tra web ngoài (VR:n verkkosivuille) - loại khỏi scope",
+      "18": "board game (Heitä noppaa) - loại khỏi scope",
+      "23": "audio (Kuuntele) - loại khỏi scope"
+    },
+    "double_check_flags": [
+      "Harjoitus 5: câu B.4 có 2 đáp án khả dĩ (2 chuyến bay cùng giờ 16:40) - cần xác nhận ý định câu hỏi",
+      "Harjoitus 17, 24, 29: không có đáp án chính thức từ sách - giữ nguyên bản Claude tự làm, cần soát kỹ hơn khi build",
+      "Harjoitus 21: câu 5 đáp án sách hơi lạ về logic (Päiväretki = 1 ngày nhưng đáp án ghi 7 ngày/1 tuần) - giữ nguyên theo sách, đã double-check",
+      "Mở rộng enum (2026-09-07): bổ sung 3 exercise type=dialogue/reading_passage lưu nguyên văn bài khoá Unit 1 (đoạn văn Pedro kể chuyện, hội thoại Pedro/Alex/Olga, bài Luetaan 5 syytä matkustaa junalla) - theo quyết định đồng bộ với Unit 2, xem DECISIONS.md entry 2026-09-07. Double-check: đã tự sửa 1 nhầm lẫn trong trí nhớ khi quét lại - hội thoại Unit 1 có 3 speaker (Pedro, Alex, Olga), KHÔNG phải 4 người, KHÔNG có nhân vật Jari (Jari thuộc Unit 3, không xuất hiện ở Unit 1)."
+    ]
+  }
+}

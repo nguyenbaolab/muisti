@@ -28,3 +28,14 @@ export interface Exercise {
   options: unknown
   created_at: string
 }
+
+export interface UserVocabProgress {
+  id: string
+  user_id: string
+  vocab_item_id: string
+  ease_factor: number
+  interval_days: number
+  due_date: string
+  review_count: number
+  last_reviewed_at: string | null
+}

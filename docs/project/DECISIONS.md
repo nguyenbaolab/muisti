@@ -4,6 +4,52 @@ Ghi theo thời gian, mới nhất ở trên. Mỗi entry: tên ngắn, ngày, q
 
 ---
 
+## `exercises.correct_answer` cho phép NULL
+
+**Ngày:** 2026-09-08
+**Quyết định:** Bỏ NOT NULL trên cột `exercises.correct_answer`.
+null có ý nghĩa thật: bài không có đáp án cố định (`free_practice`,
+`guided_composition` — luyện nói/viết tự do). Không coerce thành `{}`
+khi seed.
+
+**Lý do:**
+- `{}` và `null` có ý nghĩa khác nhau: `{}` gợi ý "có object đáp án nhưng
+  rỗng", `null` gợi ý "type này vốn không cần correct_answer" — UI
+  chấm bài (T1.6) cần phân biệt rõ để biết khi nào bỏ qua chấm điểm
+- Giữ đúng dữ liệu gốc từ content JSON thay vì biến đổi lúc seed
+
+**Phạm vi:** Schema cột `exercises.correct_answer`, seed script,
+logic chấm bài tương lai (T1.6) sẽ cần check null trước khi chấm.
+
+**Không làm gì:** Không đổi ý nghĩa NOT NULL của `options`
+(`options` vẫn nullable như cũ, không liên quan).
+
+---
+
+## Thêm cột `exercises.source_harjoitus` + `exercises.authoring_notes`
+
+**Ngày:** 2026-09-08
+**Quyết định:** Thêm 2 cột nullable vào bảng `exercises`:
+`source_harjoitus` (int, số thứ tự bài tập gốc trong sách Suomen Mestari 2)
+và `authoring_notes` (text, ghi chú của Claude lúc soạn nội dung — vd nguồn
+đáp án, cảnh báo cần double-check). Áp dụng khi seed data Unit 1 + Unit 2.
+
+**Lý do:**
+- Content JSON (`unit1_complete.json`, `unit2_complete.json`) đã có sẵn 2
+  field này ở mỗi exercise — bỏ đi sẽ mất khả năng trace về bài gốc
+  trong sách và mất cảnh báo QA quan trọng (vd "không có đáp án chính
+  thức từ sách, cần soát kỹ hơn")
+- Tách riêng khỏi `correct_answer`/`options` thay vì nhét vào jsonb —
+  giữ 2 cột đó sạch, đúng shape theo từng exercise type
+
+**Phạm vi:** Schema bảng `exercises`. Áp dụng cho toàn bộ seed data
+từ đây về sau.
+
+**Không làm gì:** Không hiển thị 2 cột này ra UI học viên (chỉ dùng
+nội bộ/authoring, không phải nội dung học).
+
+---
+
 ## Convention: `supabase/schema.sql` + `supabase/migrations/`
 
 **Ngày:** 2026-09-08  

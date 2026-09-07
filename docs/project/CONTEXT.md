@@ -30,16 +30,25 @@ src/
     LoginPage.tsx       # email/password — signInWithPassword, không sign-up
     AppShell.tsx        # sau login + Link /units + Đăng xuất
     UnitListPage.tsx    # danh sách units (fetch Supabase)
-    UnitDetailPage.tsx  # 1 unit: vocab_items + exercises (chưa chấm bài)
+    UnitDetailPage.tsx  # 1 unit: vocab + exercises + đánh dấu từ (F-04)
   types/
-    database.ts         # Unit, VocabItem, Exercise
+    database.ts         # Unit, VocabItem, Exercise, UserVocabProgress
 public/                 # static assets
 supabase/
   schema.sql              # full DDL — dùng setup project mới
   migrations/
     20260908_001_units.sql
     20260908_002_vocab_exercises.sql
-.env.example            # VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY
+    20260908_003_user_vocab_progress.sql
+    20260908_004_exercises_add_source_notes.sql
+    20260908_005_exercises_correct_answer_nullable.sql
+    20260908_006_user_vocab_progress_delete_policy.sql
+content/
+  unit1_complete.json
+  unit2_complete.json
+scripts/
+  seed-units.ts         # local seed via service role — KHÔNG import vào src/
+.env.example            # VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY, SUPABASE_SERVICE_ROLE_KEY
 ```
 
 ---
@@ -81,4 +90,7 @@ Hướng đã chốt:
 
 - `src/lib/supabase.ts`: `export const supabase` — Supabase client dùng chung toàn app; khởi tạo từ `VITE_SUPABASE_URL` + `VITE_SUPABASE_ANON_KEY`
 - Fetch units: `supabase.from('units').select('*').order('book_code', { ascending: true }).order('unit_number', { ascending: true })` — `UnitListPage`
-- Fetch unit detail: `Promise.all` — `units` `.eq('id', unitId).single()` + `vocab_items` / `exercises` `.eq('unit_id', unitId).order('created_at')` — `UnitDetailPage`
+- Fetch unit detail: `Promise.all` — `units` `.eq('id', unitId).single()` + `vocab_items` / `exercises` `.eq('unit_id', unitId).order('created_at')` + `user_vocab_progress.select('vocab_item_id').eq('user_id', currentUserId)` (bỏ qua nếu `getUser()` không có user) — `UnitDetailPage`
+- Mark unknown vocab: `insert` `{ user_id, vocab_item_id }` vào `user_vocab_progress` (SRS fields dùng default DB). Unique `(user_id, vocab_item_id)`: lỗi `23505` / duplicate key coi như thành công, thêm id vào `markedVocabIds`. Lỗi khác hiện gần nút. — `UnitDetailPage`
+- Unmark vocab: `delete` `user_vocab_progress` `.eq('user_id').eq('vocab_item_id')`; thành công thì bỏ id khỏi `markedVocabIds`. Cần policy DELETE own rows (migration `006`). — `UnitDetailPage`
+- Seed content: `npm run seed` → `scripts/seed-units.ts` — client service role (`SUPABASE_SERVICE_ROLE_KEY` + `VITE_SUPABASE_URL` từ `.env`), không dùng `src/lib/supabase.ts`. JSON `notes` trên exercise → cột `authoring_notes`. `correct_answer: null` insert nguyên (cột nullable). `metadata` không insert. Apply migration `005` trước khi seed.

@@ -4,6 +4,97 @@ Nhật ký thay đổi có ý nghĩa. Entry mới ở **đầu file** (sau tiêu
 
 ---
 
+## T1.4 mở rộng — Unmark (bỏ đánh dấu từ)
+**Ngày:** 2026-09-08
+**Trạng thái:** Done
+
+**Đã làm:**
+- Migration 20260908_006: policy DELETE cho
+  user_vocab_progress
+- UnitDetailPage: nút đánh dấu giờ toggle được — click lại để
+  unmark, DELETE row tương ứng
+- npx tsc --noEmit pass
+
+**Phụ thuộc tiếp theo:** T1.5 (F-05: ôn tập SRS hàng ngày)
+
+---
+
+## exercises.correct_answer nullable
+**Ngày:** 2026-09-08
+**Trạng thái:** File sẵn — chờ chạy incremental trên Supabase Dashboard
+
+**Đã làm:**
+- Migration 20260908_005: DROP NOT NULL trên exercises.correct_answer
+- schema.sql CREATE TABLE: correct_answer jsonb (không NOT NULL)
+- seed-units.ts: bỏ coerce null → {}; insert null nguyên
+- DECISIONS.md + REQUIREMENTS.md §4
+- Chưa chạy SQL; chưa chạy npm run seed
+
+**Phụ thuộc tiếp theo:** Apply 005 trên Dashboard, rồi `npm run seed`
+
+---
+
+## Seed script Unit 1 + Unit 2
+**Ngày:** 2026-09-08
+**Trạng thái:** Script sẵn — chưa chạy (chủ dự án tự `npm run seed`)
+
+**Đã làm:**
+- Cài tsx + dotenv (devDependencies)
+- Tạo scripts/seed-units.ts: service role client, insert unit →
+  vocab_items → exercises; JSON notes → authoring_notes
+- unique book_code+unit_number: reuse id, không insert unit trùng
+- null correct_answer → {} (cột NOT NULL)
+- Thêm `"seed": "tsx scripts/seed-units.ts"` vào package.json
+- Không đụng src/; không chạy seed
+
+**Phụ thuộc tiếp theo:** Chủ dự án chạy `npm run seed`, kiểm tra Table Editor
+
+---
+
+## DDL exercises.source_harjoitus + authoring_notes
+**Ngày:** 2026-09-08
+**Trạng thái:** File sẵn — chờ chạy incremental trên Supabase Dashboard
+
+**Đã làm:**
+- Tạo supabase/migrations/20260908_004_exercises_add_source_notes.sql
+- Append ALTER TABLE vào cuối schema.sql
+- DECISIONS.md + REQUIREMENTS.md §4 (cột mới, không hiện UI học viên)
+- Chưa chạy SQL trên project thật; chưa đụng TypeScript / seed
+
+**Phụ thuộc tiếp theo:** Apply 004 trên Dashboard, rồi seed Unit 1 + Unit 2
+
+---
+
+## T1.4 — Đánh dấu từ chưa biết (F-04)
+**Ngày:** 2026-09-08
+**Trạng thái:** Done
+
+**Đã làm:**
+- Migration 20260908_003: user_vocab_progress + RLS (select/insert/
+  update own rows)
+- Thêm UserVocabProgress type vào database.ts
+- UnitDetailPage: fetch progress hiện có, nút đánh dấu từng vocab item,
+  insert với xử lý unique constraint conflict, loading state per-item
+- npx tsc --noEmit pass
+
+**Phụ thuộc tiếp theo:** T1.5 (F-05: ôn tập SRS hàng ngày)
+
+---
+
+## T1.4-A — DDL user_vocab_progress + RLS
+**Ngày:** 2026-09-08
+**Trạng thái:** File sẵn — chờ chạy incremental trên Supabase Dashboard
+
+**Đã làm:**
+- Tạo supabase/migrations/20260908_003_user_vocab_progress.sql
+- Append bảng + 3 policy (select/insert/update own rows) vào schema.sql
+- Không thêm created_at (ngoài spec REQUIREMENTS)
+- Chưa chạy SQL trên project thật
+
+**Phụ thuộc tiếp theo:** Xác nhận Table Editor + 3 policy, rồi T1.4-B (UI đánh dấu từ)
+
+---
+
 ## T1.3 — Học 1 unit (F-03)
 **Ngày:** 2026-09-08
 **Trạng thái:** Done

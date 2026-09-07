@@ -69,13 +69,14 @@ Scaffold web app (Vite + React + TS + Supabase + Cloudflare Pages) và ship MVP:
 
 ### T1.4 — Đánh dấu từ chưa biết (F-04)
 
-**Trạng thái:** Pending  
+**Trạng thái:** Done  
 **Feature:** F-04
 
 **Acceptance:**
-- [ ] User đánh dấu từ → row `user_vocab_progress` của đúng `auth.uid()` + `vocab_item_id`
-- [ ] Đánh dấu trùng: không tạo bản ghi trùng (unique user + vocab)
-- [ ] User A không thấy / không sửa progress của user B (RLS)
+- [x] User đánh dấu từ → row `user_vocab_progress` của đúng `auth.uid()` + `vocab_item_id`
+- [x] Đánh dấu trùng: không tạo bản ghi trùng (unique user + vocab)
+- [x] User A không thấy / không sửa progress của user B (RLS)
+- [x] User bấm lại từ đã đánh dấu → xóa row user_vocab_progress tương ứng (unmark)
 
 ---
 

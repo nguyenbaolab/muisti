@@ -1,7 +1,7 @@
 # REQUIREMENTS — Muisti (Finnish Learning App)
 
 **Phiên bản:** v0.1  
-**Cập nhật:** 2026-09-07
+**Cập nhật:** 2026-09-08
 
 ---
 
@@ -26,7 +26,7 @@ Muisti là web app học tiếng Phần Lan theo giáo trình Suomen Mestari 2 (
 | F-01 | Đăng nhập | Pending | Login qua Supabase Auth; tài khoản chỉ có sau khi admin invite; không form đăng ký |
 | F-02 | Danh sách unit | Pending | Mọi user authenticated thấy cùng một danh sách unit; không khoá unit theo tốc độ người khác |
 | F-03 | Học unit | Pending | Mở 1 unit: xem từ vựng + làm exercises của unit đó |
-| F-04 | Đánh dấu từ chưa biết | Pending | Bôi đen / đánh dấu từ → thêm vào `user_vocab_progress` (hàng đợi SRS) |
+| F-04 | Đánh dấu từ chưa biết | Pending | Bôi đen / đánh dấu từ chưa biết → thêm vào `user_vocab_progress`; bấm lại để bỏ đánh dấu (xóa row) |
 | F-05 | Ôn tập SRS hàng ngày | Pending | Hàng đợi các từ có `due_date <= hôm nay`, theo lịch sử nhớ/quên của từng user |
 | F-06 | Chấm bài tự động | Pending | MCQ / fill-blank: so khớp string phía client; chưa cần AI runtime |
 
@@ -61,9 +61,11 @@ Muisti là web app học tiếng Phần Lan theo giáo trình Suomen Mestari 2 (
 - type (text) — enum chính thức, xem bảng `exercises.type` bên dưới
 - prompt (text) — câu hỏi / đề bài chữ; không chứa mô tả tranh
 - scene_description (text, nullable) — dùng cho bài tập mà đề gốc phụ thuộc hoàn toàn vào tranh vẽ (không có tranh thì đề vô nghĩa). Claude mô tả lại cảnh bằng chữ lúc authoring; mô tả phải khách quan (chỉ nêu người/vật/hành động quan sát được), **không** diễn giải sẵn ý định hoặc đáp án. Tách biệt với `prompt`. UI: hiển thị khung riêng, không gộp chung đoạn văn với câu hỏi — styling để ngỏ lúc scaffold.
-- correct_answer (jsonb) — linh hoạt theo type; `dialogue` / `reading_passage` xem ghi chú dưới bảng enum
+- correct_answer (jsonb, nullable) — linh hoạt theo type; null nếu type không có đáp án cố định (`free_practice`, `guided_composition`); `dialogue` / `reading_passage` xem ghi chú dưới bảng enum
 - options (jsonb, nullable) — cho mcq/matching
 - created_at (timestamptz)
+- source_harjoitus (int, nullable) — số thứ tự bài tập gốc (harjoitus) trong sách; null nếu không gắn bài cụ thể (vd `dialogue` / `reading_passage`)
+- authoring_notes (text, nullable) — ghi chú Claude lúc soạn (nguồn đáp án, cảnh báo QA); không hiện trên UI học viên
 
 **exercises.type** (core set)
 
@@ -125,7 +127,7 @@ Với type `dialogue` và `reading_passage`, cột `correct_answer` (jsonb) lưu
 
 ### RLS
 
-- Mọi bảng theo user (`user_vocab_progress`, `quiz_attempts`, `user_unit_progress`): policy `user_id = auth.uid()` cho select/insert/update
+- Mọi bảng theo user (`user_vocab_progress`, `quiz_attempts`, `user_unit_progress`): policy `user_id = auth.uid()` cho select/insert/update (`user_vocab_progress` thêm delete own rows để unmark)
 - Bảng content (`units`, `vocab_items`, `exercises`): select cho mọi authenticated user; insert/update/delete chỉ qua service role
 
 ---

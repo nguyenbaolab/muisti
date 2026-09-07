@@ -51,7 +51,7 @@ CREATE TABLE exercises (
   type text NOT NULL,
   prompt text NOT NULL,
   scene_description text,
-  correct_answer jsonb NOT NULL,
+  correct_answer jsonb,
   options jsonb,
   created_at timestamptz NOT NULL DEFAULT now()
 );
@@ -64,3 +64,46 @@ CREATE POLICY "exercises: authenticated users can select"
   USING (true);
 
 -- insert/update/delete: no client policies — service role bypasses RLS by default
+
+-- bảng user_vocab_progress
+CREATE TABLE user_vocab_progress (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  vocab_item_id uuid NOT NULL REFERENCES vocab_items(id) ON DELETE CASCADE,
+  ease_factor float NOT NULL DEFAULT 2.5,
+  interval_days int NOT NULL DEFAULT 0,
+  due_date date NOT NULL DEFAULT current_date,
+  review_count int NOT NULL DEFAULT 0,
+  last_reviewed_at timestamptz,
+  CONSTRAINT user_vocab_progress_unique UNIQUE (user_id, vocab_item_id)
+);
+
+-- RLS user_vocab_progress (own rows only)
+ALTER TABLE user_vocab_progress ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "user_vocab_progress: select own rows"
+  ON user_vocab_progress FOR SELECT
+  TO authenticated
+  USING (user_id = auth.uid());
+
+CREATE POLICY "user_vocab_progress: insert own rows"
+  ON user_vocab_progress FOR INSERT
+  TO authenticated
+  WITH CHECK (user_id = auth.uid());
+
+CREATE POLICY "user_vocab_progress: update own rows"
+  ON user_vocab_progress FOR UPDATE
+  TO authenticated
+  USING (user_id = auth.uid())
+  WITH CHECK (user_id = auth.uid());
+
+CREATE POLICY "user_vocab_progress: delete own rows"
+  ON user_vocab_progress FOR DELETE
+  TO authenticated
+  USING (user_id = auth.uid());
+
+-- exercises: cột authoring (nullable — không mọi bài đều có harjoitus)
+ALTER TABLE exercises
+  ADD COLUMN source_harjoitus int,
+  ADD COLUMN authoring_notes text;
+
