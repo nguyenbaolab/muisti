@@ -11,7 +11,7 @@ Scaffold web app (Vite + React + TS + Supabase + Cloudflare Pages) và ship MVP:
 
 **In scope:** T1.0 (scaffold) + F-01 … F-06 trong `docs/project/REQUIREMENTS.md`.
 
-**Phụ thuộc ngoài code:** PDF unit 1 — full-extract nội dung thật (từ vựng, ngữ pháp, bài tập, đã qua soát) phải hoàn tất trước khi bắt đầu bất kỳ task nào trong §3, kể cả T1.0 (scaffold). Không code trước khi có nội dung thật để tránh phải sửa lại cấu trúc project sau này.
+**Phụ thuộc ngoài code:** PDF unit 1 và unit 2 — full-extract nội dung thật (từ vựng, ngữ pháp, bài tập, đã qua soát) phải hoàn tất trước khi bắt đầu bất kỳ task nào trong §3, kể cả T1.0 (scaffold). Không code trước khi có nội dung thật để tránh phải sửa lại cấu trúc project sau này.
 
 ## §3 Tasks
 
@@ -109,7 +109,7 @@ Scaffold web app (Vite + React + TS + Supabase + Cloudflare Pages) và ship MVP:
 - Cá nhân hoá pacing / unlock unit theo tốc độ riêng
 - Chấm bài tự luận bằng AI
 - App báo thức (dự án riêng)
-- Tự ý thêm exercise type mới ngoài core set đã chốt (17 type, xem `docs/project/REQUIREMENTS.md`) — chỉ mở rộng khi full-extract unit thật cho thấy pattern mới cần thiết.
+- Tự ý thêm exercise type mới ngoài core set đã chốt trong `docs/project/REQUIREMENTS.md` — chỉ mở rộng khi full-extract unit thật cho thấy pattern mới cần thiết.
 - Form đăng ký công khai
 
 ## §5 Definition of done

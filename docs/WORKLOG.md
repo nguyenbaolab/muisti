@@ -4,6 +4,13 @@ Nhật ký thay đổi có ý nghĩa. Entry mới ở **đầu file** (sau tiêu
 
 ---
 
+## [2026-09-07] — docs(plan): đồng bộ PLAN_1.md §2 + §4 với thực tế extract
+
+- §2: phụ thuộc full-extract PDF unit 1 **và** unit 2 trước mọi task §3 (kể cả T1.0)
+- §4: bỏ số “17 type” — trỏ core set đã chốt trong REQUIREMENTS.md (không phải quyết định mới)
+
+---
+
 ## [2026-09-07] — docs: mở rộng exercises.type +2 (dialogue, reading_passage)
 
 - REQUIREMENTS.md: core set 17 → 19; ghi chú lines/speaker trong `correct_answer`
