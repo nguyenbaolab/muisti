@@ -4,6 +4,17 @@ Nhật ký thay đổi có ý nghĩa. Entry mới ở **đầu file** (sau tiêu
 
 ---
 
+## Fix: MCQ fallback khi thiếu từ nhiễu trong ReviewPage
+**Ngày:** 2026-09-08
+**Trạng thái:** Done
+
+**Đã làm:**
+- ReviewPage: nếu vocab_items khả dụng làm nhiễu < 3, tự động
+  fallback về hình thức "Gõ chữ" cho lượt hỏi đó
+- npx tsc --noEmit pass
+
+---
+
 ## T1.5 — Ôn tập SRS hàng ngày (F-05)
 **Ngày:** 2026-09-08
 **Trạng thái:** Done

@@ -37,7 +37,7 @@ function pickMode(enabled: AskMode[]): AskMode {
   return enabled[Math.floor(Math.random() * enabled.length)]
 }
 
-function pickMcqOptions(correct: string, pool: string[]): string[] {
+function pickMcqOptions(correct: string, pool: string[]): string[] | null {
   const seen = new Set<string>()
   const distractors: string[] = []
   const correctNorm = normalizeAnswer(correct)
@@ -50,6 +50,7 @@ function pickMcqOptions(correct: string, pool: string[]): string[] {
     if (distractors.length === 3) break
   }
 
+  if (distractors.length < 3) return null
   return shuffle([correct, ...distractors])
 }
 
@@ -90,9 +91,21 @@ export function ReviewPage() {
   function presentCard(nextQueue: SessionCard[], modes: AskMode[], pool: string[]) {
     const card = nextQueue[0]
     if (!card) return
-    const mode = pickMode(modes)
+    let mode = pickMode(modes)
+    let options: string[] = []
+    if (mode === 'mcq') {
+      const mcq = pickMcqOptions(card.finnishWord, pool)
+      if (mcq) {
+        options = mcq
+      } else {
+        // Fewer than 3 unique distractors (after excluding the correct
+        // answer and duplicates) — cannot build a 4-choice MCQ. Fall
+        // back to typing for this prompt only, even if setup was MCQ-only.
+        mode = 'type'
+      }
+    }
     setAskMode(mode)
-    setMcqOptions(mode === 'mcq' ? pickMcqOptions(card.finnishWord, pool) : [])
+    setMcqOptions(options)
     setTypedAnswer('')
     setSelectedOption(null)
     setFeedback(null)
