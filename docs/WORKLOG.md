@@ -4,6 +4,23 @@ Nhật ký thay đổi có ý nghĩa. Entry mới ở **đầu file** (sau tiêu
 
 ---
 
+## T1.5 — Ôn tập SRS hàng ngày (F-05)
+**Ngày:** 2026-09-08
+**Trạng thái:** Done
+
+**Đã làm:**
+- Tạo src/lib/srs.ts: classifyAttempt + computeNextReview theo
+  đúng công thức DECISIONS.md
+- Tạo src/pages/ReviewPage.tsx: setup hình thức (multi-select),
+  session queue với retry, 2 hình thức hỏi (gõ chữ/MCQ), update
+  DB khi từ trả hết nợ
+- Thêm route /review, Link từ AppShell
+- npx tsc --noEmit pass
+
+**Phụ thuộc tiếp theo:** T1.6 (F-06: chấm bài tự động MCQ/fill-blank)
+
+---
+
 ## T1.5-A — Quyết định thuật toán SRS
 **Ngày:** 2026-09-08
 **Trạng thái:** Done

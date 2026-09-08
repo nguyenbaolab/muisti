@@ -8,6 +8,9 @@ export function AppShell() {
       <p>
         <Link to="/units">Danh sách unit</Link>
       </p>
+      <p>
+        <Link to="/review">Ôn tập hôm nay</Link>
+      </p>
       <button type="button" onClick={() => void supabase.auth.signOut()}>
         Đăng xuất
       </button>

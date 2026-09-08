@@ -26,13 +26,15 @@ src/
   assets/               # vite.svg, react.svg, hero.png
   lib/
     supabase.ts         # Supabase client (createClient, requireEnv guard)
+    srs.ts              # classifyAttempt + computeNextReview (SM-2 rút gọn)
   pages/
     LoginPage.tsx       # email/password — signInWithPassword, không sign-up
-    AppShell.tsx        # sau login + Link /units + Đăng xuất
+    AppShell.tsx        # sau login + Link /units + /review + Đăng xuất
     UnitListPage.tsx    # danh sách units (fetch Supabase)
     UnitDetailPage.tsx  # 1 unit: vocab + exercises + đánh dấu từ (F-04)
+    ReviewPage.tsx      # ôn SRS hàng ngày (F-05)
   types/
-    database.ts         # Unit, VocabItem, Exercise, UserVocabProgress
+    database.ts         # Unit, VocabItem, Exercise, UserVocabProgress, ReviewQueueItem
 public/                 # static assets
 supabase/
   schema.sql              # full DDL — dùng setup project mới
@@ -59,6 +61,7 @@ scripts/
 - `/` — `AppShell` khi có session; chưa login thì redirect `/login`
 - `/units` — `UnitListPage` khi có session; guest / chưa login → redirect `/login` (`*` không session)
 - `/units/:id` — `UnitDetailPage` khi có session; title unit + từ vựng + bài tập; guest → `/login`
+- `/review` — `ReviewPage` khi có session; ôn vocab due hôm nay; guest → `/login`
 - Session: `getSession` + `onAuthStateChange` trong `App.tsx`; lần đầu hiện `Loading...`
 - Chi tiết UI nghiệp vụ ở `REQUIREMENTS.md`.
 
@@ -94,3 +97,5 @@ Hướng đã chốt:
 - Mark unknown vocab: `insert` `{ user_id, vocab_item_id }` vào `user_vocab_progress` (SRS fields dùng default DB). Unique `(user_id, vocab_item_id)`: lỗi `23505` / duplicate key coi như thành công, thêm id vào `markedVocabIds`. Lỗi khác hiện gần nút. — `UnitDetailPage`
 - Unmark vocab: `delete` `user_vocab_progress` `.eq('user_id').eq('vocab_item_id')`; thành công thì bỏ id khỏi `markedVocabIds`. Cần policy DELETE own rows (migration `006`). — `UnitDetailPage`
 - Seed content: `npm run seed` → `scripts/seed-units.ts` — client service role (`SUPABASE_SERVICE_ROLE_KEY` + `VITE_SUPABASE_URL` từ `.env`), không dùng `src/lib/supabase.ts`. JSON `notes` trên exercise → cột `authoring_notes`. `correct_answer: null` insert nguyên (cột nullable). `metadata` không insert. Apply migration `005` trước khi seed.
+- SRS queue: `user_vocab_progress.select('..., vocab_items(*)').eq('user_id').lte('due_date', todayLocalIsoDate())` — `ReviewPage`
+- SRS update: khi từ trả hết nợ (đúng lần cuối), `computeNextReview` rồi `update` ease/interval/due_date/review_count/last_reviewed_at. Sai chỉ đẩy lại cuối queue, không ghi DB. — `src/lib/srs.ts` + `ReviewPage`

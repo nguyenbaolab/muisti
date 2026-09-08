@@ -82,13 +82,13 @@ Scaffold web app (Vite + React + TS + Supabase + Cloudflare Pages) và ship MVP:
 
 ### T1.5 — Ôn tập SRS hàng ngày (F-05)
 
-**Trạng thái:** Pending  
+**Trạng thái:** Done  
 **Feature:** F-05
 
 **Acceptance:**
-- [ ] Hàng đợi chỉ gồm từ của user hiện tại có `due_date <= hôm nay`
-- [ ] Ôn xong cập nhật `ease_factor` / `interval_days` / `due_date` / `review_count` / `last_reviewed_at`
-- [ ] Ngày không có từ due: empty state rõ
+- [x] Hàng đợi chỉ gồm từ của user hiện tại có `due_date <= hôm nay`
+- [x] Ôn xong cập nhật `ease_factor` / `interval_days` / `due_date` / `review_count` / `last_reviewed_at`
+- [x] Ngày không có từ due: empty state rõ
 
 ---
 

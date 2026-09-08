@@ -39,3 +39,13 @@ export interface UserVocabProgress {
   review_count: number
   last_reviewed_at: string | null
 }
+
+export interface ReviewQueueItem {
+  progressId: string
+  vocabItemId: string
+  finnishWord: string
+  translation: string
+  easeFactor: number
+  intervalDays: number
+  reviewCount: number
+}
