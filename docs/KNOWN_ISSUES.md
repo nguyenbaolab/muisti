@@ -50,3 +50,96 @@ Lỗi / sai lệch đã biết. Đánh số từ **KI-001**. Entry mới ở đ�
 
 ---
 
+## KI-003 — Ý tưởng: cho phép nạp file từ vựng ngoài để tự học/kiểm tra tạm thời (không lưu DB)
+
+**Mức độ:** Enhancement (tính năng mới, chưa implement)  
+**File liên quan:** Có thể tái dùng `src/lib/srs.ts` (session/retry-queue logic), `src/pages/ReviewPage.tsx` (UI hỏi/đáp) — nhưng cần tách nguồn dữ liệu ra khỏi Supabase
+
+**Ý tưởng (chủ dự án, 2026-09-08):** Thêm 1 chế độ học riêng, cho phép user tự upload 1 file (JSON/CSV, format tiếng Phần - nghĩa) để luyện tập/kiểm tra ngay trong session, dùng đúng cơ chế session + retry queue đã có ở F-05, nhưng **không** insert vào `user_vocab_progress` hay bất kỳ bảng nào — dữ liệu chỉ tồn tại trong bộ nhớ trình duyệt lúc đó, mất đi khi rời trang.
+
+**Lý do:** Cho phép học từ vựng ngoài phạm vi Suomen Mestari 2 (vd tự thêm từ gặp ở nơi khác) mà không cần thay đổi cấu trúc DB nội dung chính thức của Muisti.
+
+**Vấn đề cần giải quyết trước khi implement:**
+1. Format file input: JSON hay CSV? Cấu trúc cột/field ra sao?
+2. UI upload: nơi nào trong app, luồng thao tác thế nào?
+3. Vì không lưu DB, không có SRS liên-ngày cho các từ này — session này có tính là "ôn tập" theo nghĩa SRS không, hay chỉ là "luyện tập tự do" một lần?
+4. Validate file input: xử lý file sai format, file rỗng, file quá lớn ra sao?
+
+**Trạng thái:** Open — ý tưởng ghi nhận, **không** đưa vào Phase 1 (MVP). Nằm ngoài `REQUIREMENTS.md` hiện tại, cần thêm feature ID mới nếu làm (vd F-07) và REQUIREMENTS riêng.
+
+---
+
+## KI-004 — Ý tưởng: pretest toàn bộ unit mới thay vì đánh dấu thủ công
+
+**Mức độ:** Enhancement (tính năng bổ sung, chưa implement — **không** thay thế F-04, có thể làm song song)  
+**File liên quan:** `src/pages/UnitDetailPage.tsx` (F-04 hiện có), tương lai có thể là 1 trang/luồng riêng "Unit Pretest"
+
+**Ý tưởng (chủ dự án, 2026-09-08):** Khi bắt đầu học 1 unit mới, hầu hết từ vựng đều chưa biết — việc tự bấm "Đánh dấu" từng từ một (F-04 hiện tại) khá thừa thãi. Đề xuất: cho phép "test nhanh" toàn bộ từ vựng của unit trước khi học chính thức — từ nào trả lời sai trong lúc pretest thì tự động thêm vào `user_vocab_progress` (giống hệt hành vi insert của `handleMark` hiện tại, nhưng trigger tự động thay vì user tự bấm), từ nào đúng thì bỏ qua không thêm vào.
+
+**Quan hệ với F-04:** Bổ sung, không thay thế. F-04 (đánh dấu thủ công) vẫn hữu ích khi đọc bài/làm exercise gặp từ lạ giữa chừng. Pretest chỉ tối ưu hoá bước "bắt đầu 1 unit mới".
+
+**Vấn đề cần giải quyết trước khi implement:**
+1. Hình thức hỏi trong pretest — dùng chung hình thức với `ReviewPage` (gõ chữ/MCQ) hay hình thức riêng đơn giản hơn (vd chỉ "Biết/Không biết" tự nhận, không cần gõ/chọn)?
+2. Unit có 100–200+ từ (Unit 1: 166, Unit 2: 211) — pretest 1 lần hết toàn bộ có quá tải không? Xem KI-007 (giới hạn batch) — có thể cần áp dụng cùng cơ chế giới hạn số từ mỗi lần.
+3. Nếu user pretest dở dang (thoát giữa chừng) — xử lý thế nào? Các từ đã test nên giữ kết quả hay huỷ hết (tương tự nguyên tắc session dở dang của F-05 đã chốt trong `DECISIONS.md`)?
+4. Từ pretest đúng ngay từ đầu (không thêm vào `user_vocab_progress`) — nếu user pretest lại unit đó lần 2 (vd ôn lại), có test lại từ đã pretest đúng không?
+
+**Trạng thái:** Open — ý tưởng ghi nhận, **không** đưa vào Phase 1 (MVP).
+
+---
+
+## KI-005 — Ý tưởng: đánh dấu từ trực tiếp trong lúc làm exercises (bôi đen → chuột phải)
+
+**Mức độ:** Enhancement (mở rộng UX của F-04, chưa implement)  
+**File liên quan:** `src/pages/UnitDetailPage.tsx` (phần render exercises), F-04 (`user_vocab_progress` insert logic đã có)
+
+**Ý tưởng (chủ dự án, 2026-09-08):** Hiện F-04 chỉ có nút "Đánh dấu" cạnh mỗi từ trong danh sách `vocab_items`. Đề xuất mở rộng: khi đọc nội dung exercises (`prompt`, `reading_passage`, `dialogue`...), cho phép bôi đen 1 từ bất kỳ trong đoạn văn, chuột phải (hoặc menu tương tự) để thêm từ đó vào `user_vocab_progress` ngay lập tức.
+
+**Vấn đề kỹ thuật cốt lõi chưa giải quyết được:** Từ user bôi đen trong 1 đoạn văn tự do **chưa chắc** đã tồn tại sẵn trong bảng `vocab_items` (exercises chứa câu văn tự nhiên, không phải mọi từ trong câu đều có sẵn dưới dạng 1 row `vocab_items`). Nếu từ đó chưa có trong DB:
+1. Phải tạo mới 1 `vocab_items` row với `finnish_word` = từ vừa bôi đen — nhưng `translation` (nghĩa tiếng Việt) lấy từ đâu? Không có sẵn.
+   - Option A: bắt user tự nhập nghĩa tay ngay lúc đó (thêm 1 bước UX, làm gián đoạn lúc đang đọc bài)
+   - Option B: để `translation` trống/null, user tự điền sau — nhưng schema hiện tại `translation` là NOT NULL
+   - Option C: gọi API dịch tự động bên ngoài — **vi phạm** negative scope đã chốt trong `REQUIREMENTS.md` §5 ("Tra cứu trang web ngoài — dữ liệu đổi theo thời gian thực" đã bị loại khỏi v0.1)
+2. Nếu từ bôi đen là 1 dạng biến cách (declined/conjugated form) của từ gốc đã có trong `vocab_items` (vd bôi đen "kirjoitin" trong khi `vocab_items` đã có "kirjoittaa") — hệ thống không có cách nào tự nhận diện đây là cùng 1 từ, sẽ tạo duplicate
+
+**Trạng thái:** Open — ý tưởng ghi nhận, **không** đưa vào Phase 1 (MVP). Cần giải pháp UX rõ ràng cho vấn đề "từ chưa có trong DB" trước khi implement — đây không phải việc nhỏ.
+
+---
+
+## KI-006 — Kiểm tra: index cho `user_vocab_progress.due_date` khi data lớn dần
+
+**Mức độ:** Low (phòng ngừa, chưa phải vấn đề thật ở quy mô hiện tại)  
+**File liên quan:** `supabase/schema.sql`, bảng `user_vocab_progress`
+
+**Bối cảnh:** Từ đã đánh dấu vào `user_vocab_progress` tồn tại vĩnh viễn (không có cơ chế tự động xoá/dọn dẹp — chỉ xoá thủ công qua unmark, đã có ở F-04). Với vocab tăng dần theo mỗi unit mới, số row có thể lên tới vài nghìn/user trong dài hạn (không phải "vài trăm nghìn" theo nghĩa đen — giáo trình có giới hạn số unit/từ vựng thực tế, nhưng vẫn nên phòng ngừa).
+
+**Câu hỏi đặt ra (chủ dự án, 2026-09-08):** Số lượng từ tăng dần có cần cơ chế xoá/dọn dẹp không?
+
+**Đánh giá:** Postgres xử lý hàng triệu row dễ dàng với bảng đơn giản như `user_vocab_progress` (8 cột). **Không** cần cơ chế "xoá tự động" ở quy mô Muisti. Vấn đề thật duy nhất là hiệu năng QUERY khi lọc `due_date <= hôm nay` nếu bảng lớn dần mà **thiếu index** phù hợp.
+
+**Cần kiểm tra:** Bảng `user_vocab_progress` hiện có index nào ngoài PRIMARY KEY (`id`) và UNIQUE (`user_id`, `vocab_item_id`) hay chưa? Query chính của F-05 (`.eq('user_id', ...).lte('due_date', ...)`) có tận dụng được UNIQUE constraint hiện có làm index không, hay cần thêm index riêng cho (`user_id`, `due_date`)?
+
+**Trạng thái:** Open — cần audit lại schema, có thể cần 1 migration nhỏ thêm composite index (`user_id`, `due_date`) nếu chưa tối ưu. Chưa cấp bách ở quy mô data hiện tại (vài trăm từ), nên làm khi thuận tiện, không chặn Phase 1.
+
+---
+
+## KI-007 — Giới hạn số từ MỚI đưa vào 1 session ôn tập (batch limit)
+
+**Mức độ:** Medium — có thể ảnh hưởng trải nghiệm thật sớm (ngay khi user đánh dấu nhiều từ cùng lúc, hoặc nếu KI-004 pretest được làm)  
+**File liên quan:** `src/pages/ReviewPage.tsx` (fetch hàng đợi due)
+
+**Vấn đề (chủ dự án, 2026-09-08):** Hàng đợi SRS hiện tại (F-05) lấy **tất cả** từ có `due_date <= hôm nay`, không giới hạn số lượng. Nếu user đánh dấu 80–100 từ mới trong 1 lần (vd mới bắt đầu học 1 unit, hoặc tương lai làm KI-004 pretest cả unit), `due_date` mặc định là hôm nay cho tất cả — nghĩa là ngay session ôn tập đầu tiên đã phải xử lý 80–100 từ cùng lúc. Với retry queue (từ sai phải hỏi lại), tổng số lượt hỏi trong 1 session có thể vượt 150–200+ lượt — quá tải, dễ gây chán nản, bỏ dở giữa chừng.
+
+**Nghiên cứu tham khảo (2026-09-08):** Anki có khái niệm "new cards per day" — giới hạn số thẻ **mới** (chưa từng ôn) được đưa vào hàng đợi mỗi ngày, tách biệt với số lượt "review" (thẻ cũ quay lại theo lịch). Khuyến nghị phổ biến: 10–20 thẻ mới/ngày là mức bền vững; vượt quá dễ dẫn tới "review overload" tích luỹ (mỗi thẻ mới thêm vào sẽ quay lại nhiều lần trong tương lai, cộng dồn theo cấp số nhân nếu học quá nhanh). Nguồn: Anki official docs (docs.ankiweb.net/deck-options.html), cộng đồng khuyến nghị 10–20/ngày (nhiều bài viết độc lập).
+
+**Hướng xử lý dự kiến (chưa chốt, cần bàn kỹ trước khi implement):**
+1. Giới hạn số từ `review_count = 0` (chưa từng ôn lần nào) được đưa vào 1 session — vd tối đa N từ mới/ngày (N cụ thể cần bàn, tham khảo 10–20 theo Anki nhưng phải cân nhắc bối cảnh khác: Muisti là app cá nhân/nhóm nhỏ học theo giáo trình cố định, không phải deck tự do như Anki)
+2. Từ mới **vượt** quá giới hạn N thì xử lý sao — vẫn hiện `due_date` = hôm nay trong DB (để sau này tự nhiên due) nhưng **không** đưa vào session hôm nay? Hay dời `due_date` của phần dư sang ngày mai/các ngày sau (dàn đều ra)?
+3. Từ `review_count > 0` (đã ôn ít nhất 1 lần, đang quay lại theo lịch SRS bình thường) — có tính vào giới hạn N không, hay chỉ áp dụng riêng cho từ hoàn toàn mới?
+4. Cần UI thông báo rõ cho user khi có từ due nhưng bị hoãn do giới hạn batch (vd "Còn 45 từ mới sẽ xuất hiện trong các ngày tới")
+
+**Trạng thái:** Open — vấn đề thật, cần giải quyết trước khi KI-004 (pretest cả unit) khả thi, vì pretest sẽ tạo chính xác tình huống 80–100+ từ mới cùng lúc. Ưu tiên bàn kỹ + chốt DECISIONS trước khi implement, có thể cần làm **sớm hơn** KI-001/002/003/004/005 vì ảnh hưởng trực tiếp đến F-05 đã có.
+
+---
+
+
