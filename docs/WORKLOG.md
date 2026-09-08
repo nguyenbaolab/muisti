@@ -4,6 +4,18 @@ Nhật ký thay đổi có ý nghĩa. Entry mới ở **đầu file** (sau tiêu
 
 ---
 
+## T1.5-A — Quyết định thuật toán SRS
+**Ngày:** 2026-09-08
+**Trạng thái:** Done
+
+**Đã làm:**
+- Ghi DECISIONS.md: SM-2 rút gọn 3 mức từ wrong_count trong session
+- Không code UI/logic
+
+**Phụ thuộc tiếp theo:** T1.5-B (UI + logic ôn tập)
+
+---
+
 ## T1.4 mở rộng — Unmark (bỏ đánh dấu từ)
 **Ngày:** 2026-09-08
 **Trạng thái:** Done

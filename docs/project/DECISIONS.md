@@ -4,6 +4,52 @@ Ghi theo thời gian, mới nhất ở trên. Mỗi entry: tên ngắn, ngày, q
 
 ---
 
+## Thuật toán SRS: SM-2 rút gọn 3 mức, đánh giá tự động từ số lần sai trong session
+
+**Ngày:** 2026-09-08
+
+**Quyết định:** Thuật toán ôn tập SRS (F-05) dùng biến thể SM-2 rút gọn, 3 mức độ, suy ra tự động từ hành vi trong session — không cho user tự chấm độ khó.
+
+**Cơ chế 2 tầng:**
+
+Tầng 1 (trong session, client-side, không ghi DB giữa chừng): mỗi từ trong hàng đợi ôn hôm nay có 1 "retry queue" riêng. Trả lời sai 1 từ → +1 lần hỏi lại từ đó trong session. Sai tiếp (liên tiếp) → +1 lần nữa mỗi lần sai. Session chỉ kết thúc khi mọi từ trong hàng đợi đã "trả hết nợ" (đúng ở lần hỏi cuối cùng của nó). Nếu user thoát app khi session còn dở dang (chưa trả hết nợ) → coi như CHƯA ôn, không ghi DB, `due_date` giữ nguyên.
+
+Tầng 2 (khi 1 từ trả hết nợ trong session, ghi DB đúng 1 lần): đếm `wrong_count` = tổng số lần trả lời sai từ đó trong session (trước khi đúng lần cuối). Map sang 1 trong 3 mức:
+
+| `wrong_count` | Mức độ |
+|---|---|
+| 0 | Nhớ dễ |
+| 1 | Nhớ |
+| >=2 | Quên |
+
+**Công thức cập nhật `ease_factor`** (sàn 1.3, trần 2.8):
+- Nhớ dễ: +0.15
+- Nhớ: -0.05
+- Quên: -0.20
+
+**Công thức cập nhật `interval_days`** (sàn 1, trần 180):
+- Lần ôn đầu tiên của từ (`review_count == 0`, tức đang có `interval_days` = 0): Nhớ dễ → cố định 4 ngày | Nhớ → cố định 2 ngày | Quên → cố định 1 ngày
+- Từ lần ôn thứ 2 trở đi (`interval_days` cũ > 0):
+  - Nhớ dễ: `max(interval_days_cũ + 1, round(interval_days_cũ * ease_factor_mới))`
+  - Nhớ: `max(interval_days_cũ + 1, round(interval_days_cũ * ease_factor_mới * 0.6))`
+  - Quên: reset về 1
+
+`due_date` = hôm nay + `interval_days` mới. `review_count += 1` và `last_reviewed_at = now()` áp dụng cho cả 3 mức.
+
+**Lý do:**
+- Đánh giá tự động từ `wrong_count` thay vì để user tự chấm ("Dễ/Khó") — dùng hành vi khách quan đã đo được thay vì cảm nhận chủ quan, đúng hướng các SRS hiện đại (FSRS) đang đi
+- 3 mức (không phải 4) sau khi kiểm chứng: mức thứ 4 ("Khó nhớ", tách riêng `wrong_count=2` khỏi `wrong_count>=3`) khi test toán học phát hiện không thực sự phạt được (interval vẫn luôn tăng dù ease giảm) và gây lỗi thứ tự khi ease chạm sàn (trường hợp `ease=1.3`, `interval=1`: "Khó nhớ" cho kết quả dài hơn "Nhớ" — sai logic). Gộp `wrong_count>=1` thành 2 mức rõ ràng (Nhớ / Quên ở `>=2`) loại bỏ được lỗi này.
+- Sàn `interval_days_cũ + 1` cho cả 2 nhánh Nhớ dễ/Nhớ: chống "low interval hell" — nếu chỉ nhân ease mà không có sàn, từ có ease thấp có thể bị kẹt ở cùng 1 interval nhiều lần liên tiếp dù vẫn đang nhớ được, đi ngược nguyên tắc Anki khuyến nghị (thành công không nên bị phạt bằng cách không tăng khoảng cách)
+- Bước khởi đầu cố định (4/2/1 ngày) cho lần ôn đầu tiên, tách khỏi công thức nhân dùng từ lần 2 trở đi: công thức nhân với interval gốc quá nhỏ (0 hoặc 1) không tạo đủ khác biệt có ý nghĩa giữa các mức
+- Trần 180 ngày: chặn tăng vô hạn theo cấp số nhân, đảm bảo mọi từ quay lại định kỳ dù đã rất vững
+- Đã kiểm chứng bằng test toán học exhaustive (không phải chỉ vài kịch bản chọn mẫu): thứ tự interval/ease luôn giảm dần hoặc bằng khi `wrong_count` tăng, luôn trong biên [1,180] và [1.3,2.8], không có trường hợp kẹt vĩnh viễn, quyết định deterministic
+
+**Phạm vi:** Logic tính SRS khi kết thúc 1 từ trong session ôn tập (F-05, T1.5). Áp dụng cho toàn bộ `user_vocab_progress` từ đây về sau.
+
+**Không làm gì:** Không cho user tự chọn mức độ (không có nút "Dễ/Khó" thủ công). Không ghi DB giữa session (chỉ ghi khi từ đã trả hết nợ). Không implement cơ chế "test bất chợt từ đã thuộc lâu" (xem KI-002, để dành sau).
+
+---
+
 ## `exercises.correct_answer` cho phép NULL
 
 **Ngày:** 2026-09-08
