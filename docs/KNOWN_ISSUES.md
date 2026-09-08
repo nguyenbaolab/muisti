@@ -142,4 +142,22 @@ Lỗi / sai lệch đã biết. Đánh số từ **KI-001**. Entry mới ở đ�
 
 ---
 
+## KI-008 — Hiệu năng lấy nhiễu MCQ khi `vocab_items` lớn dần (khác KI-006)
+
+**Mức độ:** Low (phòng ngừa, chưa phải vấn đề thật ở quy mô hiện tại ~377 từ)  
+**File liên quan:** `src/pages/ReviewPage.tsx` (hàm `pickMcqOptions` + đoạn fetch pool truyền vào)
+
+**Lưu ý phân biệt với KI-006:** KI-006 nói về index cho query hàng đợi SRS (`user_vocab_progress.due_date`). Entry này nói về vấn đề khác — cách lấy dữ liệu **nhiễu** cho MCQ trong `ReviewPage`.
+
+**Bối cảnh:** `pickMcqOptions` nhận vào 1 pool (mảng string `finnish_word`) và random chọn 3 từ làm nhiễu. Pool này hiện được tạo bằng cách fetch **mọi row** `vocab_items` về phía client (chỉ cột `finnish_word`, không `SELECT *`), rồi random bằng JavaScript (`shuffle`) — **không** random ở phía database.
+
+**Vấn đề khi data lớn dần:** Cách "tải hết cột `finnish_word` về client rồi random" chấp nhận được ở quy mô hiện tại (377 từ) nhưng sẽ chậm dần nếu `vocab_items` tăng lên rất lớn (hàng chục nghìn, trăm nghìn từ) — tốn băng thông mạng và bộ nhớ trình duyệt mỗi lần vào `ReviewPage` / bấm bắt đầu ôn, dù chỉ cần đúng 3 từ ngẫu nhiên trong số đó.
+
+**Hướng xử lý dự kiến (chưa chốt, chưa cấp bách):** Đổi sang random ở phía database thay vì tải hết về client — ví dụ dùng RPC/SQL function kiểu `ORDER BY random() LIMIT 3` (loại trừ đáp án đúng) qua Supabase, thay vì `select('finnish_word')` toàn bảng rồi shuffle trong JS. Cần đánh giá lại nếu/khi vocab thực tế tăng đáng kể so với quy mô giáo trình hiện tại.
+
+**Trạng thái:** Open — không cấp bách, không chặn Phase 1. Ghi nhận để theo dõi khi `vocab_items` tăng lớn hơn nhiều so với ~377 từ hiện tại.
+
+---
+
+
 
