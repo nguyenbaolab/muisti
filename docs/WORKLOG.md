@@ -4,6 +4,19 @@ Nhật ký thay đổi có ý nghĩa. Entry mới ở **đầu file** (sau tiêu
 
 ---
 
+## Fix 007: DROP tường minh child→parent (re-run an toàn)
+**Ngày:** 2026-09-14
+**Trạng thái:** Done (file sẵn — chưa apply lại trên Dashboard)
+
+**Đã làm:**
+- Sửa comment 007: DROP TABLE CASCADE không drop bảng FK-con
+- DROP tường minh: user_vocab_progress → vocab_items → exercises → units → decks
+- CREATE + RLS giữ nguyên
+
+**Phụ thuộc tiếp theo:** Starter apply lại 007 trên Dashboard
+
+---
+
 ## Migrate schema unit-based → deck-based (wipe data)
 **Ngày:** 2026-09-14
 **Trạng thái:** Done (file sẵn — chờ apply migration 007 trên Supabase Dashboard)

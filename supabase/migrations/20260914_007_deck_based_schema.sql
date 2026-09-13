@@ -2,13 +2,17 @@
 -- Task: wipe unit-based schema → deck-based (no data backup)
 -- Date: 2026-09-14
 --
--- DROP order: exercises first (FK → units). Then units CASCADE:
--- vocab_items.unit_id → units ON DELETE CASCADE, and
--- user_vocab_progress.vocab_item_id → vocab_items ON DELETE CASCADE.
--- DROP TABLE units CASCADE also drops those dependent tables.
+-- DROP each table explicitly, child before parent, so FK constraints
+-- do not block the wipe. DROP TABLE ... CASCADE does NOT drop other
+-- tables that only have FKs pointing at the dropped table (it drops
+-- those FK constraints). ON DELETE CASCADE is row-level only.
+-- decks is included so a partial prior run can re-run cleanly.
 
+DROP TABLE IF EXISTS user_vocab_progress CASCADE;
+DROP TABLE IF EXISTS vocab_items CASCADE;
 DROP TABLE IF EXISTS exercises CASCADE;
 DROP TABLE IF EXISTS units CASCADE;
+DROP TABLE IF EXISTS decks CASCADE;
 
 CREATE TABLE decks (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
