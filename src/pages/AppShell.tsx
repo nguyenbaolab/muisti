@@ -6,7 +6,7 @@ export function AppShell() {
     <main>
       <h1>Muisti</h1>
       <p>
-        <Link to="/units">Danh sách unit</Link>
+        <Link to="/decks">Decks</Link>
       </p>
       <p>
         <Link to="/review">Ôn tập hôm nay</Link>

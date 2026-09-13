@@ -4,6 +4,33 @@ Ghi theo thời gian, mới nhất ở trên. Mỗi entry: tên ngắn, ngày, q
 
 ---
 
+## Schema deck-based: wipe data, ownership + visibility, 2 chế độ ôn
+
+**Ngày:** 2026-09-14
+
+**Quyết định:** Bỏ schema unit-based (`units`, `exercises`) và chuyển sang deck-based. Wipe toàn bộ data cũ — không backup, không migrate-in-place. Recreate `vocab_items` + `user_vocab_progress` trên schema mới.
+
+**Ownership + visibility:**
+- `decks.owner_id` FK `auth.users`; `visibility` `'public' | 'private'` (default `'private'`)
+- Public deck: mọi authenticated SELECT deck + `vocab_items` của nó; chỉ owner UPDATE/DELETE deck
+- Private deck: chỉ owner SELECT/INSERT/UPDATE/DELETE deck + `vocab_items`
+- Client được INSERT `vocab_items` (luồng upload): chỉ owner của deck cha
+- `user_vocab_progress`: giữ nguyên cột; mỗi user có progress riêng khi ôn (kể cả deck public)
+
+**Hai chế độ ôn (ReviewPage):**
+1. Theo 1 deck: chỉ từ due thuộc deck đó
+2. Mix tất cả: mọi dòng `user_vocab_progress` của user hiện tại đang due (`user_id = auth.uid()` AND `due_date <= today`) — không join lại `decks` để check quyền (có progress nghĩa là user đã từng ôn từ đó)
+
+**`vocab_items` cột mới:** `id`, `deck_id`, `finnish_word`, `translation`, `created_at` — không mang lại `part_of_speech` / `example_sentence` / `notes` / `scene_description`.
+
+**Lý do:** REQUIREMENTS v0.2 đổi hướng khỏi unit/sách; data cũ (unit + exercise) không còn dùng; ownership theo deck cho phép user upload và chia sẻ public/private.
+
+**Phạm vi:** Schema (`decks`, `vocab_items`, `user_vocab_progress` + RLS), types, routes (`/units` xóa, `/decks` placeholder, `/review` + `/review/:deckId`), xóa seed Unit 1/2.
+
+**Không làm gì:** Không backup data. Không build UI chọn/tạo deck trong task migrate. Không đổi thuật toán SRS (`srs.ts` / entry SM-2 bên dưới). Không tự thêm cột vocab cũ.
+
+---
+
 ## Thuật toán SRS: SM-2 rút gọn 3 mức, đánh giá tự động từ số lần sai trong session
 
 **Ngày:** 2026-09-08

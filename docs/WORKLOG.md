@@ -4,6 +4,23 @@ Nhật ký thay đổi có ý nghĩa. Entry mới ở **đầu file** (sau tiêu
 
 ---
 
+## Migrate schema unit-based → deck-based (wipe data)
+**Ngày:** 2026-09-14
+**Trạng thái:** Done (file sẵn — chờ apply migration 007 trên Supabase Dashboard)
+
+**Đã làm:**
+- Migration `20260914_007_deck_based_schema.sql`: DROP exercises + units CASCADE, CREATE decks / vocab_items / user_vocab_progress + RLS
+- Cập nhật `supabase/schema.sql` (source of truth)
+- Types: thêm Deck, VocabItem.deck_id; xóa Unit / Exercise
+- Xóa UnitListPage, UnitDetailPage, routes `/units`; placeholder `/decks`; AppShell → `/decks`
+- ReviewPage: mix mặc định (`/review`); deck cụ thể (`/review/:deckId`)
+- Xóa seed-units.ts + unit1/2 JSON; bỏ script `npm run seed`
+- DECISIONS + CONTEXT + KI-002 note; `npx tsc --noEmit`
+
+**Phụ thuộc tiếp theo:** Apply 007 trên Dashboard (wipe), rồi UI decks / upload thật
+
+---
+
 ## Archive REQUIREMENTS v1 + viết REQUIREMENTS v2 (deck-based)
 **Ngày:** 2026-09-14
 **Trạng thái:** Done

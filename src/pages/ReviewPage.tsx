@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useParams } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { computeNextReview, todayLocalIsoDate } from '../lib/srs'
 import type { ReviewQueueItem, VocabItem } from '../types/database'
@@ -69,6 +69,10 @@ function mapQueueRow(row: ProgressJoinRow): ReviewQueueItem | null {
 }
 
 export function ReviewPage() {
+  const { deckId } = useParams<{ deckId?: string }>()
+  const scopedDeckId = deckId?.trim() || null
+  const reviewMode: 'mix' | 'deck' = scopedDeckId ? 'deck' : 'mix'
+
   const [pageState, setPageState] = useState<PageState>('setup')
   const [typeEnabled, setTypeEnabled] = useState(true)
   const [mcqEnabled, setMcqEnabled] = useState(true)
@@ -128,14 +132,29 @@ export function ReviewPage() {
     }
 
     const today = todayLocalIsoDate()
-    const [progressResult, vocabResult] = await Promise.all([
-      supabase
-        .from('user_vocab_progress')
-        .select('id, vocab_item_id, ease_factor, interval_days, review_count, vocab_items(*)')
-        .eq('user_id', user.id)
-        .lte('due_date', today),
-      supabase.from('vocab_items').select('finnish_word'),
-    ])
+
+    // Mix: all own due progress rows, no extra deck/visibility join.
+    // Deck: due rows whose vocab belongs to that deck (inner join).
+    let progressQuery = supabase
+      .from('user_vocab_progress')
+      .select(
+        scopedDeckId
+          ? 'id, vocab_item_id, ease_factor, interval_days, review_count, vocab_items!inner(*)'
+          : 'id, vocab_item_id, ease_factor, interval_days, review_count, vocab_items(*)',
+      )
+      .eq('user_id', user.id)
+      .lte('due_date', today)
+
+    if (scopedDeckId) {
+      progressQuery = progressQuery.eq('vocab_items.deck_id', scopedDeckId)
+    }
+
+    let vocabQuery = supabase.from('vocab_items').select('finnish_word')
+    if (scopedDeckId) {
+      vocabQuery = vocabQuery.eq('deck_id', scopedDeckId)
+    }
+
+    const [progressResult, vocabResult] = await Promise.all([progressQuery, vocabQuery])
 
     if (progressResult.error) {
       setError(progressResult.error.message)
@@ -259,6 +278,11 @@ export function ReviewPage() {
           <Link to="/">← Trang chủ</Link>
         </p>
         <h1>Ôn tập hôm nay</h1>
+        <p>
+          {reviewMode === 'deck'
+            ? `Chế độ: ôn một deck (${scopedDeckId}).`
+            : 'Chế độ: mix tất cả từ đang đến hạn.'}
+        </p>
         <p>Chọn hình thức hỏi (có thể tick cả hai — mỗi từ random một hình thức):</p>
         <label>
           <input

@@ -3,10 +3,9 @@ import type { Session } from '@supabase/supabase-js'
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { supabase } from './lib/supabase'
 import { AppShell } from './pages/AppShell'
+import { DecksPage } from './pages/DecksPage'
 import { LoginPage } from './pages/LoginPage'
 import { ReviewPage } from './pages/ReviewPage'
-import { UnitDetailPage } from './pages/UnitDetailPage'
-import { UnitListPage } from './pages/UnitListPage'
 
 function AuthRoutes() {
   const [session, setSession] = useState<Session | null>(null)
@@ -42,9 +41,9 @@ function AuthRoutes() {
     return (
       <Routes>
         <Route path="/" element={<AppShell />} />
-        <Route path="/units" element={<UnitListPage />} />
-        <Route path="/units/:id" element={<UnitDetailPage />} />
+        <Route path="/decks" element={<DecksPage />} />
         <Route path="/review" element={<ReviewPage />} />
+        <Route path="/review/:deckId" element={<ReviewPage />} />
         <Route path="/login" element={<Navigate to="/" replace />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

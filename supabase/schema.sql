@@ -1,69 +1,104 @@
 -- Muisti schema — full DDL (source of truth for fresh project setup)
--- Version: 0.1.0
--- Updated: 2026-09-08
+-- Version: 0.2.0
+-- Updated: 2026-09-14
 -- Apply entire file on a fresh Supabase project.
 -- For incremental updates on existing DB, use supabase/migrations/.
 
--- bảng units
-CREATE TABLE units (
+-- bảng decks
+CREATE TABLE decks (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  book_code text NOT NULL,
-  unit_number int NOT NULL,
-  title text NOT NULL,
+  owner_id uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  name text NOT NULL,
+  meaning_language text NOT NULL CHECK (meaning_language IN ('en', 'vi')),
   description text,
-  created_at timestamptz NOT NULL DEFAULT now(),
-  CONSTRAINT units_book_unit_unique UNIQUE (book_code, unit_number)
+  visibility text NOT NULL DEFAULT 'private' CHECK (visibility IN ('public', 'private')),
+  created_at timestamptz NOT NULL DEFAULT now()
 );
 
--- RLS units
-ALTER TABLE units ENABLE ROW LEVEL SECURITY;
+ALTER TABLE decks ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "units: authenticated users can select"
-  ON units FOR SELECT
+CREATE POLICY "decks: select public or own"
+  ON decks FOR SELECT
   TO authenticated
-  USING (true);
+  USING (visibility = 'public' OR owner_id = auth.uid());
 
--- insert/update/delete: no client policies — service role bypasses RLS by default
+CREATE POLICY "decks: insert own"
+  ON decks FOR INSERT
+  TO authenticated
+  WITH CHECK (owner_id = auth.uid());
+
+CREATE POLICY "decks: update own"
+  ON decks FOR UPDATE
+  TO authenticated
+  USING (owner_id = auth.uid())
+  WITH CHECK (owner_id = auth.uid());
+
+CREATE POLICY "decks: delete own"
+  ON decks FOR DELETE
+  TO authenticated
+  USING (owner_id = auth.uid());
 
 -- bảng vocab_items
 CREATE TABLE vocab_items (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  unit_id uuid NOT NULL REFERENCES units(id) ON DELETE CASCADE,
+  deck_id uuid NOT NULL REFERENCES decks(id) ON DELETE CASCADE,
   finnish_word text NOT NULL,
   translation text NOT NULL,
-  part_of_speech text,
-  example_sentence text,
-  notes text,
   created_at timestamptz NOT NULL DEFAULT now()
 );
 
 ALTER TABLE vocab_items ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "vocab_items: authenticated users can select"
+CREATE POLICY "vocab_items: select if deck visible"
   ON vocab_items FOR SELECT
   TO authenticated
-  USING (true);
+  USING (
+    EXISTS (
+      SELECT 1 FROM decks
+      WHERE decks.id = vocab_items.deck_id
+        AND (decks.visibility = 'public' OR decks.owner_id = auth.uid())
+    )
+  );
 
--- bảng exercises
-CREATE TABLE exercises (
-  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  unit_id uuid NOT NULL REFERENCES units(id) ON DELETE CASCADE,
-  type text NOT NULL,
-  prompt text NOT NULL,
-  scene_description text,
-  correct_answer jsonb,
-  options jsonb,
-  created_at timestamptz NOT NULL DEFAULT now()
-);
-
-ALTER TABLE exercises ENABLE ROW LEVEL SECURITY;
-
-CREATE POLICY "exercises: authenticated users can select"
-  ON exercises FOR SELECT
+CREATE POLICY "vocab_items: insert if deck owner"
+  ON vocab_items FOR INSERT
   TO authenticated
-  USING (true);
+  WITH CHECK (
+    EXISTS (
+      SELECT 1 FROM decks
+      WHERE decks.id = vocab_items.deck_id
+        AND decks.owner_id = auth.uid()
+    )
+  );
 
--- insert/update/delete: no client policies — service role bypasses RLS by default
+CREATE POLICY "vocab_items: update if deck owner"
+  ON vocab_items FOR UPDATE
+  TO authenticated
+  USING (
+    EXISTS (
+      SELECT 1 FROM decks
+      WHERE decks.id = vocab_items.deck_id
+        AND decks.owner_id = auth.uid()
+    )
+  )
+  WITH CHECK (
+    EXISTS (
+      SELECT 1 FROM decks
+      WHERE decks.id = vocab_items.deck_id
+        AND decks.owner_id = auth.uid()
+    )
+  );
+
+CREATE POLICY "vocab_items: delete if deck owner"
+  ON vocab_items FOR DELETE
+  TO authenticated
+  USING (
+    EXISTS (
+      SELECT 1 FROM decks
+      WHERE decks.id = vocab_items.deck_id
+        AND decks.owner_id = auth.uid()
+    )
+  );
 
 -- bảng user_vocab_progress
 CREATE TABLE user_vocab_progress (
@@ -78,7 +113,6 @@ CREATE TABLE user_vocab_progress (
   CONSTRAINT user_vocab_progress_unique UNIQUE (user_id, vocab_item_id)
 );
 
--- RLS user_vocab_progress (own rows only)
 ALTER TABLE user_vocab_progress ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "user_vocab_progress: select own rows"
@@ -101,9 +135,3 @@ CREATE POLICY "user_vocab_progress: delete own rows"
   ON user_vocab_progress FOR DELETE
   TO authenticated
   USING (user_id = auth.uid());
-
--- exercises: cột authoring (nullable — không mọi bài đều có harjoitus)
-ALTER TABLE exercises
-  ADD COLUMN source_harjoitus int,
-  ADD COLUMN authoring_notes text;
-

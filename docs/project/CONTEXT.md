@@ -10,7 +10,7 @@ Tài liệu kỹ thuật cho Cursor khi đọc/ghi code. Business: `REQUIREMENTS
 - **Data / Auth:** Supabase (Postgres + Auth), client gọi `supabase-js`, bảo vệ bằng RLS
 - **Auth model:** admin invite (`inviteUserByEmail`); không form đăng ký công khai
 - **Deploy:** Cloudflare Pages
-- **AI content:** Claude đọc PDF unit lúc soạn bài; app v0.1 không gọi LLM lúc runtime
+- **AI content:** app v0.1 không gọi LLM lúc runtime; nội dung deck do user upload
 - **Phân công:** Claude thiết kế + prompt; Cursor thực thi code/data; chủ dự án test và quyết định cuối
 
 ---
@@ -29,12 +29,11 @@ src/
     srs.ts              # classifyAttempt + computeNextReview (SM-2 rút gọn)
   pages/
     LoginPage.tsx       # email/password — signInWithPassword, không sign-up
-    AppShell.tsx        # sau login + Link /units + /review + Đăng xuất
-    UnitListPage.tsx    # danh sách units (fetch Supabase)
-    UnitDetailPage.tsx  # 1 unit: vocab + exercises + đánh dấu từ (F-04)
-    ReviewPage.tsx      # ôn SRS hàng ngày (F-05)
+    AppShell.tsx        # sau login + Link /decks + /review + Đăng xuất
+    DecksPage.tsx       # placeholder — chưa có UI decks thật
+    ReviewPage.tsx      # ôn SRS: mix (/review) hoặc 1 deck (/review/:deckId)
   types/
-    database.ts         # Unit, VocabItem, Exercise, UserVocabProgress, ReviewQueueItem
+    database.ts         # Deck, VocabItem, UserVocabProgress, ReviewQueueItem
 public/                 # static assets
 supabase/
   schema.sql              # full DDL — dùng setup project mới
@@ -45,11 +44,7 @@ supabase/
     20260908_004_exercises_add_source_notes.sql
     20260908_005_exercises_correct_answer_nullable.sql
     20260908_006_user_vocab_progress_delete_policy.sql
-content/
-  unit1_complete.json
-  unit2_complete.json
-scripts/
-  seed-units.ts         # local seed via service role — KHÔNG import vào src/
+    20260914_007_deck_based_schema.sql   # wipe units/exercises → decks
 .env.example            # VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY, SUPABASE_SERVICE_ROLE_KEY
 ```
 
@@ -59,9 +54,9 @@ scripts/
 
 - `/login` — `LoginPage` khi chưa có session; đã login thì redirect `/`
 - `/` — `AppShell` khi có session; chưa login thì redirect `/login`
-- `/units` — `UnitListPage` khi có session; guest / chưa login → redirect `/login` (`*` không session)
-- `/units/:id` — `UnitDetailPage` khi có session; title unit + từ vựng + bài tập; guest → `/login`
-- `/review` — `ReviewPage` khi có session; ôn vocab due hôm nay; guest → `/login`
+- `/decks` — `DecksPage` placeholder khi có session; guest → `/login`
+- `/review` — `ReviewPage` mix tất cả từ due của user; guest → `/login`
+- `/review/:deckId` — `ReviewPage` chỉ từ due thuộc deck đó (chuẩn bị cho UI chọn deck)
 - Session: `getSession` + `onAuthStateChange` trong `App.tsx`; lần đầu hiện `Loading...`
 - Chi tiết UI nghiệp vụ ở `REQUIREMENTS.md`.
 
@@ -69,12 +64,13 @@ scripts/
 
 ## §4 Data flow patterns
 
-Xem `docs/project/PATTERNS.md` (pattern lặp lại) và `docs/project/DECISIONS.md` (tách content vs progress, RLS). Không lặp lại ở đây.
+Xem `docs/project/PATTERNS.md` (pattern lặp lại) và `docs/project/DECISIONS.md` (deck ownership, RLS, SRS). Không lặp lại ở đây.
 
-Hướng đã chốt:
+Hướng đã chốt (2026-09-14):
 
-- Content (`units`, `vocab_items`, `exercises`): authenticated SELECT; ghi chỉ service role
-- Progress (`user_vocab_progress`, `quiz_attempts`, `user_unit_progress`): RLS `user_id = auth.uid()`
+- `decks`: SELECT nếu `visibility = 'public'` hoặc `owner_id = auth.uid()`; INSERT/UPDATE/DELETE chỉ owner
+- `vocab_items`: SELECT theo quyền SELECT của deck cha; INSERT/UPDATE/DELETE chỉ owner deck (client upload được)
+- `user_vocab_progress`: RLS own-rows `user_id = auth.uid()` — không đổi cấu trúc cột
 
 ---
 
@@ -92,10 +88,6 @@ Hướng đã chốt:
 ## §6 Store/API index
 
 - `src/lib/supabase.ts`: `export const supabase` — Supabase client dùng chung toàn app; khởi tạo từ `VITE_SUPABASE_URL` + `VITE_SUPABASE_ANON_KEY`
-- Fetch units: `supabase.from('units').select('*').order('book_code', { ascending: true }).order('unit_number', { ascending: true })` — `UnitListPage`
-- Fetch unit detail: `Promise.all` — `units` `.eq('id', unitId).single()` + `vocab_items` / `exercises` `.eq('unit_id', unitId).order('created_at')` + `user_vocab_progress.select('vocab_item_id').eq('user_id', currentUserId)` (bỏ qua nếu `getUser()` không có user) — `UnitDetailPage`
-- Mark unknown vocab: `insert` `{ user_id, vocab_item_id }` vào `user_vocab_progress` (SRS fields dùng default DB). Unique `(user_id, vocab_item_id)`: lỗi `23505` / duplicate key coi như thành công, thêm id vào `markedVocabIds`. Lỗi khác hiện gần nút. — `UnitDetailPage`
-- Unmark vocab: `delete` `user_vocab_progress` `.eq('user_id').eq('vocab_item_id')`; thành công thì bỏ id khỏi `markedVocabIds`. Cần policy DELETE own rows (migration `006`). — `UnitDetailPage`
-- Seed content: `npm run seed` → `scripts/seed-units.ts` — client service role (`SUPABASE_SERVICE_ROLE_KEY` + `VITE_SUPABASE_URL` từ `.env`), không dùng `src/lib/supabase.ts`. JSON `notes` trên exercise → cột `authoring_notes`. `correct_answer: null` insert nguyên (cột nullable). `metadata` không insert. Apply migration `005` trước khi seed.
-- SRS queue: `user_vocab_progress.select('..., vocab_items(*)').eq('user_id').lte('due_date', todayLocalIsoDate())` — `ReviewPage`
+- SRS queue mix: `user_vocab_progress.select('..., vocab_items(*)').eq('user_id').lte('due_date', todayLocalIsoDate())` — không join `decks` — `ReviewPage` `/review`
+- SRS queue 1 deck: cùng query + `vocab_items!inner(*)` + `.eq('vocab_items.deck_id', deckId)` — `ReviewPage` `/review/:deckId`
 - SRS update: khi từ trả hết nợ (đúng lần cuối), `computeNextReview` rồi `update` ease/interval/due_date/review_count/last_reviewed_at. Sai chỉ đẩy lại cuối queue, không ghi DB. — `src/lib/srs.ts` + `ReviewPage`

@@ -27,7 +27,7 @@ Lỗi / sai lệch đã biết. Đánh số từ **KI-001**. Entry mới ở đ�
 ## KI-002 — Ý tưởng mở rộng SRS: chèn ngẫu nhiên ~20% từ "đã thuộc lâu" vào hàng đợi ôn tập
 
 **Mức độ:** Enhancement (không phải bug — ý tưởng mở rộng, chưa implement)  
-**File liên quan:** Logic hàng đợi SRS (T1.5, chưa build), bảng `user_vocab_progress`
+**File liên quan:** `src/pages/ReviewPage.tsx`, bảng `user_vocab_progress`
 
 **Bối cảnh / vấn đề gốc:** Thuật toán SM-2 rút gọn đã chốt (xem `DECISIONS.md` entry "Thuật toán SRS...") chỉ đưa từ vào hàng đợi ôn khi `due_date <= hôm nay`. Với từ đã ôn đúng nhiều lần liên tiếp, interval tăng theo cấp số nhân (vd sau 3 lần nhớ dễ liên tục, interval có thể nhảy lên ~11 ngày, sau đó ~40 ngày...) — nghĩa là từ "đã thuộc lâu" gần như biến mất khỏi tầm mắt user trong nhiều tuần.
 
@@ -45,6 +45,8 @@ Lỗi / sai lệch đã biết. Đánh số từ **KI-001**. Entry mới ở đ�
    - Nếu áp dụng y hệt công thức "Quên" (reset interval, `due_date` = mai) → phá vỡ toàn bộ lịch `due_date` đã tính cho từ đó, coi như hạ cấp 1 từ đang mature xuống mức mới học lại — có hợp lý không?
    - Nếu **không** cập nhật gì (chỉ để user luyện tập, không ảnh hưởng `due_date`) → vậy mục đích "phát hiện ảo tưởng đã thuộc" của ý tưởng gốc không đạt được, vì DB vẫn nghĩ từ đó ổn
    - Cần 1 quyết định rõ ràng trước khi code, chưa có câu trả lời ở thời điểm ghi issue này
+
+**Cập nhật 2026-09-14 (schema deck-based, wipe):** Hàng đợi ReviewPage giờ có 2 chế độ — mix tất cả due của user, hoặc lọc due theo 1 `deck_id`. Vẫn **chỉ** lấy `due_date <= hôm nay`; chưa chèn ngẫu nhiên thẻ mature. Thuật toán SM-2 không đổi. Issue vẫn mở.
 
 **Trạng thái:** Open — ý tưởng đã ghi nhận, **không** đưa vào T1.5 (MVP). Cần bàn kỹ và chốt DECISIONS riêng trước khi implement, dự kiến sau khi core SRS (T1.5) đã chạy ổn định với data thật.
 
