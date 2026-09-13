@@ -4,6 +4,16 @@ Nhật ký thay đổi có ý nghĩa. Entry mới ở **đầu file** (sau tiêu
 
 ---
 
+## Archive REQUIREMENTS v1 + viết REQUIREMENTS v2 (deck-based)
+**Ngày:** 2026-09-14
+**Trạng thái:** Done
+
+**Đã làm:**
+- Đổi tên REQUIREMENTS.md → REQUIREMENTS_v1_book_based.md + note archived
+- Viết REQUIREMENTS.md mới: deck-based, chỉ Level 1, tái dùng srs.ts
+
+---
+
 ## Fix: MCQ fallback khi thiếu từ nhiễu trong ReviewPage
 **Ngày:** 2026-09-08
 **Trạng thái:** Done
