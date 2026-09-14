@@ -79,6 +79,8 @@ Tầng 2 (khi 1 từ trả hết nợ trong session, ghi DB đúng 1 lần): đ�
 
 ## `exercises.correct_answer` cho phép NULL
 
+**[SUPERSEDED bởi migration 007, 2026-09-14]** — quyết định này không còn áp dụng, xem entry 2026-09-14 deck-based.
+
 **Ngày:** 2026-09-08
 **Quyết định:** Bỏ NOT NULL trên cột `exercises.correct_answer`.
 null có ý nghĩa thật: bài không có đáp án cố định (`free_practice`,
@@ -100,6 +102,8 @@ logic chấm bài tương lai (T1.6) sẽ cần check null trước khi chấm.
 ---
 
 ## Thêm cột `exercises.source_harjoitus` + `exercises.authoring_notes`
+
+**[SUPERSEDED bởi migration 007, 2026-09-14]** — quyết định này không còn áp dụng, xem entry 2026-09-14 deck-based.
 
 **Ngày:** 2026-09-08
 **Quyết định:** Thêm 2 cột nullable vào bảng `exercises`:
@@ -143,6 +147,8 @@ nội bộ/authoring, không phải nội dung học).
 
 ## Mở rộng enum `exercises.type`: thêm `dialogue`, `reading_passage` (lưu nguyên văn bài khoá)
 
+**[SUPERSEDED bởi migration 007, 2026-09-14]** — quyết định này không còn áp dụng, xem entry 2026-09-14 deck-based.
+
 **Ngày:** 2026-09-07  
 **Quyết định:** Mở rộng core set `exercises.type` từ 17 lên 19, thêm `dialogue` (hội thoại có speaker) và `reading_passage` (văn xuôi không phân vai). Cả 2 dùng `correct_answer` để lưu cấu trúc `{lines: [{speaker, text}]}`. Áp dụng hồi tố cho Unit 1 đã full-extract trước đó (bổ sung thêm, không sửa nội dung cũ) và cho Unit 2 đang full-extract.
 
@@ -172,6 +178,8 @@ nội bộ/authoring, không phải nội dung học).
 
 ## Schema `units`: `book_code` + `unit_number` độc lập theo từng cuốn
 
+**[SUPERSEDED bởi migration 007, 2026-09-14]** — quyết định này không còn áp dụng, xem entry 2026-09-14 deck-based.
+
 **Ngày:** 2026-09-02  
 **Quyết định:** Bảng `units` có cột `book_code` (text, ví dụ `'suomen_mestari_2'`) tách biệt với `unit_number` (int). `unit_number` là số thứ tự **độc lập theo từng cuốn** — Kappale 1 của Suomen Mestari 2 và Kappale 1 của Suomen Mestari 1 (nếu retro-fit sau) đều có thể là `unit_number = 1`, không tiếp nối số thứ tự giữa các cuốn. Unique phải là composite (`book_code`, `unit_number`), không unique toàn cục trên `unit_number`.
 
@@ -185,6 +193,8 @@ nội bộ/authoring, không phải nội dung học).
 ---
 
 ## Core set `exercises.type` + cột `scene_description` cho bài phụ thuộc tranh
+
+**[SUPERSEDED bởi migration 007, 2026-09-14]** — quyết định này không còn áp dụng, xem entry 2026-09-14 deck-based.
 
 **Ngày:** 2026-09-02  
 **Quyết định:** Chốt enum `exercises.type` thành core set 17 type sau scan cấu trúc 3 unit đầu Suomen Mestari 2 (Kappale 1–3). Coi là bộ lõi — mở rộng dần khi full-extract unit sau phát hiện pattern lặp lại, không quét thêm unit chỉ để “hội tụ” enum cho đủ. Thêm cột `exercises.scene_description` (text, nullable), tách khỏi `prompt`, cho bài tập mà đề gốc phụ thuộc hoàn toàn vào tranh vẽ. Claude mô tả cảnh khách quan lúc authoring (người/vật/hành động quan sát được), không diễn giải ý định hay đáp án. UI hiện khung riêng; styling để ngỏ lúc scaffold.
@@ -201,6 +211,8 @@ nội bộ/authoring, không phải nội dung học).
 ---
 
 ## Chung lịch trình unit, chỉ ôn tập (SRS) là riêng từng người
+
+**[SUPERSEDED bởi migration 007, 2026-09-14]** — quyết định này không còn áp dụng, xem entry 2026-09-14 deck-based.
 
 **Ngày:** 2026-09-01  
 **Quyết định:** Tất cả user thấy cùng một danh sách unit. Không khoá/mở unit theo tốc độ của người khác. Chỉ hàng đợi ôn từ vựng (SRS) mỗi ngày khác nhau theo lịch sử nhớ/quên. Vẫn track `user_unit_progress` cho thống kê cá nhân, nhưng không dùng để khoá quyền truy cập unit tiếp theo.
@@ -282,6 +294,8 @@ nội bộ/authoring, không phải nội dung học).
 ---
 
 ## Tách data dùng chung và theo từng user
+
+**[SUPERSEDED bởi migration 007, 2026-09-14]** — quyết định này không còn áp dụng, xem entry 2026-09-14 deck-based.
 
 **Ngày:** 2026-09-01  
 **Quyết định:** Content (`units`, `vocab_items`, `exercises`) dùng chung, chỉ ghi qua service role. Progress (`user_vocab_progress`, `quiz_attempts`, `user_unit_progress`) theo user, RLS `user_id = auth.uid()`.

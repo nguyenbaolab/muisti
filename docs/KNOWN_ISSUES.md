@@ -9,7 +9,7 @@ Lỗi / sai lệch đã biết. Đánh số từ **KI-001**. Entry mới ở đ�
 - **Mô tả:**
 - **Cách tái hiện:**
 - **Hướng fix:**
-- **Trạng thái:** Open / Partial / Resolved
+- **Trạng thái:** Open / Partial / Resolved / Closed
 
 ---
 
@@ -20,7 +20,7 @@ Lỗi / sai lệch đã biết. Đánh số từ **KI-001**. Entry mới ở đ�
 **Mô tả:** Nhiều exercise (đặc biệt `type=reference_table`) có `prompt` chứa markdown (bảng, heading, list) nhưng UnitDetailPage hiện bằng `<p>{exercise.prompt}</p>` — render như text thô, không xuống dòng, không có bảng. Khó đọc, đặc biệt với `reference_table` có bảng chia động từ dài. Không chặn chức năng (đánh dấu từ / F-04 vẫn hoạt động); chỉ ảnh hưởng UX đọc nội dung bài tập / bảng tham khảo.  
 **Cách tái hiện:** 2026-09-08, test T1.3/T1.4 với data thật Unit 1 — mở unit, xem exercise `reference_table`.  
 **Hướng fix:** Thêm markdown renderer (vd `react-markdown`) cho `prompt` + phần text trong `correct_answer` / `options` khi hiện exercises. Làm sau khi hoàn tất styling pass (theo `PLAN_1.md`, styling để ngỏ lúc scaffold, làm khi xong tính năng MVP).  
-**Trạng thái:** Open
+**Trạng thái:** Closed — page/bảng liên quan (`UnitDetailPage`, `exercises`) đã bị xóa trong migration 007 (deck-based), không còn tái hiện được.
 
 ---
 
@@ -46,9 +46,9 @@ Lỗi / sai lệch đã biết. Đánh số từ **KI-001**. Entry mới ở đ�
    - Nếu **không** cập nhật gì (chỉ để user luyện tập, không ảnh hưởng `due_date`) → vậy mục đích "phát hiện ảo tưởng đã thuộc" của ý tưởng gốc không đạt được, vì DB vẫn nghĩ từ đó ổn
    - Cần 1 quyết định rõ ràng trước khi code, chưa có câu trả lời ở thời điểm ghi issue này
 
-**Cập nhật 2026-09-14 (schema deck-based, wipe):** Hàng đợi ReviewPage giờ có 2 chế độ — mix tất cả due của user, hoặc lọc due theo 1 `deck_id`. Vẫn **chỉ** lấy `due_date <= hôm nay`; chưa chèn ngẫu nhiên thẻ mature. Thuật toán SM-2 không đổi. Issue vẫn mở.
+**Cập nhật 2026-09-14 (schema deck-based, wipe):** Hàng đợi ReviewPage giờ có 2 chế độ — mix tất cả due của user, hoặc lọc due theo 1 `deck_id`. Vẫn **chỉ** lấy `due_date <= hôm nay`; chưa chèn ngẫu nhiên thẻ mature. Thuật toán SM-2 không đổi. Progress / data ôn cũ đã bị wipe trong migration 007 — không còn “data thật” từ T1.5 để quan sát interval dài; ý tưởng 20% mature review vẫn hợp lệ khi user ôn lại trên deck mới.
 
-**Trạng thái:** Open — ý tưởng đã ghi nhận, **không** đưa vào T1.5 (MVP). Cần bàn kỹ và chốt DECISIONS riêng trước khi implement, dự kiến sau khi core SRS (T1.5) đã chạy ổn định với data thật.
+**Trạng thái:** Open — ý tưởng đã ghi nhận, chưa implement. Cần bàn kỹ và chốt DECISIONS riêng trước khi code; làm sau khi SRS đã chạy ổn định với progress mới (sau upload deck), không còn phụ thuộc data T1.5 cũ.
 
 ---
 
@@ -59,7 +59,7 @@ Lỗi / sai lệch đã biết. Đánh số từ **KI-001**. Entry mới ở đ�
 
 **Ý tưởng (chủ dự án, 2026-09-08):** Thêm 1 chế độ học riêng, cho phép user tự upload 1 file (JSON/CSV, format tiếng Phần - nghĩa) để luyện tập/kiểm tra ngay trong session, dùng đúng cơ chế session + retry queue đã có ở F-05, nhưng **không** insert vào `user_vocab_progress` hay bất kỳ bảng nào — dữ liệu chỉ tồn tại trong bộ nhớ trình duyệt lúc đó, mất đi khi rời trang.
 
-**Lý do:** Cho phép học từ vựng ngoài phạm vi Suomen Mestari 2 (vd tự thêm từ gặp ở nơi khác) mà không cần thay đổi cấu trúc DB nội dung chính thức của Muisti.
+**Lý do:** Cho phép luyện một file từ vựng tạm (vd từ gặp ngoài các deck đã lưu) mà **không** ghi `decks` / `vocab_items` / `user_vocab_progress`. Khác với upload deck chính thức (ghi DB, RLS, sở hữu).
 
 **Vấn đề cần giải quyết trước khi implement:**
 1. Format file input: JSON hay CSV? Cấu trúc cột/field ra sao?
@@ -86,7 +86,7 @@ Lỗi / sai lệch đã biết. Đánh số từ **KI-001**. Entry mới ở đ�
 3. Nếu user pretest dở dang (thoát giữa chừng) — xử lý thế nào? Các từ đã test nên giữ kết quả hay huỷ hết (tương tự nguyên tắc session dở dang của F-05 đã chốt trong `DECISIONS.md`)?
 4. Từ pretest đúng ngay từ đầu (không thêm vào `user_vocab_progress`) — nếu user pretest lại unit đó lần 2 (vd ôn lại), có test lại từ đã pretest đúng không?
 
-**Trạng thái:** Open — ý tưởng ghi nhận, **không** đưa vào Phase 1 (MVP).
+**Trạng thái:** Closed — page/bảng liên quan (`UnitDetailPage`, unit, F-04) đã bị xóa trong migration 007 (deck-based), không còn tái hiện được.
 
 ---
 
@@ -104,7 +104,7 @@ Lỗi / sai lệch đã biết. Đánh số từ **KI-001**. Entry mới ở đ�
    - Option C: gọi API dịch tự động bên ngoài — **vi phạm** negative scope đã chốt trong `REQUIREMENTS.md` §5 ("Tra cứu trang web ngoài — dữ liệu đổi theo thời gian thực" đã bị loại khỏi v0.1)
 2. Nếu từ bôi đen là 1 dạng biến cách (declined/conjugated form) của từ gốc đã có trong `vocab_items` (vd bôi đen "kirjoitin" trong khi `vocab_items` đã có "kirjoittaa") — hệ thống không có cách nào tự nhận diện đây là cùng 1 từ, sẽ tạo duplicate
 
-**Trạng thái:** Open — ý tưởng ghi nhận, **không** đưa vào Phase 1 (MVP). Cần giải pháp UX rõ ràng cho vấn đề "từ chưa có trong DB" trước khi implement — đây không phải việc nhỏ.
+**Trạng thái:** Closed — page/bảng liên quan (`UnitDetailPage`, `exercises`) đã bị xóa trong migration 007 (deck-based), không còn tái hiện được.
 
 ---
 
@@ -113,7 +113,7 @@ Lỗi / sai lệch đã biết. Đánh số từ **KI-001**. Entry mới ở đ�
 **Mức độ:** Low (phòng ngừa, chưa phải vấn đề thật ở quy mô hiện tại)  
 **File liên quan:** `supabase/schema.sql`, bảng `user_vocab_progress`
 
-**Bối cảnh:** Từ đã đánh dấu vào `user_vocab_progress` tồn tại vĩnh viễn (không có cơ chế tự động xoá/dọn dẹp — chỉ xoá thủ công qua unmark, đã có ở F-04). Với vocab tăng dần theo mỗi unit mới, số row có thể lên tới vài nghìn/user trong dài hạn (không phải "vài trăm nghìn" theo nghĩa đen — giáo trình có giới hạn số unit/từ vựng thực tế, nhưng vẫn nên phòng ngừa).
+**Bối cảnh:** Dòng `user_vocab_progress` tồn tại cho đến khi bị xóa (không có cơ chế tự động dọn). UI unmark F-04 (trên UnitDetailPage) **không còn**. Vocab tăng khi user upload / thêm từ vào deck (public hoặc private), không còn giới hạn theo giáo trình unit. Số row có thể lên tới vài nghìn/user trong dài hạn — vẫn nên phòng ngừa.
 
 **Câu hỏi đặt ra (chủ dự án, 2026-09-08):** Số lượng từ tăng dần có cần cơ chế xoá/dọn dẹp không?
 
@@ -121,43 +121,43 @@ Lỗi / sai lệch đã biết. Đánh số từ **KI-001**. Entry mới ở đ�
 
 **Cần kiểm tra:** Bảng `user_vocab_progress` hiện có index nào ngoài PRIMARY KEY (`id`) và UNIQUE (`user_id`, `vocab_item_id`) hay chưa? Query chính của F-05 (`.eq('user_id', ...).lte('due_date', ...)`) có tận dụng được UNIQUE constraint hiện có làm index không, hay cần thêm index riêng cho (`user_id`, `due_date`)?
 
-**Trạng thái:** Open — cần audit lại schema, có thể cần 1 migration nhỏ thêm composite index (`user_id`, `due_date`) nếu chưa tối ưu. Chưa cấp bách ở quy mô data hiện tại (vài trăm từ), nên làm khi thuận tiện, không chặn Phase 1.
+**Trạng thái:** Open — cần audit lại schema, có thể cần 1 migration nhỏ thêm composite index (`user_id`, `due_date`) nếu chưa tối ưu. Chưa cấp bách khi data còn nhỏ (sau wipe 007, progress trống cho đến khi có upload deck).
 
 ---
 
 ## KI-007 — Giới hạn số từ MỚI đưa vào 1 session ôn tập (batch limit)
 
-**Mức độ:** Medium — có thể ảnh hưởng trải nghiệm thật sớm (ngay khi user đánh dấu nhiều từ cùng lúc, hoặc nếu KI-004 pretest được làm)  
+**Mức độ:** Medium — có thể ảnh hưởng trải nghiệm thật sớm (ngay khi user đưa nhiều từ mới vào ôn cùng lúc, vd upload một deck lớn)  
 **File liên quan:** `src/pages/ReviewPage.tsx` (fetch hàng đợi due)
 
-**Vấn đề (chủ dự án, 2026-09-08):** Hàng đợi SRS hiện tại (F-05) lấy **tất cả** từ có `due_date <= hôm nay`, không giới hạn số lượng. Nếu user đánh dấu 80–100 từ mới trong 1 lần (vd mới bắt đầu học 1 unit, hoặc tương lai làm KI-004 pretest cả unit), `due_date` mặc định là hôm nay cho tất cả — nghĩa là ngay session ôn tập đầu tiên đã phải xử lý 80–100 từ cùng lúc. Với retry queue (từ sai phải hỏi lại), tổng số lượt hỏi trong 1 session có thể vượt 150–200+ lượt — quá tải, dễ gây chán nản, bỏ dở giữa chừng.
+**Vấn đề (chủ dự án, 2026-09-08; cập nhật 2026-09-14):** Hàng đợi SRS lấy **tất cả** từ có `due_date <= hôm nay`, không giới hạn số lượng. Nếu user thêm 80–100 từ mới trong 1 lần (vd upload một deck), `due_date` mặc định là hôm nay cho tất cả — nghĩa là ngay session ôn đầu tiên đã phải xử lý 80–100 từ cùng lúc. Với retry queue (từ sai phải hỏi lại), tổng số lượt hỏi trong 1 session có thể vượt 150–200+ lượt — quá tải, dễ gây chán nản, bỏ dở giữa chừng.
 
 **Nghiên cứu tham khảo (2026-09-08):** Anki có khái niệm "new cards per day" — giới hạn số thẻ **mới** (chưa từng ôn) được đưa vào hàng đợi mỗi ngày, tách biệt với số lượt "review" (thẻ cũ quay lại theo lịch). Khuyến nghị phổ biến: 10–20 thẻ mới/ngày là mức bền vững; vượt quá dễ dẫn tới "review overload" tích luỹ (mỗi thẻ mới thêm vào sẽ quay lại nhiều lần trong tương lai, cộng dồn theo cấp số nhân nếu học quá nhanh). Nguồn: Anki official docs (docs.ankiweb.net/deck-options.html), cộng đồng khuyến nghị 10–20/ngày (nhiều bài viết độc lập).
 
 **Hướng xử lý dự kiến (chưa chốt, cần bàn kỹ trước khi implement):**
-1. Giới hạn số từ `review_count = 0` (chưa từng ôn lần nào) được đưa vào 1 session — vd tối đa N từ mới/ngày (N cụ thể cần bàn, tham khảo 10–20 theo Anki nhưng phải cân nhắc bối cảnh khác: Muisti là app cá nhân/nhóm nhỏ học theo giáo trình cố định, không phải deck tự do như Anki)
+1. Giới hạn số từ `review_count = 0` (chưa từng ôn lần nào) được đưa vào 1 session — vd tối đa N từ mới/ngày (N cụ thể cần bàn, tham khảo 10–20 theo Anki). Muisti hiện **là** deck-based: user tự upload deck (public/private), không còn giáo trình unit cố định — bối cảnh gần Anki hơn hướng sách cũ.
 2. Từ mới **vượt** quá giới hạn N thì xử lý sao — vẫn hiện `due_date` = hôm nay trong DB (để sau này tự nhiên due) nhưng **không** đưa vào session hôm nay? Hay dời `due_date` của phần dư sang ngày mai/các ngày sau (dàn đều ra)?
 3. Từ `review_count > 0` (đã ôn ít nhất 1 lần, đang quay lại theo lịch SRS bình thường) — có tính vào giới hạn N không, hay chỉ áp dụng riêng cho từ hoàn toàn mới?
 4. Cần UI thông báo rõ cho user khi có từ due nhưng bị hoãn do giới hạn batch (vd "Còn 45 từ mới sẽ xuất hiện trong các ngày tới")
 
-**Trạng thái:** Open — vấn đề thật, cần giải quyết trước khi KI-004 (pretest cả unit) khả thi, vì pretest sẽ tạo chính xác tình huống 80–100+ từ mới cùng lúc. Ưu tiên bàn kỹ + chốt DECISIONS trước khi implement, có thể cần làm **sớm hơn** KI-001/002/003/004/005 vì ảnh hưởng trực tiếp đến F-05 đã có.
+**Trạng thái:** Open — vấn đề thật, dễ gặp ngay khi upload deck lớn (mọi từ mới due hôm nay). Ưu tiên bàn kỹ + chốt DECISIONS trước khi implement; ảnh hưởng trực tiếp ReviewPage / SRS.
 
 ---
 
 ## KI-008 — Hiệu năng lấy nhiễu MCQ khi `vocab_items` lớn dần (khác KI-006)
 
-**Mức độ:** Low (phòng ngừa, chưa phải vấn đề thật ở quy mô hiện tại ~377 từ)  
+**Mức độ:** Low (phòng ngừa; sau wipe 007 pool không còn cố định ~377 từ giáo trình)  
 **File liên quan:** `src/pages/ReviewPage.tsx` (hàm `pickMcqOptions` + đoạn fetch pool truyền vào)
 
 **Lưu ý phân biệt với KI-006:** KI-006 nói về index cho query hàng đợi SRS (`user_vocab_progress.due_date`). Entry này nói về vấn đề khác — cách lấy dữ liệu **nhiễu** cho MCQ trong `ReviewPage`.
 
-**Bối cảnh:** `pickMcqOptions` nhận vào 1 pool (mảng string `finnish_word`) và random chọn 3 từ làm nhiễu. Pool này hiện được tạo bằng cách fetch **mọi row** `vocab_items` về phía client (chỉ cột `finnish_word`, không `SELECT *`), rồi random bằng JavaScript (`shuffle`) — **không** random ở phía database.
+**Bối cảnh:** `pickMcqOptions` nhận vào 1 pool (mảng string `finnish_word`) và random chọn 3 từ làm nhiễu. Pool này hiện được tạo bằng cách fetch `finnish_word` từ `vocab_items` về phía client (RLS: deck public + deck của user; ôn 1 deck thì filter theo `deck_id`), rồi random bằng JavaScript (`shuffle`) — **không** random ở phía database. Không còn mốc cố định 377 từ SM2.
 
-**Vấn đề khi data lớn dần:** Cách "tải hết cột `finnish_word` về client rồi random" chấp nhận được ở quy mô hiện tại (377 từ) nhưng sẽ chậm dần nếu `vocab_items` tăng lên rất lớn (hàng chục nghìn, trăm nghìn từ) — tốn băng thông mạng và bộ nhớ trình duyệt mỗi lần vào `ReviewPage` / bấm bắt đầu ôn, dù chỉ cần đúng 3 từ ngẫu nhiên trong số đó.
+**Vấn đề khi data lớn dần:** Cách "tải hết cột `finnish_word` về client rồi random" chấp nhận được khi user mới thấy ít từ, nhưng sẽ chậm dần nếu `vocab_items` tăng lên rất lớn (hàng chục nghìn, trăm nghìn từ trên các deck user được SELECT) — tốn băng thông mạng và bộ nhớ trình duyệt mỗi lần vào `ReviewPage` / bấm bắt đầu ôn, dù chỉ cần đúng 3 từ ngẫu nhiên trong số đó.
 
-**Hướng xử lý dự kiến (chưa chốt, chưa cấp bách):** Đổi sang random ở phía database thay vì tải hết về client — ví dụ dùng RPC/SQL function kiểu `ORDER BY random() LIMIT 3` (loại trừ đáp án đúng) qua Supabase, thay vì `select('finnish_word')` toàn bảng rồi shuffle trong JS. Cần đánh giá lại nếu/khi vocab thực tế tăng đáng kể so với quy mô giáo trình hiện tại.
+**Hướng xử lý dự kiến (chưa chốt, chưa cấp bách):** Đổi sang random ở phía database thay vì tải hết về client — ví dụ dùng RPC/SQL function kiểu `ORDER BY random() LIMIT 3` (loại trừ đáp án đúng) qua Supabase, thay vì `select('finnish_word')` rồi shuffle trong JS. Cần đánh giá lại nếu/khi vocab user thấy tăng đáng kể.
 
-**Trạng thái:** Open — không cấp bách, không chặn Phase 1. Ghi nhận để theo dõi khi `vocab_items` tăng lớn hơn nhiều so với ~377 từ hiện tại.
+**Trạng thái:** Open — không cấp bách. Ghi nhận để theo dõi khi pool MCQ (theo deck user đang thấy) lớn hơn nhiều so với vài trăm từ.
 
 ---
 

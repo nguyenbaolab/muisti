@@ -13,7 +13,7 @@ Trước khi làm bất cứ việc gì, đọc theo thứ tự:
 
 ## Project
 
-Web app học tiếng Phần Lan (Suomen Mestari 2, có thể mở rộng SM1 sau). Nội dung unit dùng chung; SRS / tiến độ ôn tập riêng từng người. Invite-only.
+Web app học từ vựng tiếng Phần Lan theo deck do người dùng upload (public hoặc private). SRS / tiến độ ôn tập riêng từng người. Invite-only.
 
 Phân công: Claude thiết kế và viết prompt từng bước. Cursor thực thi code/data theo prompt đó. Không tự ý đổi kiến trúc đã chốt trong `docs/project/DECISIONS.md` nếu chưa được chủ dự án xác nhận.
 
@@ -30,7 +30,11 @@ Phân công: Claude thiết kế và viết prompt từng bước. Cursor thực
 - Trao đổi với chủ dự án qua Claude: tiếng Việt, giọng thân mật (mình / bạn)
 - `npx tsc --noEmit` phải pass trước khi báo done
 - Mọi bảng có `user_id` phải bật RLS, policy giới hạn theo `auth.uid()`
-- Bảng content (`units` / `vocab_items` / `exercises`): client authenticated chỉ SELECT; ghi chỉ qua service role
+- RLS hiện tại (sau migration 007, deck-based):
+  - `decks`: SELECT nếu `visibility = 'public'` hoặc `owner_id = auth.uid()`; INSERT/UPDATE/DELETE chỉ owner (`owner_id = auth.uid()`)
+  - `vocab_items`: SELECT theo quyền SELECT của deck cha (public hoặc owner); INSERT/UPDATE/DELETE chỉ khi là owner của deck chứa nó
+  - `user_vocab_progress`: SELECT/INSERT/UPDATE/DELETE chỉ trên dòng của chính user (`user_id = auth.uid()`)
+- Owner ghi deck + vocab trực tiếp từ client qua RLS — không còn "content dùng chung, ghi chỉ service role"
 - WORKLOG: entry mới ở **đầu file** (sau tiêu đề)
 - Khi bí → ghi `docs/BLOCKERS.md`, dừng, hỏi user
 

@@ -1,6 +1,6 @@
 # Muisti
 
-Web app học tiếng Phần Lan theo giáo trình Suomen Mestari 2 (có thể mở rộng thêm Suomen Mestari 1 trong tương lai). Nội dung bài học dùng chung; ôn tập từ vựng (SRS) riêng từng người. Invite-only, không đăng ký công khai.
+Web app học từ vựng tiếng Phần Lan theo deck do người dùng tự upload (public hoặc private). Dùng thuật toán SRS (SM-2 rút gọn) để ôn tập; tiến độ ôn riêng từng người. Invite-only, không đăng ký công khai.
 
 ## Docs
 

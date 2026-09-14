@@ -1,5 +1,7 @@
 # PLAN — Phase 1: Nền tảng + MVP học unit
 
+> **LỊCH SỬ:** Plan này mô tả Phase 1 theo hướng unit-based (Suomen Mestari 2), đã dừng lại và đổi hướng sang deck-based ở migration 007 (2026-09-14). Xem REQUIREMENTS.md hiện hành cho scope mới.
+
 **Trạng thái phase:** In Progress  
 **Version mục tiêu:** v0.1
 
