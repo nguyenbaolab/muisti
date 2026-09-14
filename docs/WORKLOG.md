@@ -4,6 +4,23 @@ Nhật ký thay đổi có ý nghĩa. Entry mới ở **đầu file** (sau tiêu
 
 ---
 
+## Upload deck: parser + /decks + /decks/new
+**Ngày:** 2026-09-14
+**Trạng thái:** Done
+
+**Đã làm:**
+- `src/lib/deckParser.ts`: parse `từ;nghĩa`, max 500 dòng, lỗi dòng trống / thiếu `;` / vế rỗng / trùng (case-insensitive)
+- `DecksPage`: list own+public, count từ, badge visibility, xóa owner (confirm + CASCADE), click → `/review/:deckId`
+- `CreateDeckPage`: form + FileReader + preview + Lưu (disabled nếu lỗi / 0 từ / tên trống); `owner_id` truyền tường minh
+- Route `/decks/new` trong auth gate; AppShell đã có link Decks
+- KI-009: upload không tạo progress → ôn trống
+- KI-010: newline cuối file → dòng trống → chặn Lưu
+- `npx tsc --noEmit`
+
+**Phụ thuộc tiếp theo:** Chốt cách đưa từ mới vào hàng đợi SRS (KI-009)
+
+---
+
 ## Fix 007: DROP tường minh child→parent (re-run an toàn)
 **Ngày:** 2026-09-14
 **Trạng thái:** Done (file sẵn — chưa apply lại trên Dashboard)

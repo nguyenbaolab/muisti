@@ -4,6 +4,7 @@ import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { supabase } from './lib/supabase'
 import { AppShell } from './pages/AppShell'
 import { DecksPage } from './pages/DecksPage'
+import { CreateDeckPage } from './pages/CreateDeckPage'
 import { LoginPage } from './pages/LoginPage'
 import { ReviewPage } from './pages/ReviewPage'
 
@@ -41,6 +42,7 @@ function AuthRoutes() {
     return (
       <Routes>
         <Route path="/" element={<AppShell />} />
+        <Route path="/decks/new" element={<CreateDeckPage />} />
         <Route path="/decks" element={<DecksPage />} />
         <Route path="/review" element={<ReviewPage />} />
         <Route path="/review/:deckId" element={<ReviewPage />} />

@@ -27,10 +27,12 @@ src/
   lib/
     supabase.ts         # Supabase client (createClient, requireEnv guard)
     srs.ts              # classifyAttempt + computeNextReview (SM-2 rút gọn)
+    deckParser.ts       # parseDeckFile — split `;`, trim, max 500 dòng
   pages/
     LoginPage.tsx       # email/password — signInWithPassword, không sign-up
     AppShell.tsx        # sau login + Link /decks + /review + Đăng xuất
-    DecksPage.tsx       # placeholder — chưa có UI decks thật
+    DecksPage.tsx       # danh sách decks (own + public), xóa owner, link ôn
+    CreateDeckPage.tsx  # /decks/new — form + parse file + preview + lưu
     ReviewPage.tsx      # ôn SRS: mix (/review) hoặc 1 deck (/review/:deckId)
   types/
     database.ts         # Deck, VocabItem, UserVocabProgress, ReviewQueueItem
@@ -54,7 +56,8 @@ supabase/
 
 - `/login` — `LoginPage` khi chưa có session; đã login thì redirect `/`
 - `/` — `AppShell` khi có session; chưa login thì redirect `/login`
-- `/decks` — `DecksPage` placeholder khi có session; guest → `/login`
+- `/decks` — `DecksPage` khi có session; guest → `/login`
+- `/decks/new` — `CreateDeckPage` khi có session; guest → `/login`
 - `/review` — `ReviewPage` mix tất cả từ due của user; guest → `/login`
 - `/review/:deckId` — `ReviewPage` chỉ từ due thuộc deck đó (chuẩn bị cho UI chọn deck)
 - Session: `getSession` + `onAuthStateChange` trong `App.tsx`; lần đầu hiện `Loading...`
@@ -88,6 +91,10 @@ Hướng đã chốt (2026-09-14):
 ## §6 Store/API index
 
 - `src/lib/supabase.ts`: `export const supabase` — Supabase client dùng chung toàn app; khởi tạo từ `VITE_SUPABASE_URL` + `VITE_SUPABASE_ANON_KEY`
+- Parse deck file: `parseDeckFile(content)` — `src/lib/deckParser.ts`
+- List decks: `decks.select('*, vocab_items(count)')` — RLS lọc own + public — `DecksPage`
+- Create deck: `decks.insert({ owner_id, name, meaning_language, description, visibility }).select('id').single()` rồi `vocab_items.insert([...])` — `CreateDeckPage` (`owner_id` không có DEFAULT trên schema, phải truyền `user.id`)
+- Delete deck: `decks.delete().eq('id')` — CASCADE vocab + progress — `DecksPage`
 - SRS queue mix: `user_vocab_progress.select('..., vocab_items(*)').eq('user_id').lte('due_date', todayLocalIsoDate())` — không join `decks` — `ReviewPage` `/review`
 - SRS queue 1 deck: cùng query + `vocab_items!inner(*)` + `.eq('vocab_items.deck_id', deckId)` — `ReviewPage` `/review/:deckId`
 - SRS update: khi từ trả hết nợ (đúng lần cuối), `computeNextReview` rồi `update` ease/interval/due_date/review_count/last_reviewed_at. Sai chỉ đẩy lại cuối queue, không ghi DB. — `src/lib/srs.ts` + `ReviewPage`

@@ -23,11 +23,14 @@ Khai thác nội dung SM2 sâu hơn (bài tập ngữ pháp, vận dụng) là m
 
 ## 3. Concept cốt lõi: Deck
 
+**Trạng thái:** Done (upload + danh sách + xóa — 2026-09-14)
+
 - **Deck** = một bộ từ vựng người dùng upload, độc lập với “unit sách”.
-- Metadata: tên deck (bắt buộc); ngôn ngữ nghĩa — Anh hoặc Việt (bắt buộc); mô tả ngắn (optional).
-- Input: file `.txt` / `.csv`, mỗi dòng `từ_phần_lan;nghĩa`. Parse thuần code (`split` theo `;`, `trim`) — **không** dùng AI.
-- Sau parse: preview để user xác nhận/sửa trước khi lưu DB (tránh data bẩn như F-06).
+- Metadata: tên deck (bắt buộc); ngôn ngữ nghĩa — Anh hoặc Việt (bắt buộc); mô tả ngắn (optional); visibility public/private (default private).
+- Input: file `.txt` / `.csv`, mỗi dòng `từ_phần_lan;nghĩa`. Parse thuần code (`src/lib/deckParser.ts`) — **không** dùng AI. Tối đa 500 dòng; dòng lỗi chặn lưu.
+- Sau parse: preview xác nhận (bảng từ hợp lệ + bảng lỗi). **Không** sửa từng dòng trong preview ở slice này — file phải sạch mới Lưu được.
 - Cùng mặt chữ ở hai deck = hai `vocab_items` độc lập, hai dòng `user_vocab_progress` độc lập — không gộp, không chặn trùng.
+- UI: `/decks` danh sách (own + public); `/decks/new` tạo; xóa deck (owner) CASCADE vocab + progress; click deck → `/review/:deckId`.
 
 ---
 

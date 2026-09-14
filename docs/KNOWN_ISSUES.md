@@ -13,6 +13,36 @@ Lỗi / sai lệch đã biết. Đánh số từ **KI-001**. Entry mới ở đ�
 
 ---
 
+## KI-010 — Dòng trống cuối file (newline) chặn Lưu
+
+**Mức độ:** Low  
+**File liên quan:** `src/lib/deckParser.ts`, `src/pages/CreateDeckPage.tsx`
+
+**Mô tả:** Spec parse: mọi dòng trống là lỗi "Dòng trống", và bất kỳ lỗi nào thì disable Lưu. Nhiều editor/OS thêm newline cuối file → `split` ra 1 dòng rỗng cuối → 1 lỗi dù toàn bộ từ đều hợp lệ. Đã xác nhận lúc test upload.
+
+**Cách tái hiện:** File `kissa;mèo\\nkoira;chó\\n` (có newline sau dòng cuối) → preview "N lỗi" gồm dòng trống, nút Lưu disabled.
+
+**Hướng fix:** Có thể bỏ qua đúng 1 trailing empty line, hoặc cho Lưu khi chỉ còn lỗi dòng trống cuối. Cần chốt vì khác spec hiện tại ("dòng trống = lỗi").
+
+**Trạng thái:** Open
+
+---
+
+## KI-009 — Upload deck không tạo `user_vocab_progress` — ôn `/review/:deckId` trống
+
+**Mức độ:** High  
+**File liên quan:** `src/pages/CreateDeckPage.tsx`, `src/pages/ReviewPage.tsx`, bảng `user_vocab_progress`
+
+**Mô tả:** Luồng tạo deck chỉ INSERT `decks` + `vocab_items`. ReviewPage chỉ lấy từ đang due trong `user_vocab_progress`. F-04 (đánh dấu từ) đã bị xóa cùng UnitDetailPage. Sau khi upload, bấm card deck → `/review/:deckId` sẽ hiện "Không có từ nào cần ôn hôm nay" dù deck có từ.
+
+**Cách tái hiện:** Tạo deck mới, lưu file hợp lệ, click deck trên `/decks`.
+
+**Hướng fix:** Cần chốt DECISIONS: tự insert progress khi upload (mọi từ due hôm nay — đụng KI-007 batch limit), hay UI "đưa vào ôn" / đánh dấu lại, hay pretest (KI-004 đã đóng theo unit). Không làm trong task upload này (không đụng ReviewPage).
+
+**Trạng thái:** Open
+
+---
+
 ## KI-001 — UnitDetailPage hiện `exercises.prompt` / `correct_answer` dạng markdown thô, chưa render
 
 **Mức độ:** Low  
