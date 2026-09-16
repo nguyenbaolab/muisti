@@ -10,6 +10,7 @@ export function CreateDeckPage() {
   const [meaningLanguage, setMeaningLanguage] = useState<Deck['meaning_language']>('vi')
   const [description, setDescription] = useState('')
   const [visibility, setVisibility] = useState<Deck['visibility']>('private')
+  const [activePoolSize, setActivePoolSize] = useState(20)
   const [validLines, setValidLines] = useState<ValidLine[]>([])
   const [errors, setErrors] = useState<ParseError[]>([])
   const [fileName, setFileName] = useState<string | null>(null)
@@ -17,8 +18,15 @@ export function CreateDeckPage() {
   const [saving, setSaving] = useState(false)
   const [saveError, setSaveError] = useState<string | null>(null)
 
+  const poolSizeValid =
+    Number.isInteger(activePoolSize) && activePoolSize >= 10 && activePoolSize <= 30
+
   const canSave =
-    errors.length === 0 && validLines.length > 0 && name.trim() !== '' && !saving
+    errors.length === 0 &&
+    validLines.length > 0 &&
+    name.trim() !== '' &&
+    poolSizeValid &&
+    !saving
 
   function handleFileChange(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0]
@@ -73,6 +81,7 @@ export function CreateDeckPage() {
         meaning_language: meaningLanguage,
         description: trimmedDescription === '' ? null : trimmedDescription,
         visibility,
+        active_pool_size: activePoolSize,
       })
       .select('id')
       .single()
@@ -166,6 +175,26 @@ export function CreateDeckPage() {
             public
           </label>
         </fieldset>
+
+        <label style={{ display: 'block', marginBottom: 12 }}>
+          Số từ học cùng lúc
+          <input
+            type="number"
+            min={10}
+            max={30}
+            step={1}
+            value={activePoolSize}
+            onChange={(e) => setActivePoolSize(Number(e.target.value))}
+            required
+            style={{ display: 'block', marginTop: 4 }}
+          />
+        </label>
+        <p style={{ marginTop: -8, marginBottom: 12, maxWidth: 480 }}>
+          Hệ thống tự thêm từ mới khi bạn đã học vững các từ đang ôn.
+        </p>
+        {!poolSizeValid ? (
+          <p style={{ color: 'crimson' }}>Nhập số nguyên từ 10 đến 30.</p>
+        ) : null}
 
         <label style={{ display: 'block', marginBottom: 12 }}>
           File từ vựng (.txt, .csv)

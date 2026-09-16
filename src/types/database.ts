@@ -5,6 +5,7 @@ export interface Deck {
   meaning_language: 'en' | 'vi'
   description: string | null
   visibility: 'public' | 'private'
+  active_pool_size: number
   created_at: string
 }
 

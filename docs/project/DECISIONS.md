@@ -26,7 +26,9 @@ Ghi theo thời gian, mới nhất ở trên. Mỗi entry: tên ngắn, ngày, q
 
 **Phạm vi (khi implement):** migration 008 cột `active_pool_size`; `CreateDeckPage` nhập lúc tạo; `ReviewPage` enroll trên `/review/:deckId` only. Không đụng `srs.ts` / retry queue / persist khi trả hết nợ.
 
-**Không làm gì (chưa chốt):** UI sửa `active_pool_size` sau khi tạo (modal vs `/decks/:id/edit`) — cần UX trước khi code. Không enroll trên mix. Không đóng KI-009 cho đến khi code chạy.
+**Implemented:** 2026-09-16 — migration 008 + form tạo deck + `enrollActivePool` trong `startReview`. UI sửa `active_pool_size` sau khi tạo vẫn chưa làm.
+
+**Không làm gì (chưa chốt):** UI sửa `active_pool_size` sau khi tạo (modal vs `/decks/:id/edit`) — cần UX trước khi code. Không enroll trên mix.
 
 ---
 

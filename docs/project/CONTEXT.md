@@ -33,7 +33,7 @@ src/
     AppShell.tsx        # sau login + Link /decks + /review + Đăng xuất
     DecksPage.tsx       # danh sách decks (own + public), xóa owner, link ôn
     CreateDeckPage.tsx  # /decks/new — form + parse file + preview + lưu
-    ReviewPage.tsx      # ôn SRS: mix (/review) hoặc 1 deck (/review/:deckId)
+    ReviewPage.tsx      # ôn SRS: mix (/review); /review/:deckId enroll Active Pool rồi due fetch
   types/
     database.ts         # Deck, VocabItem, UserVocabProgress, ReviewQueueItem
 public/                 # static assets
@@ -47,6 +47,7 @@ supabase/
     20260908_005_exercises_correct_answer_nullable.sql
     20260908_006_user_vocab_progress_delete_policy.sql
     20260914_007_deck_based_schema.sql   # wipe units/exercises → decks
+    20260916_008_deck_active_pool_size.sql
 .env.example            # VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY, SUPABASE_SERVICE_ROLE_KEY
 ```
 
@@ -93,8 +94,9 @@ Hướng đã chốt (2026-09-14):
 - `src/lib/supabase.ts`: `export const supabase` — Supabase client dùng chung toàn app; khởi tạo từ `VITE_SUPABASE_URL` + `VITE_SUPABASE_ANON_KEY`
 - Parse deck file: `parseDeckFile(content)` — `src/lib/deckParser.ts`
 - List decks: `decks.select('*, vocab_items(count)')` — RLS lọc own + public — `DecksPage`
-- Create deck: `decks.insert({ owner_id, name, meaning_language, description, visibility }).select('id').single()` rồi `vocab_items.insert([...])` — `CreateDeckPage` (`owner_id` không có DEFAULT trên schema, phải truyền `user.id`)
+- Create deck: `decks.insert({ owner_id, name, meaning_language, description, visibility, active_pool_size }).select('id').single()` rồi `vocab_items.insert([...])` — `CreateDeckPage` (`owner_id` không có DEFAULT; `active_pool_size` 10–30, default 20)
 - Delete deck: `decks.delete().eq('id')` — CASCADE vocab + progress — `DecksPage`
+- Active pool enroll (chỉ `/review/:deckId`): trước due fetch, `enrollActivePool` — join progress↔vocab_items, `interval_days < 30`, insert progress cho từ chưa enroll (`ease_factor`/`interval_days`/`review_count` theo DEFAULT schema 2.5/0/0, `due_date` = `todayLocalIsoDate()`). Mix `/review` không enroll.
 - SRS queue mix: `user_vocab_progress.select('..., vocab_items(*)').eq('user_id').lte('due_date', todayLocalIsoDate())` — không join `decks` — `ReviewPage` `/review`
 - SRS queue 1 deck: cùng query + `vocab_items!inner(*)` + `.eq('vocab_items.deck_id', deckId)` — `ReviewPage` `/review/:deckId`
 - SRS update: khi từ trả hết nợ (đúng lần cuối), `computeNextReview` rồi `update` ease/interval/due_date/review_count/last_reviewed_at. Sai chỉ đẩy lại cuối queue, không ghi DB. — `src/lib/srs.ts` + `ReviewPage`

@@ -37,9 +37,8 @@ Lỗi / sai lệch đã biết. Đánh số từ **KI-001**. Entry mới ở đ�
 
 **Cách tái hiện:** Tạo deck mới, lưu file hợp lệ, click deck trên `/decks`.
 
-**Hướng fix:** Đã chốt 2026-09-16 — **Active Pool Enrollment** (xem `DECISIONS.md`). Enroll progress khi mở `/review/:deckId` nếu `active_count < active_pool_size`. Chưa implement.
-
-**Trạng thái:** Open
+**Hướng fix:** Active Pool Enrollment — `enrollActivePool` trong `startReview` khi có `deckId`; cột `decks.active_pool_size` (migration 008).  
+**Trạng thái:** Open — code đã có; cần apply 008 trên Dashboard rồi verify: pool_size=10, 15 từ, session ôn đúng 10 từ. Mix `/review` không enroll.
 
 ---
 

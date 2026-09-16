@@ -1,7 +1,7 @@
 # REQUIREMENTS — Muisti (Finnish Learning App)
 
 **Phiên bản:** v0.2  
-**Cập nhật:** 2026-09-14
+**Cập nhật:** 2026-09-16
 
 ---
 
@@ -26,7 +26,8 @@ Khai thác nội dung SM2 sâu hơn (bài tập ngữ pháp, vận dụng) là m
 **Trạng thái:** Done (upload + danh sách + xóa — 2026-09-14)
 
 - **Deck** = một bộ từ vựng người dùng upload, độc lập với “unit sách”.
-- Metadata: tên deck (bắt buộc); ngôn ngữ nghĩa — Anh hoặc Việt (bắt buộc); mô tả ngắn (optional); visibility public/private (default private).
+- Metadata: tên deck (bắt buộc); ngôn ngữ nghĩa — Anh hoặc Việt (bắt buộc); mô tả ngắn (optional); visibility public/private (default private); **số từ học cùng lúc** `active_pool_size` (10–30, default 20) lúc tạo deck.
+- **Active Pool (2026-09-16):** enroll `user_vocab_progress` khi bấm ôn `/review/:deckId` nếu số từ `interval_days < 30` của user trên deck đó < `active_pool_size`. Mix `/review` không enroll. UI sửa pool size sau khi tạo: chưa có.
 - Input: file `.txt` / `.csv`, mỗi dòng `từ_phần_lan;nghĩa`. Parse thuần code (`src/lib/deckParser.ts`) — **không** dùng AI. Tối đa 500 dòng; dòng lỗi chặn lưu.
 - Sau parse: preview xác nhận (bảng từ hợp lệ + bảng lỗi). **Không** sửa từng dòng trong preview ở slice này — file phải sạch mới Lưu được.
 - Cùng mặt chữ ở hai deck = hai `vocab_items` độc lập, hai dòng `user_vocab_progress` độc lập — không gộp, không chặn trùng.

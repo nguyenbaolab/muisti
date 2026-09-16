@@ -4,6 +4,22 @@ Nhật ký thay đổi có ý nghĩa. Entry mới ở **đầu file** (sau tiêu
 
 ---
 
+## Active Pool Enrollment — 008 + form + enroll trước due fetch
+**Ngày:** 2026-09-16
+**Trạng thái:** Done (file sẵn — apply 008 trên Dashboard trước khi verify tay)
+
+**Đã làm:**
+- Migration `20260916_008_deck_active_pool_size.sql` + `schema.sql`: `decks.active_pool_size` 10–30 default 20
+- CreateDeckPage: field "Số từ học cùng lúc", validate, insert cột mới
+- ReviewPage: `enrollActivePool` chỉ khi `/review/:deckId`, trước due fetch; mix không enroll
+- Enroll defaults khớp schema: ease 2.5, interval 0, review_count 0, due = todayLocalIsoDate()
+- Không đụng srs.ts / retry / UPDATE trả hết nợ
+- `npx tsc --noEmit`
+
+**Phụ thuộc tiếp theo:** Apply 008; UI sửa pool size sau khi tạo (chưa chốt)
+
+---
+
 ## Chốt Active Pool Enrollment (KI-009) — chưa code
 **Ngày:** 2026-09-16
 **Trạng thái:** Decision recorded

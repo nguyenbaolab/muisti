@@ -68,6 +68,91 @@ function mapQueueRow(row: ProgressJoinRow): ReviewQueueItem | null {
   }
 }
 
+/** Schema defaults on user_vocab_progress: ease_factor 2.5, interval_days 0, review_count 0. */
+const ENROLL_EASE_FACTOR = 2.5
+const ENROLL_INTERVAL_DAYS = 0
+const ENROLL_REVIEW_COUNT = 0
+
+async function enrollActivePool(
+  userId: string,
+  deckId: string,
+  todayIso: string,
+): Promise<{ fatalError: string | null }> {
+  const { data: deckData, error: deckError } = await supabase
+    .from('decks')
+    .select('active_pool_size')
+    .eq('id', deckId)
+    .single()
+
+  if (deckError) {
+    return { fatalError: deckError.message }
+  }
+
+  const poolSize = deckData?.active_pool_size as number
+
+  const { data: activeRows, error: activeError } = await supabase
+    .from('user_vocab_progress')
+    .select('id, vocab_items!inner(deck_id)')
+    .eq('user_id', userId)
+    .eq('vocab_items.deck_id', deckId)
+    .lt('interval_days', 30)
+
+  if (activeError) {
+    return { fatalError: null }
+  }
+
+  const activeCount = (activeRows ?? []).length
+  const needed = poolSize - activeCount
+  if (needed <= 0) {
+    return { fatalError: null }
+  }
+
+  const { data: existingProgress, error: existingError } = await supabase
+    .from('user_vocab_progress')
+    .select('vocab_item_id, vocab_items!inner(deck_id)')
+    .eq('user_id', userId)
+    .eq('vocab_items.deck_id', deckId)
+
+  const { data: allVocabItems, error: vocabIdsError } = await supabase
+    .from('vocab_items')
+    .select('id')
+    .eq('deck_id', deckId)
+
+  if (existingError || vocabIdsError) {
+    return { fatalError: null }
+  }
+
+  const enrolled = new Set(
+    ((existingProgress ?? []) as { vocab_item_id: string }[]).map((row) => row.vocab_item_id),
+  )
+  const candidates = shuffle(
+    ((allVocabItems ?? []) as { id: string }[])
+      .map((row) => row.id)
+      .filter((id) => !enrolled.has(id)),
+  )
+  const selected = candidates.slice(0, needed)
+  if (selected.length === 0) {
+    return { fatalError: null }
+  }
+
+  const { error: insertError } = await supabase.from('user_vocab_progress').insert(
+    selected.map((vocabItemId) => ({
+      user_id: userId,
+      vocab_item_id: vocabItemId,
+      ease_factor: ENROLL_EASE_FACTOR,
+      interval_days: ENROLL_INTERVAL_DAYS,
+      due_date: todayIso,
+      review_count: ENROLL_REVIEW_COUNT,
+    })),
+  )
+
+  if (insertError) {
+    return { fatalError: null }
+  }
+
+  return { fatalError: null }
+}
+
 export function ReviewPage() {
   const { deckId } = useParams<{ deckId?: string }>()
   const scopedDeckId = deckId?.trim() || null
@@ -132,6 +217,15 @@ export function ReviewPage() {
     }
 
     const today = todayLocalIsoDate()
+
+    if (scopedDeckId) {
+      const enroll = await enrollActivePool(user.id, scopedDeckId, today)
+      if (enroll.fatalError) {
+        setError(enroll.fatalError)
+        setPageState('error')
+        return
+      }
+    }
 
     // Mix: all own due progress rows, no extra deck/visibility join.
     // Deck: due rows whose vocab belongs to that deck (inner join).

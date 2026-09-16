@@ -1,6 +1,6 @@
 -- Muisti schema — full DDL (source of truth for fresh project setup)
 -- Version: 0.2.0
--- Updated: 2026-09-14
+-- Updated: 2026-09-16
 -- Apply entire file on a fresh Supabase project.
 -- For incremental updates on existing DB, use supabase/migrations/.
 
@@ -12,6 +12,7 @@ CREATE TABLE decks (
   meaning_language text NOT NULL CHECK (meaning_language IN ('en', 'vi')),
   description text,
   visibility text NOT NULL DEFAULT 'private' CHECK (visibility IN ('public', 'private')),
+  active_pool_size integer NOT NULL DEFAULT 20 CHECK (active_pool_size BETWEEN 10 AND 30),
   created_at timestamptz NOT NULL DEFAULT now()
 );
 
