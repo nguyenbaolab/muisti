@@ -4,6 +4,48 @@ Ghi theo thời gian, mới nhất ở trên. Mỗi entry: tên ngắn, ngày, q
 
 ---
 
+## Deck public người khác: Preview + Clone, không học trực tiếp; bỏ guard public→private
+
+**Ngày:** 2026-09-16
+
+**Quyết định:** Non-owner không ôn trực tiếp trên deck public của người khác. Họ xem `/decks/:id/preview` (đọc-only danh sách từ) và **Clone** thành deck riêng rồi mới học. Deck của chính mình (public hay private) vẫn `/review/:deckId` như cũ. `/review` mix không đổi.
+
+**Clone:** deck mới `name` = gốc + ` (Copy)` (không cho sửa trước khi clone); `visibility = private`; `active_pool_size = 20` (không copy từ gốc); copy `vocab_items`; không copy `user_vocab_progress`. Insert + rollback nếu vocab lỗi — cùng pattern `CreateDeckPage`.
+
+**ReviewPage:** `startReview` khi có `scopedDeckId` fetch `owner_id`; không phải owner → error, không enroll. Mix không vào nhánh này.
+
+**Bỏ guard public→private** trong `EditDeckPage`: người học dùng bản clone độc lập, không phụ thuộc deck gốc nên owner đổi visibility tự do.
+
+**Không hồi tố:** chưa có user thật học deck public của người khác.
+
+**Implemented:** 2026-09-16 — `DeckPreviewPage`, route `/decks/:id/preview`, DecksPage link theo `owned`, ReviewPage owner check, xóa guard EditDeckPage. KI-011 Closed vì đổi kiến trúc, không phải vì sửa được guard RLS.
+
+**Phạm vi:** `DeckPreviewPage`, `DecksPage` link, `ReviewPage.startReview`, `EditDeckPage` bỏ guard, `App.tsx` route. Không đụng `CreateDeckPage` / `srs.ts`.
+
+**Không làm gì:** Không sửa tên trước clone. Không copy pool size / progress. Không xử lý data cũ.
+
+---
+
+## Sửa metadata deck tại `/decks/:id/edit`; chặn public→private nếu user khác đang học
+
+**[SUPERSEDED một phần — guard public→private, 2026-09-16]** — phần chặn public→private không còn áp dụng (xem entry Preview + Clone cùng ngày). Phần sửa 5 cột metadata / trang edit / nút Sửa vẫn còn hiệu lực.
+
+**Ngày:** 2026-09-16
+
+**Quyết định:** Owner được sửa metadata deck sau khi tạo: `name`, `meaning_language`, `description`, `visibility`, `active_pool_size` (đủ 5 cột, không chỉ 4). Trang `/decks/:id/edit`; nút Sửa cạnh Xóa trên `/decks` khi `owner_id === user.id`. Không sửa danh sách `vocab_items` (thêm/xóa/sửa từng từ) ở slice này.
+
+**Guard visibility:** Chỉ khi deck đang `public` trong DB và form đổi sang `private`: nếu có `user_vocab_progress` của user khác (không phải owner) trên từ thuộc deck → chặn submit toàn form, không lưu field nào, cho đến khi user để lại `public` hoặc hủy. Chiều private → public luôn cho phép. Hạ `active_pool_size` dưới `active_count`: cho sửa tự do (không trục xuất).
+
+**Implemented:** 2026-09-16 — `EditDeckPage` + route + nút Sửa. Guard query đúng spec (join `vocab_items!inner`, `.neq('user_id', owner)`). **Hạn chế:** RLS `user_vocab_progress` chỉ SELECT own-rows nên query này **không thấy** progress của user khác khi chạy với session owner; chặn thật sự cần RPC `SECURITY DEFINER` (chưa làm).
+
+**Lý do:** Chốt UX sửa pool size / metadata sau tạo (thay “chưa chốt modal vs edit page”). Public deck đã có người khác enroll thì không được kéo về private (mất quyền SELECT vocab).
+
+**Phạm vi:** `EditDeckPage`, `DecksPage` nút Sửa, route `/decks/:id/edit`. Không đụng `CreateDeckPage` / `ReviewPage` / `srs.ts`.
+
+**Không làm gì:** Không sửa từng từ trong deck. Không thêm RPC/bypass RLS cho guard. Không chặn hạ pool size.
+
+---
+
 ## Active Pool Enrollment: enroll progress khi mở ôn 1 deck, không lazy-create lúc trả lời
 
 **Ngày:** 2026-09-16
@@ -26,9 +68,9 @@ Ghi theo thời gian, mới nhất ở trên. Mỗi entry: tên ngắn, ngày, q
 
 **Phạm vi (khi implement):** migration 008 cột `active_pool_size`; `CreateDeckPage` nhập lúc tạo; `ReviewPage` enroll trên `/review/:deckId` only. Không đụng `srs.ts` / retry queue / persist khi trả hết nợ.
 
-**Implemented:** 2026-09-16 — migration 008 + form tạo deck + `enrollActivePool` trong `startReview`. Verify cùng ngày: 008 apply (Table Editor); pool=10 / 15 từ → enroll 10 trên `/review/:deckId`; mix `/review` không insert progress mới. UI sửa `active_pool_size` sau khi tạo vẫn chưa làm.
+**Implemented:** 2026-09-16 — migration 008 + form tạo deck + `enrollActivePool` trong `startReview`. Verify cùng ngày: 008 apply (Table Editor); pool=10 / 15 từ → enroll 10 trên `/review/:deckId`; mix `/review` không insert progress mới. UI sửa `active_pool_size` sau khi tạo: `EditDeckPage` `/decks/:id/edit` (cùng ngày).
 
-**Không làm gì (chưa chốt):** UI sửa `active_pool_size` sau khi tạo (modal vs `/decks/:id/edit`) — cần UX trước khi code. Không enroll trên mix.
+**Không làm gì:** Không enroll trên mix.
 
 ---
 

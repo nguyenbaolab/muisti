@@ -13,6 +13,21 @@ Lỗi / sai lệch đã biết. Đánh số từ **KI-001**. Entry mới ở đ�
 
 ---
 
+## KI-011 — Guard public→private không thấy progress user khác (RLS own-rows)
+
+**Mức độ:** Medium  
+**File liên quan:** `src/pages/EditDeckPage.tsx`, RLS `user_vocab_progress`
+
+**Mô tả:** Spec cũ chặn owner đổi deck `public` → `private` nếu user khác có `user_vocab_progress` trên từ của deck. Query client join `vocab_items!inner` + `.neq('user_id', owner)`. RLS `user_vocab_progress` chỉ `SELECT` dòng `user_id = auth.uid()` nên owner **không đọc được** progress người khác → query luôn rỗng → guard không bao giờ chặn.
+
+**Cách tái hiện:** Cần account thứ 2 enroll deck public rồi owner đổi sang private. Không giả lập được với 1 session owner. Public→private khi chỉ owner có progress: lưu thành công (query không lỗi).
+
+**Hướng fix:** Không còn áp dụng. 2026-09-16 đổi kiến trúc: non-owner không học trực tiếp trên deck public — Preview + Clone. Guard đã xóa khỏi `EditDeckPage`. Không sửa RLS / không thêm RPC.
+
+**Trạng thái:** Closed (2026-09-16) — đóng do đổi kiến trúc (Clone thay thế học trực tiếp), không phải do sửa được guard.
+
+---
+
 ## KI-010 — Dòng trống cuối file (newline) chặn Lưu
 
 **Mức độ:** Low  

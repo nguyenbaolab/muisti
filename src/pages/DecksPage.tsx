@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Link, useLocation } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import type { Deck } from '../types/database'
 
@@ -17,6 +17,7 @@ function languageLabel(code: Deck['meaning_language']): string {
 
 export function DecksPage() {
   const location = useLocation()
+  const navigate = useNavigate()
   const successMessage = (location.state as { success?: string } | null)?.success
 
   const [userId, setUserId] = useState<string | null>(null)
@@ -110,7 +111,10 @@ export function DecksPage() {
                   marginBottom: 12,
                 }}
               >
-                <Link to={`/review/${deck.id}`} style={{ display: 'block' }}>
+                <Link
+                  to={owned ? `/review/${deck.id}` : `/decks/${deck.id}/preview`}
+                  style={{ display: 'block' }}
+                >
                   <strong>{deck.name}</strong>
                   <span style={{ display: 'block' }}>{vocabCount(deck)} từ</span>
                   <span style={{ display: 'block' }}>
@@ -120,6 +124,9 @@ export function DecksPage() {
                 </Link>
                 {owned ? (
                   <p>
+                    <button type="button" onClick={() => navigate(`/decks/${deck.id}/edit`)}>
+                      Sửa
+                    </button>{' '}
                     <button
                       type="button"
                       disabled={deletingId === deck.id}

@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from 'react'
+import { useEffect, useState, type FormEvent } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { computeNextReview, todayLocalIsoDate } from '../lib/srs'
@@ -172,6 +172,46 @@ export function ReviewPage() {
   const [saving, setSaving] = useState(false)
   const [finnishPool, setFinnishPool] = useState<string[]>([])
 
+  useEffect(() => {
+    if (!scopedDeckId) return
+
+    let cancelled = false
+
+    async function checkOwner() {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser()
+      if (!user || cancelled) return
+
+      const { data: deckOwnerData, error: deckOwnerError } = await supabase
+        .from('decks')
+        .select('owner_id')
+        .eq('id', scopedDeckId)
+        .single()
+
+      if (cancelled) return
+
+      if (deckOwnerError || !deckOwnerData) {
+        setError('Không tìm thấy deck.')
+        setPageState('error')
+        return
+      }
+
+      if (deckOwnerData.owner_id !== user.id) {
+        setError(
+          'Đây là deck của người khác. Vào trang xem trước để Clone về deck của bạn trước khi học.',
+        )
+        setPageState('error')
+      }
+    }
+
+    void checkOwner()
+
+    return () => {
+      cancelled = true
+    }
+  }, [scopedDeckId])
+
   const enabledModes: AskMode[] = [
     ...(typeEnabled ? (['type'] as const) : []),
     ...(mcqEnabled ? (['mcq'] as const) : []),
@@ -214,6 +254,28 @@ export function ReviewPage() {
       setError('Không có phiên đăng nhập.')
       setPageState('error')
       return
+    }
+
+    if (scopedDeckId) {
+      const { data: deckOwnerData, error: deckOwnerError } = await supabase
+        .from('decks')
+        .select('owner_id')
+        .eq('id', scopedDeckId)
+        .single()
+
+      if (deckOwnerError || !deckOwnerData) {
+        setError('Không tìm thấy deck.')
+        setPageState('error')
+        return
+      }
+
+      if (deckOwnerData.owner_id !== user.id) {
+        setError(
+          'Đây là deck của người khác. Vào trang xem trước để Clone về deck của bạn trước khi học.',
+        )
+        setPageState('error')
+        return
+      }
     }
 
     const today = todayLocalIsoDate()
@@ -412,6 +474,11 @@ export function ReviewPage() {
     return (
       <main>
         <p>{error}</p>
+        {scopedDeckId ? (
+          <p>
+            <Link to={`/decks/${scopedDeckId}/preview`}>Xem trước deck</Link>
+          </p>
+        ) : null}
         <p>
           <Link to="/">← Trang chủ</Link>
         </p>

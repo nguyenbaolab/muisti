@@ -4,6 +4,54 @@ Nhật ký thay đổi có ý nghĩa. Entry mới ở **đầu file** (sau tiêu
 
 ---
 
+## ReviewPage — check owner lúc mount (UX)
+**Ngày:** 2026-09-16
+**Trạng thái:** Done
+
+**Đã làm:**
+- `useEffect` theo `scopedDeckId`: non-owner / không tìm thấy → `pageState = 'error'` ngay, không hiện màn setup
+- Giữ nguyên guard owner trong `startReview` (lớp 2)
+- Mix `/review` không đổi (`!scopedDeckId` return sớm)
+- Không đổi kiến trúc; không sửa DECISIONS/REQUIREMENTS
+
+**Phụ thuộc tiếp theo:** Verify non-owner URL vẫn cần account thứ 2 nếu chưa có sẵn
+
+---
+
+## Preview + Clone — không học trực tiếp deck public người khác
+**Ngày:** 2026-09-16
+**Trạng thái:** Done
+
+**Đã làm:**
+- Xóa guard public→private trong `EditDeckPage` (kèm `originalVisibility` vì `noUnusedLocals`)
+- `ReviewPage.startReview`: khi `scopedDeckId`, fetch `owner_id`; non-owner → error, không enroll; mix không đổi
+- `DeckPreviewPage` `/decks/:id/preview`: đọc-only; Clone pattern CreateDeckPage; `(Copy)`, private, pool 20; không copy progress
+- `DecksPage`: own → `/review/:id`, không phải mình → `/preview`
+- Route `/decks/:id/preview`; đóng KI-011 vì đổi kiến trúc
+- `npx tsc --noEmit` pass
+
+**Phụ thuộc tiếp theo:** Verify Clone + URL `/review/:id` non-owner cần account thứ 2 (không có trên session hiện tại)
+
+---
+
+## EditDeckPage — sửa metadata deck `/decks/:id/edit`
+**Ngày:** 2026-09-16
+**Trạng thái:** Done
+
+**Đã làm:**
+- Route `/decks/:id/edit` trong auth gate; nút Sửa cạnh Xóa trên `/decks` (owner)
+- `EditDeckPage`: load deck, chặn non-owner / not found; form prefill `name` / `meaning_language` / `description` / `visibility` / `active_pool_size`
+- Guard public→private: query progress user khác join `vocab_items`; chặn submit nếu có dòng
+- Thành công → `/decks` + `location.state`; Hủy không lưu
+- Không sửa `vocab_items`; không đụng CreateDeckPage / ReviewPage / srs.ts
+- `npx tsc --noEmit` pass
+- Verify: private deck sửa name/language/description/pool → lưu, `/decks` hiện đúng + banner; private→public thành công không chặn; public→private (không có user khác) lưu được, query guard không lỗi
+- KI-011: không test được case “user khác đang học” (1 session); RLS own-rows khiến guard không thấy progress người khác
+
+**Phụ thuộc tiếp theo:** RPC `SECURITY DEFINER` nếu muốn enforce guard public→private (KI-011)
+
+---
+
 ## Verify Active Pool: apply 008 + 2 case pass
 **Ngày:** 2026-09-16
 **Trạng thái:** Done

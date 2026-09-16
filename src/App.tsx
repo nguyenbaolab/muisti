@@ -5,6 +5,8 @@ import { supabase } from './lib/supabase'
 import { AppShell } from './pages/AppShell'
 import { DecksPage } from './pages/DecksPage'
 import { CreateDeckPage } from './pages/CreateDeckPage'
+import { EditDeckPage } from './pages/EditDeckPage'
+import { DeckPreviewPage } from './pages/DeckPreviewPage'
 import { LoginPage } from './pages/LoginPage'
 import { ReviewPage } from './pages/ReviewPage'
 
@@ -43,6 +45,8 @@ function AuthRoutes() {
       <Routes>
         <Route path="/" element={<AppShell />} />
         <Route path="/decks/new" element={<CreateDeckPage />} />
+        <Route path="/decks/:id/edit" element={<EditDeckPage />} />
+        <Route path="/decks/:id/preview" element={<DeckPreviewPage />} />
         <Route path="/decks" element={<DecksPage />} />
         <Route path="/review" element={<ReviewPage />} />
         <Route path="/review/:deckId" element={<ReviewPage />} />
