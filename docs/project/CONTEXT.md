@@ -101,7 +101,7 @@ Hướng đã chốt (2026-09-14, cột pool 2026-09-16):
 - Create deck: `decks.insert({ owner_id, name, meaning_language, description, visibility, active_pool_size }).select('id').single()` rồi `vocab_items.insert([...])` — `CreateDeckPage` (`owner_id` không có DEFAULT; `active_pool_size` 10–30, default 20)
 - Update deck metadata: `decks.update({ name, meaning_language, description, visibility, active_pool_size }).eq('id')` — `EditDeckPage` (không còn guard public→private)
 - Preview deck: `decks.select('*, vocab_items(finnish_word, translation)').eq('id').single()` — `DeckPreviewPage`
-- Clone deck: insert deck mới (`name` + ` (Copy)`, `visibility: 'private'`, `active_pool_size: 20`) rồi bulk insert vocab; rollback delete deck nếu vocab lỗi; không copy progress — `DeckPreviewPage`
+- Clone deck: insert deck mới (`name` + ` (Copy)`, `visibility: 'private'`, `active_pool_size: 20`) rồi bulk insert vocab; rollback delete deck nếu vocab lỗi; không copy progress — `DeckPreviewPage`. Verified 2026-09-16 (tài khoản B, deck public của A): Clone + enroll Active Pool trên bản copy.
 - Delete deck: `decks.delete().eq('id')` — CASCADE vocab + progress — `DecksPage`
 - Active pool enroll (chỉ `/review/:deckId` **và** owner): `startReview` fetch `decks.owner_id`; nếu không phải owner thì error, không enroll. Mix `/review` không check owner, không enroll.
 - SRS queue mix: `user_vocab_progress.select('..., vocab_items(*)').eq('user_id').lte('due_date', todayLocalIsoDate())` — không join `decks` — `ReviewPage` `/review`

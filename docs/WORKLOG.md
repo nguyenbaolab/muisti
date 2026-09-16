@@ -34,6 +34,16 @@ Nhật ký thay đổi có ý nghĩa. Entry mới ở **đầu file** (sau tiêu
 
 ---
 
+## Verify Clone end-to-end — tài khoản B, deck public của A
+**Ngày:** 2026-09-16
+**Trạng thái:** Done
+
+**Đã làm:**
+- Owner (B) verify tay: bấm Clone trên preview deck public của A → deck mới trên `/decks` của B, tên có hậu tố `(Copy)`, đúng số từ như gốc
+- Vào `/review/:id` của deck vừa clone, bấm «Bắt đầu ôn tập» → `enrollActivePool` chạy đúng, enroll từ bình thường, không lỗi
+
+---
+
 ## EditDeckPage — sửa metadata deck `/decks/:id/edit`
 **Ngày:** 2026-09-16
 **Trạng thái:** Done
