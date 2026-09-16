@@ -4,6 +4,32 @@ Ghi theo thời gian, mới nhất ở trên. Mỗi entry: tên ngắn, ngày, q
 
 ---
 
+## Active Pool Enrollment: enroll progress khi mở ôn 1 deck, không lazy-create lúc trả lời
+
+**Ngày:** 2026-09-16
+
+**Quyết định:** Thay thế hoàn toàn “lazy creation” (tạo progress lúc ôn lần đầu — **chưa từng được code**) và F-04 đánh dấu thủ công (đã xóa). Cơ chế mới: **Active Pool**, tự động, user chỉ bấm vào học.
+
+**Enroll** = INSERT dòng `user_vocab_progress` đầu tiên (`due_date` = hôm nay, `review_count` = 0, SRS defaults còn lại). Trước enroll, từ chỉ nằm trong `vocab_items`, không vào hàng đợi ôn.
+
+**Active pool** = các từ của user trên deck đó có `interval_days < 30` (tính động, không lưu cờ). **Graduated** = `interval_days >= 30` — vẫn ở `user_vocab_progress` và vẫn due theo SRS, chỉ không tính vào `active_count`.
+
+**`decks.active_pool_size`:** integer 10–30, default 20, **sửa được sau khi tạo deck**. Không dùng tên `daily_new_words_limit` — không giới hạn theo ngày, không đếm “hôm nay đã enroll bao nhiêu”.
+
+**Công thức:** nếu `active_count < active_pool_size` thì enroll `active_pool_size - active_count` từ ngẫu nhiên trong `vocab_items` của deck mà user **chưa** có progress. Pool tạm vượt N (nhiều từ graduated cùng “Quên” → `interval_days` reset 1): **không trục xuất**, chỉ ngừng enroll thêm cho đến khi pool tụt dưới N.
+
+**Khi chạy:** mỗi lần user vào `/review/:deckId`, **trước** fetch due queue; client-side, không cron. `/review` mix **không** enroll (không biết deck nào).
+
+**Quên từ graduated:** `computeNextReview` đã reset `intervalDays = 1` khi Quên — không sửa `srs.ts`. Lần mở review sau, từ tự vào lại `active_count`.
+
+**Lý do:** KI-009 — ReviewPage chỉ đọc `user_vocab_progress` + `.update()`; upload không tạo progress → ôn trống.
+
+**Phạm vi (khi implement):** migration 008 cột `active_pool_size`; `CreateDeckPage` nhập lúc tạo; `ReviewPage` enroll trên `/review/:deckId` only. Không đụng `srs.ts` / retry queue / persist khi trả hết nợ.
+
+**Không làm gì (chưa chốt):** UI sửa `active_pool_size` sau khi tạo (modal vs `/decks/:id/edit`) — cần UX trước khi code. Không enroll trên mix. Không đóng KI-009 cho đến khi code chạy.
+
+---
+
 ## Schema deck-based: wipe data, ownership + visibility, 2 chế độ ôn
 
 **Ngày:** 2026-09-14

@@ -4,6 +4,19 @@ Nhật ký thay đổi có ý nghĩa. Entry mới ở **đầu file** (sau tiêu
 
 ---
 
+## Chốt Active Pool Enrollment (KI-009) — chưa code
+**Ngày:** 2026-09-16
+**Trạng thái:** Decision recorded
+
+**Đã làm:**
+- DECISIONS.md: enroll khi `/review/:deckId`, `active_pool_size` 10–30 default 20, ngưỡng graduate 30 ngày
+- KI-009 hướng fix trỏ sang Active Pool, vẫn Open
+- Recon CreateDeckPage / DecksPage / schema — chưa implement
+
+**Phụ thuộc tiếp theo:** Prompt implement 008 + CreateDeckPage field + ReviewPage enroll (không gồm UI sửa pool size)
+
+---
+
 ## Upload deck: parser + /decks + /decks/new
 **Ngày:** 2026-09-14
 **Trạng thái:** Done

@@ -37,7 +37,7 @@ Lỗi / sai lệch đã biết. Đánh số từ **KI-001**. Entry mới ở đ�
 
 **Cách tái hiện:** Tạo deck mới, lưu file hợp lệ, click deck trên `/decks`.
 
-**Hướng fix:** Cần chốt DECISIONS: tự insert progress khi upload (mọi từ due hôm nay — đụng KI-007 batch limit), hay UI "đưa vào ôn" / đánh dấu lại, hay pretest (KI-004 đã đóng theo unit). Không làm trong task upload này (không đụng ReviewPage).
+**Hướng fix:** Đã chốt 2026-09-16 — **Active Pool Enrollment** (xem `DECISIONS.md`). Enroll progress khi mở `/review/:deckId` nếu `active_count < active_pool_size`. Chưa implement.
 
 **Trạng thái:** Open
 
