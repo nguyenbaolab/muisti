@@ -32,7 +32,7 @@ src/
     LoginPage.tsx       # email/password — signInWithPassword, không sign-up
     AppShell.tsx        # sau login + Link /decks + /review + Đăng xuất
     DecksPage.tsx       # danh sách decks (own + public), xóa owner, link ôn
-    CreateDeckPage.tsx  # /decks/new — form + parse file + preview + lưu
+    CreateDeckPage.tsx  # /decks/new — form + parse file + preview + lưu + active_pool_size
     ReviewPage.tsx      # ôn SRS: mix (/review); /review/:deckId enroll Active Pool rồi due fetch
   types/
     database.ts         # Deck, VocabItem, UserVocabProgress, ReviewQueueItem
@@ -47,7 +47,7 @@ supabase/
     20260908_005_exercises_correct_answer_nullable.sql
     20260908_006_user_vocab_progress_delete_policy.sql
     20260914_007_deck_based_schema.sql   # wipe units/exercises → decks
-    20260916_008_deck_active_pool_size.sql
+    20260916_008_deck_active_pool_size.sql  # decks.active_pool_size 10–30 default 20
 .env.example            # VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY, SUPABASE_SERVICE_ROLE_KEY
 ```
 
@@ -60,7 +60,7 @@ supabase/
 - `/decks` — `DecksPage` khi có session; guest → `/login`
 - `/decks/new` — `CreateDeckPage` khi có session; guest → `/login`
 - `/review` — `ReviewPage` mix tất cả từ due của user; guest → `/login`
-- `/review/:deckId` — `ReviewPage` chỉ từ due thuộc deck đó (chuẩn bị cho UI chọn deck)
+- `/review/:deckId` — `ReviewPage` enroll Active Pool rồi ôn từ due thuộc deck đó; guest → `/login`
 - Session: `getSession` + `onAuthStateChange` trong `App.tsx`; lần đầu hiện `Loading...`
 - Chi tiết UI nghiệp vụ ở `REQUIREMENTS.md`.
 
@@ -70,9 +70,9 @@ supabase/
 
 Xem `docs/project/PATTERNS.md` (pattern lặp lại) và `docs/project/DECISIONS.md` (deck ownership, RLS, SRS). Không lặp lại ở đây.
 
-Hướng đã chốt (2026-09-14):
+Hướng đã chốt (2026-09-14, cột pool 2026-09-16):
 
-- `decks`: SELECT nếu `visibility = 'public'` hoặc `owner_id = auth.uid()`; INSERT/UPDATE/DELETE chỉ owner
+- `decks`: SELECT nếu `visibility = 'public'` hoặc `owner_id = auth.uid()`; INSERT/UPDATE/DELETE chỉ owner. Cột `active_pool_size` integer 10–30, default 20.
 - `vocab_items`: SELECT theo quyền SELECT của deck cha; INSERT/UPDATE/DELETE chỉ owner deck (client upload được)
 - `user_vocab_progress`: RLS own-rows `user_id = auth.uid()` — không đổi cấu trúc cột
 

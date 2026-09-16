@@ -38,7 +38,7 @@ Lỗi / sai lệch đã biết. Đánh số từ **KI-001**. Entry mới ở đ�
 **Cách tái hiện:** Tạo deck mới, lưu file hợp lệ, click deck trên `/decks`.
 
 **Hướng fix:** Active Pool Enrollment — `enrollActivePool` trong `startReview` khi có `deckId`; cột `decks.active_pool_size` (migration 008).  
-**Trạng thái:** Open — code đã có; cần apply 008 trên Dashboard rồi verify: pool_size=10, 15 từ, session ôn đúng 10 từ. Mix `/review` không enroll.
+**Trạng thái:** Closed — 2026-09-16. Owner apply 008 (SQL Editor, xác nhận Table Editor). Verify: `active_pool_size = 10`, upload 15 từ, `/review/:deckId` → enroll đúng 10 từ; `/review` mix không insert `user_vocab_progress` mới.
 
 ---
 

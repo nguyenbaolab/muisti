@@ -4,6 +4,20 @@ Nhật ký thay đổi có ý nghĩa. Entry mới ở **đầu file** (sau tiêu
 
 ---
 
+## Verify Active Pool: apply 008 + 2 case pass
+**Ngày:** 2026-09-16
+**Trạng thái:** Done
+
+**Đã làm:**
+- Owner apply `20260916_008_deck_active_pool_size.sql` trên SQL Editor; Table Editor có `decks.active_pool_size`
+- Verify `/review/:deckId`: `active_pool_size = 10`, upload 15 từ → enroll đúng 10, không phải 15
+- Verify `/review` mix: không insert `user_vocab_progress` mới
+- Đóng KI-009 (2026-09-16)
+
+**Phụ thuộc tiếp theo:** UI sửa `active_pool_size` sau khi tạo (chưa chốt UX)
+
+---
+
 ## Active Pool Enrollment — 008 + form + enroll trước due fetch
 **Ngày:** 2026-09-16
 **Trạng thái:** Done (file sẵn — apply 008 trên Dashboard trước khi verify tay)
