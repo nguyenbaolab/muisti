@@ -77,7 +77,7 @@ async function enrollActivePool(
   userId: string,
   deckId: string,
   todayIso: string,
-): Promise<{ fatalError: string | null }> {
+): Promise<{ fatalError: string | null; enrolledCount: number }> {
   const { data: deckData, error: deckError } = await supabase
     .from('decks')
     .select('active_pool_size')
@@ -85,7 +85,7 @@ async function enrollActivePool(
     .single()
 
   if (deckError) {
-    return { fatalError: deckError.message }
+    return { fatalError: deckError.message, enrolledCount: 0 }
   }
 
   const poolSize = deckData?.active_pool_size as number
@@ -98,13 +98,13 @@ async function enrollActivePool(
     .lt('interval_days', 30)
 
   if (activeError) {
-    return { fatalError: null }
+    return { fatalError: null, enrolledCount: 0 }
   }
 
   const activeCount = (activeRows ?? []).length
   const needed = poolSize - activeCount
   if (needed <= 0) {
-    return { fatalError: null }
+    return { fatalError: null, enrolledCount: 0 }
   }
 
   const { data: existingProgress, error: existingError } = await supabase
@@ -119,7 +119,7 @@ async function enrollActivePool(
     .eq('deck_id', deckId)
 
   if (existingError || vocabIdsError) {
-    return { fatalError: null }
+    return { fatalError: null, enrolledCount: 0 }
   }
 
   const enrolled = new Set(
@@ -132,25 +132,25 @@ async function enrollActivePool(
   )
   const selected = candidates.slice(0, needed)
   if (selected.length === 0) {
-    return { fatalError: null }
+    return { fatalError: null, enrolledCount: 0 }
   }
 
-  const { error: insertError } = await supabase.from('user_vocab_progress').insert(
-    selected.map((vocabItemId) => ({
-      user_id: userId,
-      vocab_item_id: vocabItemId,
-      ease_factor: ENROLL_EASE_FACTOR,
-      interval_days: ENROLL_INTERVAL_DAYS,
-      due_date: todayIso,
-      review_count: ENROLL_REVIEW_COUNT,
-    })),
-  )
+  const rowsToInsert = selected.map((vocabItemId) => ({
+    user_id: userId,
+    vocab_item_id: vocabItemId,
+    ease_factor: ENROLL_EASE_FACTOR,
+    interval_days: ENROLL_INTERVAL_DAYS,
+    due_date: todayIso,
+    review_count: ENROLL_REVIEW_COUNT,
+  }))
+
+  const { error: insertError } = await supabase.from('user_vocab_progress').insert(rowsToInsert)
 
   if (insertError) {
-    return { fatalError: null }
+    return { fatalError: null, enrolledCount: 0 }
   }
 
-  return { fatalError: null }
+  return { fatalError: null, enrolledCount: rowsToInsert.length }
 }
 
 export function ReviewPage() {
@@ -163,7 +163,6 @@ export function ReviewPage() {
   const [mcqEnabled, setMcqEnabled] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [queue, setQueue] = useState<SessionCard[]>([])
-  const [sessionTotal, setSessionTotal] = useState(0)
   const [askMode, setAskMode] = useState<AskMode>('type')
   const [mcqOptions, setMcqOptions] = useState<string[]>([])
   const [typedAnswer, setTypedAnswer] = useState('')
@@ -171,6 +170,9 @@ export function ReviewPage() {
   const [feedback, setFeedback] = useState<{ correct: boolean } | null>(null)
   const [saving, setSaving] = useState(false)
   const [finnishPool, setFinnishPool] = useState<string[]>([])
+  const [completedCards, setCompletedCards] = useState<SessionCard[]>([])
+  const [sessionStartTime, setSessionStartTime] = useState<number | null>(null)
+  const [enrolledCount, setEnrolledCount] = useState(0)
 
   useEffect(() => {
     if (!scopedDeckId) return
@@ -245,6 +247,9 @@ export function ReviewPage() {
     if (enabledModes.length === 0) return
 
     setPageState('loading')
+    setSessionStartTime(Date.now())
+    setCompletedCards([])
+    setEnrolledCount(0)
     setError(null)
 
     const {
@@ -287,6 +292,7 @@ export function ReviewPage() {
         setPageState('error')
         return
       }
+      setEnrolledCount(enroll.enrolledCount)
     }
 
     // Mix: all own due progress rows, no extra deck/visibility join.
@@ -330,7 +336,6 @@ export function ReviewPage() {
 
     if (items.length === 0) {
       setQueue([])
-      setSessionTotal(0)
       setPageState('empty')
       return
     }
@@ -340,7 +345,6 @@ export function ReviewPage() {
     )
     const shuffled = shuffle(items)
     setFinnishPool(pool)
-    setSessionTotal(shuffled.length)
     setQueue(shuffled)
     presentCard(shuffled, enabledModes, pool)
     setPageState('reviewing')
@@ -408,6 +412,11 @@ export function ReviewPage() {
     if (!feedback || saving) return
 
     if (feedback.correct) {
+      const finishedCard = queue[0]
+      if (finishedCard) {
+        setCompletedCards((prev) => [...prev, finishedCard])
+      }
+
       const remaining = queue.slice(1)
       setQueue(remaining)
       if (remaining.length === 0) {
@@ -498,9 +507,56 @@ export function ReviewPage() {
   }
 
   if (pageState === 'done') {
+    const total = completedCards.length
+    const easyCount = completedCards.filter((c) => c.wrongCount === 0).length
+    const okCount = completedCards.filter((c) => c.wrongCount === 1).length
+    const forgotCount = completedCards.filter((c) => c.wrongCount >= 2).length
+    const forgotCards = completedCards.filter((c) => c.wrongCount >= 2)
+
+    const elapsedMs = sessionStartTime ? Date.now() - sessionStartTime : 0
+    const elapsedMinutes = Math.floor(elapsedMs / 60000)
+    const elapsedSeconds = Math.floor((elapsedMs % 60000) / 1000)
+    const elapsedLabel = `${elapsedMinutes}:${elapsedSeconds.toString().padStart(2, '0')}`
+
     return (
       <main>
-        <p>Hoàn thành! Đã ôn xong {sessionTotal} từ hôm nay.</p>
+        <h1>Hoàn thành!</h1>
+        <p>
+          Đã ôn xong {total} từ hôm nay trong {elapsedLabel}.
+        </p>
+
+        {scopedDeckId && enrolledCount > 0 ? (
+          <p>Có {enrolledCount} từ mới được thêm vào hôm nay.</p>
+        ) : null}
+
+        <ul>
+          <li>Nhớ dễ: {easyCount}</li>
+          <li>Nhớ: {okCount}</li>
+          <li>Quên: {forgotCount}</li>
+        </ul>
+
+        {forgotCards.length > 0 ? (
+          <>
+            <h2>Từ cần chú ý</h2>
+            <table>
+              <thead>
+                <tr>
+                  <th>Tiếng Phần Lan</th>
+                  <th>Nghĩa</th>
+                </tr>
+              </thead>
+              <tbody>
+                {forgotCards.map((card) => (
+                  <tr key={card.progressId}>
+                    <td>{card.finnishWord}</td>
+                    <td>{card.translation}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </>
+        ) : null}
+
         <p>
           <Link to="/">← Trang chủ</Link>
         </p>

@@ -35,7 +35,7 @@ src/
     CreateDeckPage.tsx  # /decks/new — form + parse file + preview + lưu + active_pool_size
     EditDeckPage.tsx    # /decks/:id/edit — sửa metadata deck (owner); không sửa vocab_items
     DeckPreviewPage.tsx # /decks/:id/preview — đọc-only + Clone (non-owner)
-    ReviewPage.tsx      # ôn SRS: mix (/review); /review/:deckId chỉ owner — enroll Active Pool rồi due fetch
+    ReviewPage.tsx      # ôn SRS; done = Session Summary (3 mức + thời gian + từ quên; enrollCount trên deck)
   types/
     database.ts         # Deck, VocabItem, UserVocabProgress, ReviewQueueItem
 public/                 # static assets
@@ -103,7 +103,8 @@ Hướng đã chốt (2026-09-14, cột pool 2026-09-16):
 - Preview deck: `decks.select('*, vocab_items(finnish_word, translation)').eq('id').single()` — `DeckPreviewPage`
 - Clone deck: insert deck mới (`name` + ` (Copy)`, `visibility: 'private'`, `active_pool_size: 20`) rồi bulk insert vocab; rollback delete deck nếu vocab lỗi; không copy progress — `DeckPreviewPage`. Verified 2026-09-16 (tài khoản B, deck public của A): Clone + enroll Active Pool trên bản copy.
 - Delete deck: `decks.delete().eq('id')` — CASCADE vocab + progress — `DecksPage`
-- Active pool enroll (chỉ `/review/:deckId` **và** owner): `startReview` fetch `decks.owner_id`; nếu không phải owner thì error, không enroll. Mix `/review` không check owner, không enroll.
+- Active pool enroll (chỉ `/review/:deckId` **và** owner): `enrollActivePool` trả `{ fatalError, enrolledCount }`; `startReview` lưu `enrolledCount`. Mix `/review` không enroll.
+- Session Summary: `completedCards` tích khi trả hết nợ; màn `done` đếm wrongCount 0/1/≥2, thời gian từ `sessionStartTime`, bảng từ quên; dòng từ mới chỉ khi `scopedDeckId && enrolledCount > 0`.
 - SRS queue mix: `user_vocab_progress.select('..., vocab_items(*)').eq('user_id').lte('due_date', todayLocalIsoDate())` — không join `decks` — `ReviewPage` `/review`
 - SRS queue 1 deck: cùng query + `vocab_items!inner(*)` + `.eq('vocab_items.deck_id', deckId)` — `ReviewPage` `/review/:deckId`
 - SRS update: khi từ trả hết nợ (đúng lần cuối), `computeNextReview` rồi `update` ease/interval/due_date/review_count/last_reviewed_at. Sai chỉ đẩy lại cuối queue, không ghi DB. — `src/lib/srs.ts` + `ReviewPage`

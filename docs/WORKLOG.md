@@ -4,6 +4,22 @@ Nhật ký thay đổi có ý nghĩa. Entry mới ở **đầu file** (sau tiêu
 
 ---
 
+## Session Summary — màn done sau phiên ôn
+**Ngày:** 2026-09-16
+**Trạng thái:** Done
+
+**Đã làm:**
+- State `completedCards` / `sessionStartTime` / `enrolledCount`; reset lúc `startReview`
+- `enrollActivePool` trả thêm `enrolledCount`
+- `handleNext` (đúng) đẩy thẻ vào `completedCards` trước khi `slice` queue
+- Màn done: thời gian, 3 mức Nhớ dễ/Nhớ/Quên, bảng Từ cần chú ý, dòng từ mới chỉ trên `/review/:deckId`
+- Không đụng srs.ts / persist / retry; không trừ idle
+- Bỏ `sessionTotal` (done dùng `completedCards.length`; `noUnusedLocals`)
+
+**Verify:** 2026-09-16 — đầy đủ 5/5 case: mixed 3 mức + bảng Từ cần chú ý; elapsed không 0:00; `/review/:deckId` enroll hiện «Có N từ mới…»; all-easy clone 3 từ trên `/review/:deckId` → 3/0/0, không bảng quên; mix (enroll trên deck rồi thoát, ôn mix 3 từ đúng ngay) → không dòng từ mới, 3/0/0.
+
+---
+
 ## ReviewPage — check owner lúc mount (UX)
 **Ngày:** 2026-09-16
 **Trạng thái:** Done
