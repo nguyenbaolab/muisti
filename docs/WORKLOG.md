@@ -4,6 +4,21 @@ Nhật ký thay đổi có ý nghĩa. Entry mới ở **đầu file** (sau tiêu
 
 ---
 
+## Trang chi tiết deck owner — `/decks/:id` (2 tab + nút ôn)
+**Ngày:** 2026-09-16
+**Trạng thái:** Done
+
+**Đã làm:**
+- Route `/decks/:id` → `DeckDetailPage` (sau edit/preview); owner only
+- `DecksPage`: click own → `/decks/:id` (không còn thẳng `/review/:id`); non-own vẫn `/preview`
+- Tab Từ vựng: bảng FI | Nghĩa | Trạng thái (Chưa học / Đang học / Đã thuộc)
+- Tab Tổng kết: tổng từ, đã/chưa học, đã thuộc/đang học, due hôm nay; thời gian học + số ngày ôn là ước lượng
+- Nút «Bắt đầu ôn tập» link `/review/:id` (không phải tab nội dung)
+- Non-owner gõ URL: thông báo không quyền + link preview; không lộ số liệu
+- Không đụng DeckPreviewPage / srs.ts / ReviewPage / EditDeckPage
+
+---
+
 ## Session Summary — màn done sau phiên ôn
 **Ngày:** 2026-09-16
 **Trạng thái:** Done

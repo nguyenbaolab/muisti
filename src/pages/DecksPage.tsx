@@ -112,7 +112,7 @@ export function DecksPage() {
                 }}
               >
                 <Link
-                  to={owned ? `/review/${deck.id}` : `/decks/${deck.id}/preview`}
+                  to={owned ? `/decks/${deck.id}` : `/decks/${deck.id}/preview`}
                   style={{ display: 'block' }}
                 >
                   <strong>{deck.name}</strong>

@@ -31,10 +31,11 @@ src/
   pages/
     LoginPage.tsx       # email/password — signInWithPassword, không sign-up
     AppShell.tsx        # sau login + Link /decks + /review + Đăng xuất
-    DecksPage.tsx       # danh sách decks (own + public); own → /review/:id; khác → /preview; sửa/xóa owner
+    DecksPage.tsx       # danh sách decks (own + public); own → /decks/:id; khác → /preview; sửa/xóa owner
     CreateDeckPage.tsx  # /decks/new — form + parse file + preview + lưu + active_pool_size
     EditDeckPage.tsx    # /decks/:id/edit — sửa metadata deck (owner); không sửa vocab_items
-    DeckPreviewPage.tsx # /decks/:id/preview — đọc-only + Clone (non-owner)
+    DeckPreviewPage.tsx # /decks/:id/preview — đọc-only + Clone (non-owner); không đổi
+    DeckDetailPage.tsx  # /decks/:id — owner: tab Từ vựng + Tổng kết; nút ôn → /review/:id
     ReviewPage.tsx      # ôn SRS; done = Session Summary (3 mức + thời gian + từ quên; enrollCount trên deck)
   types/
     database.ts         # Deck, VocabItem, UserVocabProgress, ReviewQueueItem
@@ -63,6 +64,7 @@ supabase/
 - `/decks/new` — `CreateDeckPage` khi có session; guest → `/login`
 - `/decks/:id/edit` — `EditDeckPage` khi có session; guest → `/login`; chỉ owner thấy form
 - `/decks/:id/preview` — `DeckPreviewPage` khi có session; guest → `/login`; public hoặc own; Clone nếu không phải owner
+- `/decks/:id` — `DeckDetailPage` khi có session; guest → `/login`; chỉ owner (non-owner: thông báo + link preview, không redirect)
 - `/review` — `ReviewPage` mix tất cả từ due của user; guest → `/login`
 - `/review/:deckId` — `ReviewPage` chỉ owner: check `owner_id` rồi enroll Active Pool rồi ôn due; non-owner bị chặn (nhắn sang preview)
 - Session: `getSession` + `onAuthStateChange` trong `App.tsx`; lần đầu hiện `Loading...`
@@ -97,7 +99,8 @@ Hướng đã chốt (2026-09-14, cột pool 2026-09-16):
 
 - `src/lib/supabase.ts`: `export const supabase` — Supabase client dùng chung toàn app; khởi tạo từ `VITE_SUPABASE_URL` + `VITE_SUPABASE_ANON_KEY`
 - Parse deck file: `parseDeckFile(content)` — `src/lib/deckParser.ts`
-- List decks: `decks.select('*, vocab_items(count)')` — RLS lọc own + public — `DecksPage`; click own → `/review/:id`, click không phải mình → `/decks/:id/preview`
+- List decks: `decks.select('*, vocab_items(count)')` — RLS lọc own + public — `DecksPage`; click own → `/decks/:id`, click không phải mình → `/decks/:id/preview`
+- Deck detail (owner): `decks.select('*')` rồi `vocab_items` + `user_vocab_progress` join `vocab_items!inner` lọc `deck_id` — `DeckDetailPage`; ngày «hôm nay» = `todayLocalIsoDate()`
 - Create deck: `decks.insert({ owner_id, name, meaning_language, description, visibility, active_pool_size }).select('id').single()` rồi `vocab_items.insert([...])` — `CreateDeckPage` (`owner_id` không có DEFAULT; `active_pool_size` 10–30, default 20)
 - Update deck metadata: `decks.update({ name, meaning_language, description, visibility, active_pool_size }).eq('id')` — `EditDeckPage` (không còn guard public→private)
 - Preview deck: `decks.select('*, vocab_items(finnish_word, translation)').eq('id').single()` — `DeckPreviewPage`

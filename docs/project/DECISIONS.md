@@ -4,6 +4,20 @@ Ghi theo thời gian, mới nhất ở trên. Mỗi entry: tên ngắn, ngày, q
 
 ---
 
+## Số liệu thời gian học / số ngày đã ôn trên trang chi tiết deck là ước lượng
+
+**Ngày:** 2026-09-16
+
+**Quyết định:** Tab Tổng kết trên `/decks/:id` (owner) dùng dữ liệu có sẵn, không thêm bảng `review_sessions`. «Bắt đầu học từ» = `decks.created_at` (ngày tạo deck, không phải lần ôn đầu). «Số ngày đã ôn» = số ngày local distinct từ `user_vocab_progress.last_reviewed_at` (mỗi từ chỉ giữ lần ôn gần nhất) — có thể thấp hơn số ngày thật đã mở phiên.
+
+**Lý do:** Tránh schema mới; chấp nhận ước lượng.
+
+**Phạm vi:** `DeckDetailPage` tab Tổng kết. Không đụng `srs.ts` / `ReviewPage` / `DeckPreviewPage`.
+
+**Không làm gì:** Không tính streak. Không log từng phiên ôn.
+
+---
+
 ## Deck public người khác: Preview + Clone, không học trực tiếp; bỏ guard public→private
 
 **Ngày:** 2026-09-16

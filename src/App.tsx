@@ -7,6 +7,7 @@ import { DecksPage } from './pages/DecksPage'
 import { CreateDeckPage } from './pages/CreateDeckPage'
 import { EditDeckPage } from './pages/EditDeckPage'
 import { DeckPreviewPage } from './pages/DeckPreviewPage'
+import { DeckDetailPage } from './pages/DeckDetailPage'
 import { LoginPage } from './pages/LoginPage'
 import { ReviewPage } from './pages/ReviewPage'
 
@@ -47,6 +48,7 @@ function AuthRoutes() {
         <Route path="/decks/new" element={<CreateDeckPage />} />
         <Route path="/decks/:id/edit" element={<EditDeckPage />} />
         <Route path="/decks/:id/preview" element={<DeckPreviewPage />} />
+        <Route path="/decks/:id" element={<DeckDetailPage />} />
         <Route path="/decks" element={<DecksPage />} />
         <Route path="/review" element={<ReviewPage />} />
         <Route path="/review/:deckId" element={<ReviewPage />} />
