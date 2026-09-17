@@ -23,7 +23,7 @@ Khai thác nội dung SM2 sâu hơn (bài tập ngữ pháp, vận dụng) là m
 
 ## 3. Concept cốt lõi: Deck
 
-**Trạng thái:** Done (upload + danh sách + xóa — 2026-09-14; Active Pool Enrollment — 2026-09-16; sửa metadata — 2026-09-16; preview + clone — 2026-09-16; Session Summary — 2026-09-16; trang chi tiết deck — 2026-09-16)
+**Trạng thái:** Done (upload + danh sách + xóa — 2026-09-14; Active Pool Enrollment — 2026-09-16; sửa metadata — 2026-09-16; preview + clone — 2026-09-16; Session Summary — 2026-09-16; trang chi tiết deck — 2026-09-16; Tổng kết Tổng AppShell — 2026-09-17)
 
 - **Deck** = một bộ từ vựng người dùng upload, độc lập với “unit sách”.
 - Metadata: tên deck (bắt buộc); ngôn ngữ nghĩa — Anh hoặc Việt (bắt buộc); mô tả ngắn (optional); visibility public/private (default private); **số từ học cùng lúc** `active_pool_size` (10–30, default 20) lúc tạo deck.
@@ -35,6 +35,7 @@ Khai thác nội dung SM2 sâu hơn (bài tập ngữ pháp, vận dụng) là m
 - Cùng mặt chữ ở hai deck = hai `vocab_items` độc lập, hai dòng `user_vocab_progress` độc lập — không gộp, không chặn trùng.
 - UI: `/decks` danh sách (own + public); click own → `/decks/:id` (trang chi tiết); click public không phải mình → `/decks/:id/preview`; `/decks/new` tạo; `/decks/:id/edit` sửa metadata (owner); xóa deck (owner) CASCADE vocab + progress. Ôn tập vẫn `/review/:deckId` (nút trên trang chi tiết).
 - **Trang chi tiết deck (owner):** Done (2026-09-16). `/decks/:id` chỉ chủ deck. 2 tab nội dung: **Từ vựng** (bảng đọc-only + cột Trạng thái: Chưa học / Đang học `interval_days < 30` / Đã thuộc `>= 30`) và **Tổng kết** (tổng từ, đã/chưa học, đã thuộc/đang học, due hôm nay; «bắt đầu học từ» theo `decks.created_at`; «số ngày đã ôn» = distinct date `last_reviewed_at` — cả hai là ước lượng). Nút «Bắt đầu ôn tập» riêng, link `/review/:id` — không phải tab nội dung. Non-owner gõ URL: thông báo không quyền + link `/preview`, không lộ số liệu. `DeckPreviewPage` không đổi.
+- **Tổng kết Tổng (trang chủ):** Done (2026-09-17). `/` (`AppShell`) sau login hiện số liệu gộp **chỉ deck user sở hữu**: tổng deck, tổng từ, đã học / chưa học, đã thuộc / đang học, due hôm nay. Không tính deck public người khác chưa Clone. Không streak / thời gian học / số ngày ôn ở mức tổng (những số đó chỉ trên tab Tổng kết từng deck). Chưa có deck → gợi ý + link `/decks/new`.
 - **Session Summary:** Done (2026-09-16). Khi `pageState === 'done'`: số từ đã ôn, thời gian (`Date.now() - sessionStartTime`, không trừ idle), đếm 3 mức SRS theo `wrongCount` (Nhớ dễ = 0 / Nhớ = 1 / Quên ≥ 2), bảng «Từ cần chú ý» nếu có từ Quên. Trên `/review/:deckId` hiện «Có N từ mới…» nếu `enrolledCount > 0`; mix `/review` không hiện dòng đó.
 
 ---

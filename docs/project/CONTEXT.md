@@ -30,7 +30,7 @@ src/
     deckParser.ts       # parseDeckFile — split `;`, trim, max 500 dòng
   pages/
     LoginPage.tsx       # email/password — signInWithPassword, không sign-up
-    AppShell.tsx        # sau login + Link /decks + /review + Đăng xuất
+    AppShell.tsx        # sau login: Tổng kết Tổng (fetch own decks + progress) + Link /decks + /review + Đăng xuất
     DecksPage.tsx       # danh sách decks (own + public); own → /decks/:id; khác → /preview; sửa/xóa owner
     CreateDeckPage.tsx  # /decks/new — form + parse file + preview + lưu + active_pool_size
     EditDeckPage.tsx    # /decks/:id/edit — sửa metadata deck (owner); không sửa vocab_items
@@ -59,7 +59,7 @@ supabase/
 ## §3 Navigation skeleton
 
 - `/login` — `LoginPage` khi chưa có session; đã login thì redirect `/`
-- `/` — `AppShell` khi có session; chưa login thì redirect `/login`
+- `/` — `AppShell` khi có session (Tổng kết Tổng + link Decks / Ôn tập + Đăng xuất); chưa login thì redirect `/login`
 - `/decks` — `DecksPage` khi có session; guest → `/login`
 - `/decks/new` — `CreateDeckPage` khi có session; guest → `/login`
 - `/decks/:id/edit` — `EditDeckPage` khi có session; guest → `/login`; chỉ owner thấy form
@@ -100,6 +100,7 @@ Hướng đã chốt (2026-09-14, cột pool 2026-09-16):
 - `src/lib/supabase.ts`: `export const supabase` — Supabase client dùng chung toàn app; khởi tạo từ `VITE_SUPABASE_URL` + `VITE_SUPABASE_ANON_KEY`
 - Parse deck file: `parseDeckFile(content)` — `src/lib/deckParser.ts`
 - List decks: `decks.select('*, vocab_items(count)')` — RLS lọc own + public — `DecksPage`; click own → `/decks/:id`, click không phải mình → `/decks/:id/preview`
+- Account summary: `decks.select('id, vocab_items(count)').eq('owner_id', user.id)` + `user_vocab_progress.select('interval_days, due_date').eq('user_id')` — `AppShell` `/`; `todayLocalIsoDate()`; không join vocab cho progress
 - Deck detail (owner): `decks.select('*')` rồi `vocab_items` + `user_vocab_progress` join `vocab_items!inner` lọc `deck_id` — `DeckDetailPage`; ngày «hôm nay» = `todayLocalIsoDate()`
 - Create deck: `decks.insert({ owner_id, name, meaning_language, description, visibility, active_pool_size }).select('id').single()` rồi `vocab_items.insert([...])` — `CreateDeckPage` (`owner_id` không có DEFAULT; `active_pool_size` 10–30, default 20)
 - Update deck metadata: `decks.update({ name, meaning_language, description, visibility, active_pool_size }).eq('id')` — `EditDeckPage` (không còn guard public→private)

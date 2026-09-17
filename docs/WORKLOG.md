@@ -4,6 +4,18 @@ Nhật ký thay đổi có ý nghĩa. Entry mới ở **đầu file** (sau tiêu
 
 ---
 
+## Tổng kết Tổng trên AppShell (trang chủ)
+**Ngày:** 2026-09-17
+**Trạng thái:** Done
+
+**Đã làm:**
+- `AppShell` fetch lúc mount: deck `owner_id = user.id` + `vocab_items(count)`; toàn bộ `user_vocab_progress` của user
+- Khối số liệu sau `h1`, trước link Decks / Ôn tập: tổng deck, tổng từ, đã/chưa học, đã thuộc/đang học, due hôm nay
+- `totalDecks === 0` → gợi ý + link `/decks/new`, không hiện toàn 0
+- Không streak / thời gian học tổng; không route mới; không đụng DeckDetailPage / DecksPage / ReviewPage / srs.ts
+
+---
+
 ## Trang chi tiết deck owner — `/decks/:id` (2 tab + nút ôn)
 **Ngày:** 2026-09-16
 **Trạng thái:** Done
