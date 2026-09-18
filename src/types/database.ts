@@ -1,3 +1,8 @@
+export interface Profile {
+  id: string
+  email: string
+}
+
 export interface Deck {
   id: string
   owner_id: string

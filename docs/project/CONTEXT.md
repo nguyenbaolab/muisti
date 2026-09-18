@@ -31,14 +31,14 @@ src/
   pages/
     LoginPage.tsx       # email/password — signInWithPassword, không sign-up
     AppShell.tsx        # sau login: Tổng kết Tổng (fetch own decks + progress) + Link /decks + /review + Đăng xuất
-    DecksPage.tsx       # danh sách decks (own + public); own → /decks/:id; khác → /preview; sửa/xóa owner
+    DecksPage.tsx       # danh sách decks (own + public); own → /decks/:id; khác → /preview + tên chia sẻ; sửa/xóa owner
     CreateDeckPage.tsx  # /decks/new — form + parse file + preview + lưu + active_pool_size
     EditDeckPage.tsx    # /decks/:id/edit — sửa metadata deck (owner); không sửa vocab_items
-    DeckPreviewPage.tsx # /decks/:id/preview — đọc-only + Clone (non-owner); không đổi
+    DeckPreviewPage.tsx # /decks/:id/preview — đọc-only + Clone (non-owner); «Chia sẻ bởi» nếu !owned
     DeckDetailPage.tsx  # /decks/:id — owner: tab Từ vựng + Tổng kết; nút ôn → /review/:id
     ReviewPage.tsx      # ôn SRS; done = Session Summary (3 mức + thời gian + từ quên; enrollCount trên deck)
   types/
-    database.ts         # Deck, VocabItem, UserVocabProgress, ReviewQueueItem
+    database.ts         # Deck, VocabItem, UserVocabProgress, ReviewQueueItem, Profile
 public/                 # static assets
 supabase/
   schema.sql              # full DDL — dùng setup project mới
@@ -51,6 +51,7 @@ supabase/
     20260908_006_user_vocab_progress_delete_policy.sql
     20260914_007_deck_based_schema.sql   # wipe units/exercises → decks
     20260916_008_deck_active_pool_size.sql  # decks.active_pool_size 10–30 default 20
+    20260916_009_profiles.sql               # profiles + trigger auth.users — CHƯA APPLY (owner SQL Editor)
 .env.example            # VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY, SUPABASE_SERVICE_ROLE_KEY
 ```
 
@@ -76,11 +77,12 @@ supabase/
 
 Xem `docs/project/PATTERNS.md` (pattern lặp lại) và `docs/project/DECISIONS.md` (deck ownership, RLS, SRS). Không lặp lại ở đây.
 
-Hướng đã chốt (2026-09-14, cột pool 2026-09-16):
+Hướng đã chốt (2026-09-14, cột pool 2026-09-16, profiles 2026-09-17):
 
 - `decks`: SELECT nếu `visibility = 'public'` hoặc `owner_id = auth.uid()`; INSERT/UPDATE/DELETE chỉ owner. Cột `active_pool_size` integer 10–30, default 20.
 - `vocab_items`: SELECT theo quyền SELECT của deck cha; INSERT/UPDATE/DELETE chỉ owner deck (client upload được)
 - `user_vocab_progress`: RLS own-rows `user_id = auth.uid()` — không đổi cấu trúc cột
+- `profiles`: `id` = `auth.users.id`, `email`; SELECT mọi authenticated (`USING (true)`); trigger `on_auth_user_created` INSERT khi có user mới. **009 chưa apply trên DB cho đến khi owner chạy SQL Editor.**
 
 ---
 
@@ -100,6 +102,7 @@ Hướng đã chốt (2026-09-14, cột pool 2026-09-16):
 - `src/lib/supabase.ts`: `export const supabase` — Supabase client dùng chung toàn app; khởi tạo từ `VITE_SUPABASE_URL` + `VITE_SUPABASE_ANON_KEY`
 - Parse deck file: `parseDeckFile(content)` — `src/lib/deckParser.ts`
 - List decks: `decks.select('*, vocab_items(count)')` — RLS lọc own + public — `DecksPage`; click own → `/decks/:id`, click không phải mình → `/decks/:id/preview`
+- Owner email (tên chia sẻ): query 2 — `profiles.select('id, email').in('id', ownerIds)` trên `DecksPage`; `profiles.select('email').eq('id', owner_id)` trên `DeckPreviewPage` nếu `!owned`. Không embed từ `decks` (không FK `decks`→`profiles`). UI cắt phần trước `@`.
 - Account summary: `decks.select('id, vocab_items(count)').eq('owner_id', user.id)` + `user_vocab_progress.select('interval_days, due_date').eq('user_id')` — `AppShell` `/`; `todayLocalIsoDate()`; không join vocab cho progress
 - Deck detail (owner): `decks.select('*')` rồi `vocab_items` + `user_vocab_progress` join `vocab_items!inner` lọc `deck_id` — `DeckDetailPage`; ngày «hôm nay» = `todayLocalIsoDate()`
 - Create deck: `decks.insert({ owner_id, name, meaning_language, description, visibility, active_pool_size }).select('id').single()` rồi `vocab_items.insert([...])` — `CreateDeckPage` (`owner_id` không có DEFAULT; `active_pool_size` 10–30, default 20)

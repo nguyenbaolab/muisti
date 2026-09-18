@@ -4,6 +4,20 @@ Ghi theo thời gian, mới nhất ở trên. Mỗi entry: tên ngắn, ngày, q
 
 ---
 
+## profiles + trigger sync email; tên chia sẻ = phần trước @
+
+**Ngày:** 2026-09-17
+
+**Quyết định:** Bảng `public.profiles` (`id` PK = `auth.users.id`, `email text NOT NULL`). Trigger `on_auth_user_created` AFTER INSERT trên `auth.users` (function `handle_new_user` SECURITY DEFINER) copy `id` + `email`. Backfill user hiện có. RLS SELECT: mọi `authenticated` đọc mọi dòng email — chấp nhận vì quy mô nhỏ / invite-only. Tên hiển thị luôn `email.slice(0, indexOf('@'))`; thiếu email → «Ẩn danh». Không hiện email đầy đủ. Không hiện trên deck `owned`.
+
+**Client:** không embed PostgREST `decks.select('..., profiles(email)')` vì `decks.owner_id` FK `auth.users`, không FK `profiles`. Fetch `profiles` query riêng (`.in('id', ownerIds)` / `.eq('id', owner_id)`).
+
+**Phạm vi:** migration 009 + `schema.sql`; `DecksPage`, `DeckPreviewPage`. Không đụng ReviewPage / DeckDetailPage / AppShell.
+
+**Không làm gì:** Cursor không apply SQL. Không display name riêng.
+
+---
+
 ## Số liệu thời gian học / số ngày đã ôn trên trang chi tiết deck là ước lượng
 
 **Ngày:** 2026-09-16

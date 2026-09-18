@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
-import type { Deck } from '../types/database'
+import type { Deck, Profile } from '../types/database'
 
 type DeckListRow = Deck & {
   vocab_items: { count: number }[] | null
@@ -15,6 +15,12 @@ function languageLabel(code: Deck['meaning_language']): string {
   return code === 'en' ? 'Nghĩa: Anh' : 'Nghĩa: Việt'
 }
 
+function sharerNameFromEmail(email: string | null | undefined): string {
+  if (!email) return 'Ẩn danh'
+  const atIndex = email.indexOf('@')
+  return atIndex === -1 ? email : email.slice(0, atIndex)
+}
+
 export function DecksPage() {
   const location = useLocation()
   const navigate = useNavigate()
@@ -22,6 +28,7 @@ export function DecksPage() {
 
   const [userId, setUserId] = useState<string | null>(null)
   const [decks, setDecks] = useState<DeckListRow[]>([])
+  const [emailByOwnerId, setEmailByOwnerId] = useState<Map<string, string>>(new Map())
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [deletingId, setDeletingId] = useState<string | null>(null)
@@ -37,12 +44,14 @@ export function DecksPage() {
       setError('Không có phiên đăng nhập.')
       setUserId(null)
       setDecks([])
+      setEmailByOwnerId(new Map())
       setLoading(false)
       return
     }
 
     setUserId(user.id)
 
+    // Two queries: decks.owner_id FKs auth.users, not profiles — PostgREST cannot embed profiles(email).
     const { data, error: fetchError } = await supabase
       .from('decks')
       .select('*, vocab_items(count)')
@@ -51,9 +60,22 @@ export function DecksPage() {
     if (fetchError) {
       setError(fetchError.message)
       setDecks([])
-    } else {
-      setDecks((data ?? []) as DeckListRow[])
+      setEmailByOwnerId(new Map())
+      setLoading(false)
+      return
     }
+
+    const deckRows = (data ?? []) as DeckListRow[]
+    const ownerIds = [...new Set(deckRows.map((d) => d.owner_id))]
+
+    let emailMap = new Map<string, string>()
+    if (ownerIds.length > 0) {
+      const { data: profilesData } = await supabase.from('profiles').select('id, email').in('id', ownerIds)
+      emailMap = new Map(((profilesData ?? []) as Profile[]).map((p) => [p.id, p.email]))
+    }
+
+    setDecks(deckRows)
+    setEmailByOwnerId(emailMap)
     setLoading(false)
   }
 
@@ -121,6 +143,11 @@ export function DecksPage() {
                     {deck.visibility === 'public' ? 'public' : 'private'} ·{' '}
                     {languageLabel(deck.meaning_language)}
                   </span>
+                  {!owned ? (
+                    <span style={{ display: 'block' }}>
+                      Chia sẻ bởi: {sharerNameFromEmail(emailByOwnerId.get(deck.owner_id))}
+                    </span>
+                  ) : null}
                 </Link>
                 {owned ? (
                   <p>

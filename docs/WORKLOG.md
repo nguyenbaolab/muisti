@@ -4,6 +4,18 @@ Nhật ký thay đổi có ý nghĩa. Entry mới ở **đầu file** (sau tiêu
 
 ---
 
+## profiles + tên người chia sẻ deck (phần trước @)
+**Ngày:** 2026-09-17
+**Trạng thái:** Done (code) — **migration 009 chưa apply, owner tự chạy SQL Editor**
+
+**Đã làm:**
+- File `supabase/migrations/20260916_009_profiles.sql` + cập nhật `schema.sql` (bảng, RLS SELECT authenticated, trigger `on_auth_user_created`, backfill)
+- Type `Profile`; `DecksPage` / `DeckPreviewPage`: 2 query (không embed — `decks.owner_id` FK `auth.users`, không FK sang `profiles`)
+- `!owned` hiện «Chia sẻ bởi: {phần trước @}»; owned không hiện; không hiện email đầy đủ
+- Không đụng DeckDetailPage / ReviewPage / EditDeckPage / CreateDeckPage / AppShell / srs.ts
+
+---
+
 ## Tổng kết Tổng trên AppShell (trang chủ)
 **Ngày:** 2026-09-17
 **Trạng thái:** Done

@@ -18,6 +18,12 @@ function languageLabel(code: Deck['meaning_language']): string {
   return code === 'en' ? 'Anh' : 'Việt'
 }
 
+function sharerNameFromEmail(email: string | null | undefined): string {
+  if (!email) return 'Ẩn danh'
+  const atIndex = email.indexOf('@')
+  return atIndex === -1 ? email : email.slice(0, atIndex)
+}
+
 export function DeckPreviewPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
@@ -25,6 +31,7 @@ export function DeckPreviewPage() {
   const [status, setStatus] = useState<PageStatus>('loading')
   const [userId, setUserId] = useState<string | null>(null)
   const [deck, setDeck] = useState<PreviewDeck | null>(null)
+  const [ownerEmail, setOwnerEmail] = useState<string | null>(null)
   const [cloning, setCloning] = useState(false)
   const [cloneError, setCloneError] = useState<string | null>(null)
 
@@ -58,8 +65,22 @@ export function DeckPreviewPage() {
         return
       }
 
+      const loadedDeck = data as PreviewDeck
+      let email: string | null = null
+      if (loadedDeck.owner_id !== user.id) {
+        const { data: profileData } = await supabase
+          .from('profiles')
+          .select('email')
+          .eq('id', loadedDeck.owner_id)
+          .single()
+        email = (profileData as { email: string } | null)?.email ?? null
+      }
+
+      if (cancelled) return
+
       setUserId(user.id)
-      setDeck(data as PreviewDeck)
+      setDeck(loadedDeck)
+      setOwnerEmail(email)
       setStatus('ready')
     }
 
@@ -146,6 +167,7 @@ export function DeckPreviewPage() {
         <Link to="/decks">← Decks</Link>
       </p>
       <h1>{deck.name}</h1>
+      {!owned ? <p>Chia sẻ bởi: {sharerNameFromEmail(ownerEmail)}</p> : null}
       {deck.description ? <p>{deck.description}</p> : null}
       <p>
         Nghĩa: {languageLabel(deck.meaning_language)} · {vocab.length} từ

@@ -1,7 +1,7 @@
 # REQUIREMENTS — Muisti (Finnish Learning App)
 
 **Phiên bản:** v0.2  
-**Cập nhật:** 2026-09-16
+**Cập nhật:** 2026-09-17
 
 ---
 
@@ -23,13 +23,14 @@ Khai thác nội dung SM2 sâu hơn (bài tập ngữ pháp, vận dụng) là m
 
 ## 3. Concept cốt lõi: Deck
 
-**Trạng thái:** Done (upload + danh sách + xóa — 2026-09-14; Active Pool Enrollment — 2026-09-16; sửa metadata — 2026-09-16; preview + clone — 2026-09-16; Session Summary — 2026-09-16; trang chi tiết deck — 2026-09-16; Tổng kết Tổng AppShell — 2026-09-17)
+**Trạng thái:** Done (upload + danh sách + xóa — 2026-09-14; Active Pool Enrollment — 2026-09-16; sửa metadata — 2026-09-16; preview + clone — 2026-09-16; Session Summary — 2026-09-16; trang chi tiết deck — 2026-09-16; Tổng kết Tổng AppShell — 2026-09-17; tên người chia sẻ — 2026-09-17, chờ apply 009)
 
 - **Deck** = một bộ từ vựng người dùng upload, độc lập với “unit sách”.
 - Metadata: tên deck (bắt buộc); ngôn ngữ nghĩa — Anh hoặc Việt (bắt buộc); mô tả ngắn (optional); visibility public/private (default private); **số từ học cùng lúc** `active_pool_size` (10–30, default 20) lúc tạo deck.
 - **Active Pool Enrollment:** Done (verify 2026-09-16). Enroll `user_vocab_progress` khi bấm ôn `/review/:deckId` nếu số từ `interval_days < 30` của user trên deck đó < `active_pool_size`. Mix `/review` không enroll.
 - **Sửa metadata deck:** Done (2026-09-16). Owner sửa `name` / `meaning_language` / `description` / `visibility` / `active_pool_size` tại `/decks/:id/edit`. Không sửa danh sách `vocab_items` (thêm/xóa/sửa từng từ) ở slice này. Public → private không còn guard (học viên dùng bản clone độc lập). Hạ `active_pool_size` dưới active_count hiện tại: cho phép (không trục xuất từ đã enroll).
 - **Deck public người khác:** Done (verify 2026-09-16, tài khoản B). Xem-trước đọc-only tại `/decks/:id/preview` + **Clone** về deck riêng (`name` + ` (Copy)`, `visibility = private`, `active_pool_size = 20`, copy `vocab_items`, không copy progress). Clone + enroll Active Pool trên bản copy đã verify end-to-end. Không học trực tiếp trên deck gốc. Deck của chính mình (public hay private) vẫn ôn `/review/:deckId` như cũ.
+- **Tên người chia sẻ:** Done (code 2026-09-17; **cần apply migration 009**). Deck không phải của mình trên `/decks` và `/decks/:id/preview` hiện «Chia sẻ bởi: {phần trước @}» từ `profiles.email`. Deck của mình không hiện dòng này. Không hiện email đầy đủ.
 - Input: file `.txt` / `.csv`, mỗi dòng `từ_phần_lan;nghĩa`. Parse thuần code (`src/lib/deckParser.ts`) — **không** dùng AI. Tối đa 500 dòng; dòng lỗi chặn lưu.
 - Sau parse: preview xác nhận (bảng từ hợp lệ + bảng lỗi). **Không** sửa từng dòng trong preview ở slice này — file phải sạch mới Lưu được.
 - Cùng mặt chữ ở hai deck = hai `vocab_items` độc lập, hai dòng `user_vocab_progress` độc lập — không gộp, không chặn trùng.
