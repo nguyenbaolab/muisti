@@ -32,6 +32,7 @@ export function DecksPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [deletingId, setDeletingId] = useState<string | null>(null)
+  const [activeTab, setActiveTab] = useState<'mine' | 'public'>('mine')
 
   async function loadDecks() {
     setLoading(true)
@@ -103,6 +104,11 @@ export function DecksPage() {
     setDecks((prev) => prev.filter((row) => row.id !== deck.id))
   }
 
+  const visibleDecks = decks.filter((deck) => {
+    const owned = userId !== null && deck.owner_id === userId
+    return activeTab === 'mine' ? owned : !owned
+  })
+
   return (
     <main>
       <p>
@@ -113,16 +119,37 @@ export function DecksPage() {
         <Link to="/decks/new">Tạo deck mới</Link>
       </p>
 
+      <p>
+        <button
+          type="button"
+          onClick={() => setActiveTab('mine')}
+          style={{ fontWeight: activeTab === 'mine' ? 'bold' : 'normal' }}
+        >
+          Cá nhân
+        </button>{' '}
+        <button
+          type="button"
+          onClick={() => setActiveTab('public')}
+          style={{ fontWeight: activeTab === 'public' ? 'bold' : 'normal' }}
+        >
+          Public
+        </button>
+      </p>
+
       {successMessage ? <p>{successMessage}</p> : null}
       {error ? <p>{error}</p> : null}
 
       {loading ? (
         <p>Đang tải...</p>
-      ) : decks.length === 0 ? (
-        <p>Chưa có deck nào. Tạo deck mới để bắt đầu.</p>
+      ) : visibleDecks.length === 0 ? (
+        <p>
+          {activeTab === 'mine'
+            ? 'Bạn chưa có deck nào. Tạo deck mới để bắt đầu.'
+            : 'Chưa có deck công khai nào.'}
+        </p>
       ) : (
         <ul style={{ listStyle: 'none', padding: 0 }}>
-          {decks.map((deck) => {
+          {visibleDecks.map((deck) => {
             const owned = userId !== null && deck.owner_id === userId
             return (
               <li

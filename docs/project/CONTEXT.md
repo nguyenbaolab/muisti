@@ -31,7 +31,7 @@ src/
   pages/
     LoginPage.tsx       # email/password — signInWithPassword, không sign-up
     AppShell.tsx        # sau login: Tổng kết Tổng (fetch own decks + progress) + Link /decks + /review + Đăng xuất
-    DecksPage.tsx       # danh sách decks (own + public); own → /decks/:id; khác → /preview + tên chia sẻ; sửa/xóa owner
+    DecksPage.tsx       # /decks 2 tab Cá nhân/Public (activeTab); own → /decks/:id; khác → /preview + tên chia sẻ
     CreateDeckPage.tsx  # /decks/new — form + parse file + preview + lưu + active_pool_size
     EditDeckPage.tsx    # /decks/:id/edit — sửa metadata deck (owner); không sửa vocab_items
     DeckPreviewPage.tsx # /decks/:id/preview — đọc-only + Clone (non-owner); «Chia sẻ bởi» nếu !owned
@@ -61,7 +61,7 @@ supabase/
 
 - `/login` — `LoginPage` khi chưa có session; đã login thì redirect `/`
 - `/` — `AppShell` khi có session (Tổng kết Tổng + link Decks / Ôn tập + Đăng xuất); chưa login thì redirect `/login`
-- `/decks` — `DecksPage` khi có session; guest → `/login`
+- `/decks` — `DecksPage` khi có session (tab Cá nhân / Public, default Cá nhân); guest → `/login`
 - `/decks/new` — `CreateDeckPage` khi có session; guest → `/login`
 - `/decks/:id/edit` — `EditDeckPage` khi có session; guest → `/login`; chỉ owner thấy form
 - `/decks/:id/preview` — `DeckPreviewPage` khi có session; guest → `/login`; public hoặc own; Clone nếu không phải owner
@@ -101,7 +101,7 @@ Hướng đã chốt (2026-09-14, cột pool 2026-09-16, profiles 2026-09-17):
 
 - `src/lib/supabase.ts`: `export const supabase` — Supabase client dùng chung toàn app; khởi tạo từ `VITE_SUPABASE_URL` + `VITE_SUPABASE_ANON_KEY`
 - Parse deck file: `parseDeckFile(content)` — `src/lib/deckParser.ts`
-- List decks: `decks.select('*, vocab_items(count)')` — RLS lọc own + public — `DecksPage`; click own → `/decks/:id`, click không phải mình → `/decks/:id/preview`
+- List decks: `decks.select('*, vocab_items(count)')` — RLS lọc own + public — `DecksPage`; filter client `activeTab` `'mine' | 'public'`; click own → `/decks/:id`, click không phải mình → `/decks/:id/preview`
 - Owner email (tên chia sẻ): query 2 — `profiles.select('id, email').in('id', ownerIds)` trên `DecksPage`; `profiles.select('email').eq('id', owner_id)` trên `DeckPreviewPage` nếu `!owned`. Không embed từ `decks` (không FK `decks`→`profiles`). UI cắt phần trước `@`.
 - Account summary: `decks.select('id, vocab_items(count)').eq('owner_id', user.id)` + `user_vocab_progress.select('interval_days, due_date').eq('user_id')` — `AppShell` `/`; `todayLocalIsoDate()`; không join vocab cho progress
 - Deck detail (owner): `decks.select('*')` rồi `vocab_items` + `user_vocab_progress` join `vocab_items!inner` lọc `deck_id` — `DeckDetailPage`; ngày «hôm nay» = `todayLocalIsoDate()`

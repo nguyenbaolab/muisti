@@ -4,6 +4,17 @@ Nhật ký thay đổi có ý nghĩa. Entry mới ở **đầu file** (sau tiêu
 
 ---
 
+## `/decks` — 2 tab Cá nhân / Public
+**Ngày:** 2026-09-18
+**Trạng thái:** Done
+
+**Đã làm:**
+- State `activeTab: 'mine' | 'public'` (default `mine`); filter client `visibleDecks`; không đổi `loadDecks`
+- Empty riêng: Cá nhân → tạo deck; Public → chưa có deck công khai
+- Không route/query param; không đụng trang khác
+
+---
+
 ## profiles + tên người chia sẻ deck (phần trước @)
 **Ngày:** 2026-09-17
 **Trạng thái:** Done (code) — **migration 009 chưa apply, owner tự chạy SQL Editor**
