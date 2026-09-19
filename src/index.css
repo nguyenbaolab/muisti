@@ -1,55 +1,132 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  /* Light mode base */
+  --color-bg: #FAFAF8;
+  --color-surface: #FFFFFF;
+  --color-text: #2A2F35;
+  --color-text-muted: #6B7280;
+  --color-border: #E5E7E5;
+
+  /* Dark mode base (referenced via .dark class, not prefers-color-scheme directly) */
+  --color-bg-dark: #12181F;
+  --color-surface-dark: #1A2229;
+  --color-text-dark: #B8C4CC;
+  --color-text-muted-dark: #8A96A0;
+  --color-border-dark: #2A333B;
+
+  /* Accent: järvi (lake) blue-grey */
+  --color-accent: #3D5A6C;
+  --color-accent-hover: #324B5A;
+  --color-accent-dark: #6B8CA0;
+
+  /* Secondary accent: moss green, for success/graduated states */
+  --color-success: #6B8570;
+  --color-success-dark: #8AA890;
+
+  /* Danger / error */
+  --color-danger: #A6483C;
+  --color-danger-dark: #C77164;
+
+  --font-sans: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+
+  --radius-base: 0.5rem;
+}
+
+/*
+  Legacy Vite-template aliases still used by unupgraded pages
+  (e.g. DecksPage var(--border)). Values follow the järvi palette.
+  prefers-color-scheme keeps current OS-driven behavior; html.dark /
+  html:not(.dark) follow the JS toggle when it is wired later.
+*/
 :root {
-  --text: #6b6375;
-  --text-h: #08060d;
-  --bg: #fff;
-  --border: #e5e4e7;
-  --code-bg: #f4f3ec;
-  --accent: #aa3bff;
-  --accent-bg: rgba(170, 59, 255, 0.1);
-  --accent-border: rgba(170, 59, 255, 0.5);
-  --social-bg: rgba(244, 243, 236, 0.5);
+  --text: var(--color-text);
+  --text-h: #2A2F35;
+  --bg: var(--color-bg);
+  --border: var(--color-border);
+  --code-bg: #F4F5F3;
+  --accent: var(--color-accent);
+  --accent-bg: rgba(61, 90, 108, 0.1);
+  --accent-border: rgba(61, 90, 108, 0.5);
+  --social-bg: rgba(244, 245, 243, 0.5);
   --shadow:
     rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
-
-  --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
+  --sans: var(--font-sans);
+  --heading: var(--font-sans);
   --mono: ui-monospace, Consolas, monospace;
 
   font: 18px/145% var(--sans);
   letter-spacing: 0.18px;
   color-scheme: light dark;
-  color: var(--text);
-  background: var(--bg);
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-
-  @media (max-width: 1024px) {
-    font-size: 16px;
-  }
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --text: #9ca3af;
-    --text-h: #f3f4f6;
-    --bg: #16171d;
-    --border: #2e303a;
-    --code-bg: #1f2028;
-    --accent: #c084fc;
-    --accent-bg: rgba(192, 132, 252, 0.15);
-    --accent-border: rgba(192, 132, 252, 0.5);
-    --social-bg: rgba(47, 48, 58, 0.5);
+    --text: var(--color-text-dark);
+    --text-h: #B8C4CC;
+    --bg: var(--color-bg-dark);
+    --border: var(--color-border-dark);
+    --code-bg: #1A2229;
+    --accent: var(--color-accent-dark);
+    --accent-bg: rgba(107, 140, 160, 0.15);
+    --accent-border: rgba(107, 140, 160, 0.5);
+    --social-bg: rgba(42, 51, 59, 0.5);
     --shadow:
       rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
   }
-
-  #social .button-icon {
-    filter: invert(1) brightness(2);
-  }
 }
 
+html.dark {
+  --text: var(--color-text-dark);
+  --text-h: #B8C4CC;
+  --bg: var(--color-bg-dark);
+  --border: var(--color-border-dark);
+  --code-bg: #1A2229;
+  --accent: var(--color-accent-dark);
+  --accent-bg: rgba(107, 140, 160, 0.15);
+  --accent-border: rgba(107, 140, 160, 0.5);
+  --social-bg: rgba(42, 51, 59, 0.5);
+  --shadow:
+    rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
+}
+
+html:not(.dark) {
+  --text: var(--color-text);
+  --text-h: #2A2F35;
+  --bg: var(--color-bg);
+  --border: var(--color-border);
+  --code-bg: #F4F5F3;
+  --accent: var(--color-accent);
+  --accent-bg: rgba(61, 90, 108, 0.1);
+  --accent-border: rgba(61, 90, 108, 0.5);
+  --social-bg: rgba(244, 245, 243, 0.5);
+  --shadow:
+    rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
+}
+
+html {
+  color-scheme: light dark;
+}
+
+body {
+  margin: 0;
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-sans);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.dark body {
+  background: var(--color-bg-dark);
+  color: var(--color-text-dark);
+}
+
+/* Keep the existing app chrome so unupgraded pages do not lose layout. */
 #root {
   width: 1126px;
   max-width: 100%;
@@ -60,10 +137,6 @@
   display: flex;
   flex-direction: column;
   box-sizing: border-box;
-}
-
-body {
-  margin: 0;
 }
 
 h1,
@@ -82,6 +155,7 @@ h1 {
     margin: 20px 0;
   }
 }
+
 h2 {
   font-size: 24px;
   line-height: 118%;
@@ -91,19 +165,16 @@ h2 {
     font-size: 20px;
   }
 }
+
 p {
   margin: 0;
 }
 
-code,
-.counter {
+code {
   font-family: var(--mono);
   display: inline-flex;
   border-radius: 4px;
   color: var(--text-h);
-}
-
-code {
   font-size: 15px;
   line-height: 135%;
   padding: 4px 8px;

@@ -4,6 +4,19 @@ Nhật ký thay đổi có ý nghĩa. Entry mới ở **đầu file** (sau tiêu
 
 ---
 
+## Giai đoạn 0 — Tailwind + token järvi + dark/light
+**Ngày:** 2026-09-19
+**Trạng thái:** Done
+
+**Đã làm:**
+- Cài `tailwindcss` + `@tailwindcss/vite` v4; plugin trong `vite.config.ts`
+- Xóa `App.css` (không được import)
+- `index.css`: `@theme` järvi + `@custom-variant dark`; giữ alias `--text`/`--bg`/`--border`/`--accent`… map sang palette mới + `#root` layout cũ
+- `useTheme`, `ThemeToggle`, `Button`, `Input`, `Card` — chưa gắn vào `src/pages/`
+- Inter + script chống FOUC trong `index.html`
+
+---
+
 ## ReviewPage — auto-focus ô gõ chữ Typing
 **Ngày:** 2026-09-19
 **Trạng thái:** Done

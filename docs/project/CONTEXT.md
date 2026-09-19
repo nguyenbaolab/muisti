@@ -7,6 +7,7 @@ Tài liệu kỹ thuật cho Cursor khi đọc/ghi code. Business: `REQUIREMENTS
 ## §1 Tech stack
 
 - **Frontend:** Vite + React + TypeScript, static SPA
+- **CSS:** Tailwind CSS v4 (`@tailwindcss/vite` + `@import "tailwindcss"` trong `index.css`). Token järvi trong `@theme`; dark mode class `.dark` trên `<html>` (`@custom-variant`). Component dùng chung (`Button` / `Input` / `Card` / `ThemeToggle`) **chưa gắn** vào `src/pages/` — trang cũ vẫn inline style + alias `--border` / `--text` / `--bg`
 - **Data / Auth:** Supabase (Postgres + Auth), client gọi `supabase-js`, bảo vệ bằng RLS
 - **Auth model:** admin invite (`inviteUserByEmail`); không form đăng ký công khai
 - **Deploy:** Cloudflare Pages
@@ -21,13 +22,14 @@ Tài liệu kỹ thuật cho Cursor khi đọc/ghi code. Business: `REQUIREMENTS
 src/
   main.tsx              # entry point
   App.tsx               # BrowserRouter + session gate (onAuthStateChange)
-  App.css
-  index.css
+  index.css             # Tailwind + token järvi + alias CSS cũ
   assets/               # vite.svg, react.svg, hero.png
+  components/           # Button, Input, Card, ThemeToggle — chưa dùng ở pages
   lib/
     supabase.ts         # Supabase client (createClient, requireEnv guard)
     srs.ts              # classifyAttempt + computeNextReview (SM-2 rút gọn)
     deckParser.ts       # parseDeckFile — split `;`, trim, max 500 dòng
+    useTheme.ts         # light/dark + localStorage `muisti-theme`; chưa gắn UI
   pages/
     LoginPage.tsx       # email/password — signInWithPassword, không sign-up
     AppShell.tsx        # sau login: Tổng kết Tổng (fetch own decks + progress) + Link /decks + /review + Đăng xuất
@@ -113,6 +115,7 @@ Hướng đã chốt (2026-09-14, cột pool 2026-09-16, profiles 2026-09-17):
 - Active pool enroll (chỉ `/review/:deckId` **và** owner): `enrollActivePool` trả `{ fatalError, enrolledCount }`; `startReview` lưu `enrolledCount`. Mix `/review` không enroll.
 - Session Summary: `completedCards` tích khi trả hết nợ; màn `done` đếm wrongCount 0/1/≥2, thời gian từ `sessionStartTime`, bảng từ quên; dòng từ mới chỉ khi `scopedDeckId && enrolledCount > 0`.
 - Review keyboard (`pageState === 'reviewing'` only): document `keydown` — Enter + `feedback` → `handleNext`; MCQ A–D → `submitMcqChoice(chosen)` (không đọc `selectedOption` vì stale). `handleSubmit` chuột/form không đổi.
+- Theme: `useTheme` + script chống FOUC trong `index.html`; key `localStorage['muisti-theme']`. `ThemeToggle` chưa mount.
 - SRS queue mix: `user_vocab_progress.select('..., vocab_items(*)').eq('user_id').lte('due_date', todayLocalIsoDate())` — không join `decks` — `ReviewPage` `/review`
 - SRS queue 1 deck: cùng query + `vocab_items!inner(*)` + `.eq('vocab_items.deck_id', deckId)` — `ReviewPage` `/review/:deckId`
 - SRS update: khi từ trả hết nợ (đúng lần cuối), `computeNextReview` rồi `update` ease/interval/due_date/review_count/last_reviewed_at. Sai chỉ đẩy lại cuối queue, không ghi DB. — `src/lib/srs.ts` + `ReviewPage`
