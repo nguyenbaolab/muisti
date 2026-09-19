@@ -1,11 +1,17 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
+import { Button, buttonPrimaryClassName } from '../components/Button'
+import { DeckHeader } from '../components/DeckHeader'
+import { VocabTable } from '../components/VocabTable'
+import { sharerNameFromEmail } from '../lib/deckLabels'
 import { supabase } from '../lib/supabase'
 import type { Deck } from '../types/database'
 
 type PreviewVocab = {
+  id: string
   finnish_word: string
   translation: string
+  created_at: string
 }
 
 type PreviewDeck = Deck & {
@@ -14,15 +20,8 @@ type PreviewDeck = Deck & {
 
 type PageStatus = 'loading' | 'notfound' | 'ready'
 
-function languageLabel(code: Deck['meaning_language']): string {
-  return code === 'en' ? 'Anh' : 'Việt'
-}
-
-function sharerNameFromEmail(email: string | null | undefined): string {
-  if (!email) return 'Ẩn danh'
-  const atIndex = email.indexOf('@')
-  return atIndex === -1 ? email : email.slice(0, atIndex)
-}
+const backLinkClassName =
+  'mb-4 inline-block text-base text-[var(--color-text-muted)] no-underline hover:text-[var(--color-text)] dark:text-[var(--color-text-muted-dark)] dark:hover:text-[var(--color-text-dark)]'
 
 export function DeckPreviewPage() {
   const { id } = useParams<{ id: string }>()
@@ -54,7 +53,7 @@ export function DeckPreviewPage() {
 
       const { data, error } = await supabase
         .from('decks')
-        .select('*, vocab_items(finnish_word, translation)')
+        .select('*, vocab_items(id, finnish_word, translation, created_at)')
         .eq('id', id)
         .single()
 
@@ -66,14 +65,24 @@ export function DeckPreviewPage() {
       }
 
       const loadedDeck = data as PreviewDeck
+      const vocabItems = [...(loadedDeck.vocab_items ?? [])].sort((a, b) =>
+        a.created_at.localeCompare(b.created_at),
+      )
+      loadedDeck.vocab_items = vocabItems
+
       let email: string | null = null
       if (loadedDeck.owner_id !== user.id) {
-        const { data: profileData } = await supabase
+        const { data: profileData, error: profilesError } = await supabase
           .from('profiles')
           .select('email')
           .eq('id', loadedDeck.owner_id)
           .single()
-        email = (profileData as { email: string } | null)?.email ?? null
+
+        if (profilesError) {
+          console.error(profilesError)
+        } else {
+          email = (profileData as { email: string } | null)?.email ?? null
+        }
       }
 
       if (cancelled) return
@@ -137,24 +146,23 @@ export function DeckPreviewPage() {
 
   if (status === 'loading') {
     return (
-      <main>
-        <p>
-          <Link to="/decks">← Decks</Link>
-        </p>
-        <p>Đang tải...</p>
-      </main>
+      <p className="text-[var(--color-text-muted)] dark:text-[var(--color-text-muted-dark)]">Đang tải...</p>
     )
   }
 
   if (status === 'notfound' || !deck) {
     return (
-      <main>
-        <p>
-          <Link to="/decks">← Decks</Link>
-        </p>
+      <div>
         <h1>Xem trước deck</h1>
-        <p>Không tìm thấy deck hoặc bạn không có quyền xem.</p>
-      </main>
+        <p className="text-[var(--color-text-muted)] dark:text-[var(--color-text-muted-dark)]">
+          Không tìm thấy deck hoặc bạn không có quyền xem.
+        </p>
+        <p className="mt-4">
+          <Link to="/decks" className={backLinkClassName}>
+            ← Decks
+          </Link>
+        </p>
+      </div>
     )
   }
 
@@ -162,48 +170,48 @@ export function DeckPreviewPage() {
   const owned = userId !== null && deck.owner_id === userId
 
   return (
-    <main>
+    <div>
       <p>
-        <Link to="/decks">← Decks</Link>
+        <Link to="/decks" className={backLinkClassName}>
+          ← Decks
+        </Link>
       </p>
-      <h1>{deck.name}</h1>
-      {!owned ? <p>Chia sẻ bởi: {sharerNameFromEmail(ownerEmail)}</p> : null}
-      {deck.description ? <p>{deck.description}</p> : null}
-      <p>
-        Nghĩa: {languageLabel(deck.meaning_language)} · {vocab.length} từ
-      </p>
+
+      <DeckHeader
+        name={deck.name}
+        description={deck.description}
+        meaningLanguage={deck.meaning_language}
+        wordCount={vocab.length}
+        visibility={owned ? deck.visibility : undefined}
+        sharedBy={owned ? undefined : sharerNameFromEmail(ownerEmail)}
+        actions={
+          owned ? (
+            <Link to={`/review/${deck.id}`} className={`${buttonPrimaryClassName} no-underline`}>
+              Bắt đầu ôn tập
+            </Link>
+          ) : (
+            <Button variant="primary" loading={cloning} onClick={() => void handleClone()}>
+              {cloning ? 'Đang clone…' : 'Clone về deck của tôi'}
+            </Button>
+          )
+        }
+      />
 
       {owned ? (
-        <p>
-          Đây là deck của bạn.{' '}
-          <Link to={`/review/${deck.id}`}>Bắt đầu ôn tập</Link>
+        <p className="mt-3 text-sm text-[var(--color-text-muted)] dark:text-[var(--color-text-muted-dark)]">
+          Đây là deck của bạn.
         </p>
-      ) : (
-        <p>
-          <button type="button" disabled={cloning} onClick={() => void handleClone()}>
-            {cloning ? 'Đang clone…' : 'Clone về deck của tôi'}
-          </button>
+      ) : null}
+
+      {cloneError ? (
+        <p role="alert" className="mt-3 text-sm text-[var(--color-danger)] dark:text-[var(--color-danger-dark)]">
+          {cloneError}
         </p>
-      )}
+      ) : null}
 
-      {cloneError ? <p style={{ color: 'crimson' }}>{cloneError}</p> : null}
-
-      <table>
-        <thead>
-          <tr>
-            <th>Tiếng Phần Lan</th>
-            <th>Nghĩa</th>
-          </tr>
-        </thead>
-        <tbody>
-          {vocab.map((item, index) => (
-            <tr key={`${item.finnish_word}-${index}`}>
-              <td>{item.finnish_word}</td>
-              <td>{item.translation}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </main>
+      <div className="mt-8">
+        <VocabTable items={vocab} caption={`Danh sách từ vựng của deck ${deck.name}`} />
+      </div>
+    </div>
   )
 }

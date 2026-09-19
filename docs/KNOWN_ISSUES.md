@@ -13,6 +13,36 @@ Lỗi / sai lệch đã biết. Đánh số từ **KI-001**. Entry mới ở đ�
 
 ---
 
+## KI-015 — Thứ tự hàng từ vựng trên Detail/Preview không ổn định
+
+**Mức độ:** Low  
+**File liên quan:** `src/pages/DeckDetailPage.tsx`, `src/pages/DeckPreviewPage.tsx`
+
+**Mô tả:** Query vocab không `order` (Preview embed cũng không `id`/`created_at`) → thứ tự bảng phụ thuộc Postgres.
+
+**Cách tái hiện (cũ):** Mở `/decks/:id` hoặc `/preview` — hàng không theo thứ tự tạo.
+
+**Hướng fix (đã làm 2026-09-19):** Detail `vocab_items.order('created_at', { ascending: true })`. Preview select `id, created_at` rồi sort client theo `created_at`. Key hàng = `item.id`.
+
+**Trạng thái:** Closed (2026-09-19)
+
+---
+
+## KI-014 — Tab đang chọn trên DeckDetail bị `disabled`
+
+**Mức độ:** Low  
+**File liên quan:** `src/pages/DeckDetailPage.tsx`, `src/components/Tabs.tsx`
+
+**Mô tả:** Hai nút «Từ vựng»/«Tổng kết» `disabled` khi đang chọn → không còn trong tab order, không focus lại tab hiện tại.
+
+**Cách tái hiện (cũ):** Mở `/decks/:id`, tab đang chọn xám/`disabled`.
+
+**Hướng fix (đã làm 2026-09-19):** `Tabs` dùng `aria-selected` + roving tabindex; tab chọn không `disabled`. Detail/DecksPage dùng chung.
+
+**Trạng thái:** Closed (2026-09-19)
+
+---
+
 ## KI-013 — F5 làm thông báo clone hiện lại vì `location.state`
 
 **Mức độ:** Low  

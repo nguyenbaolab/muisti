@@ -18,6 +18,8 @@ const variantClasses: Record<ButtonVariant, string> = {
 
 export const buttonPrimaryClassName = `rounded-base px-4 py-2 text-sm font-medium transition-colors ${variantClasses.primary}`
 
+export const buttonSecondaryClassName = `rounded-base px-4 py-2 text-sm font-medium transition-colors ${variantClasses.secondary}`
+
 export function Button({
   variant = 'primary',
   className = '',

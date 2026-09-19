@@ -4,6 +4,27 @@ Ghi theo thời gian, mới nhất ở trên. Mỗi entry: tên ngắn, ngày, q
 
 ---
 
+## Detail + Preview järvi; tách Tabs / DeckHeader / VocabTable / deckLabels
+
+**Ngày:** 2026-09-19
+
+**Quyết định:**
+- Nhãn dùng chung `src/lib/deckLabels.ts`: `languageLabel` → `Anh`/`Việt` (không kèm «Nghĩa: »); `visibilityLabel` Công khai/Riêng tư (chỉ hiển thị); `sharerNameFromEmail` cắt trước `@` / «Ẩn danh». DecksPage import và tự thêm prefix «Nghĩa: » khi render — copy list không đổi.
+- `Tabs` + `TabPanel`: cùng giao diện/hành vi tab DecksPage (tablist ARIA, roving tabindex, mũi tên + Home/End, gạch chân accent). Tab đang chọn **không** `disabled`. `idPrefix` sinh `*-tab-{id}` và `*-tabpanel`.
+- `DeckHeader`: h1 + mô tả muted + meta `Nghĩa: … · [visibility] · n từ · [Chia sẻ bởi …]`; `actions` bên phải h1.
+- `VocabTable`: caption `sr-only`; `th scope="col"`; hairline giữa hàng; trạng thái chữ màu (muted / accent / success), không badge. Dưới `sm` cột Trạng thái ẩn, nhãn nằm dưới từ Phần Lan. 0 từ → «Deck này chưa có từ vựng.»
+- Detail: Link «Sửa» (`/decks/:id/edit`, giả Button secondary) cạnh «Bắt đầu ôn tập». Tổng kết lưới số liệu (nhãn «Đến hạn hôm nay»); ước lượng giữ nguyên chữ. Vocab `.order('created_at')`.
+- Preview: embed thêm `id` + `created_at`, sort client `created_at` asc; Clone dùng `Button loading`; «Chia sẻ bởi {tên}» không dấu hai chấm; owner mới hiện visibility.
+- Query/status/clone/wordStatus/công thức Tổng kết không đổi ngoài order + id embed.
+
+**Lý do:** Một đợt UI hai trang; tránh lặp tab/bảng/nhãn; sửa tab disabled và thứ tự từ không ổn định.
+
+**Phạm vi:** `Tabs.tsx`, `DeckHeader.tsx`, `VocabTable.tsx`, `deckLabels.ts`, `DeckDetailPage`, `DeckPreviewPage`, `DecksPage` (import Tabs + labels), export `buttonSecondaryClassName`.
+
+**Không làm gì:** Không sửa Create/Edit (nhãn English/Visibility), ReviewPage, `handleClone` logic, KI-013.
+
+---
+
 ## DecksPage järvi: tab gạch chân ARIA; hàng hairline; Link tạo deck
 
 **Ngày:** 2026-09-19

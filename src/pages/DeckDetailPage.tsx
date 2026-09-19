@@ -1,5 +1,9 @@
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
+import { buttonPrimaryClassName, buttonSecondaryClassName } from '../components/Button'
+import { DeckHeader } from '../components/DeckHeader'
+import { TabPanel, Tabs } from '../components/Tabs'
+import { VocabTable } from '../components/VocabTable'
 import { supabase } from '../lib/supabase'
 import { todayLocalIsoDate } from '../lib/srs'
 import type { Deck } from '../types/database'
@@ -25,10 +29,6 @@ type WordRow = VocabRow & {
   status: WordStatus
 }
 
-function languageLabel(code: Deck['meaning_language']): string {
-  return code === 'en' ? 'Anh' : 'Việt'
-}
-
 function wordStatus(intervalDays: number | undefined): WordStatus {
   if (intervalDays === undefined) return 'Chưa học'
   if (intervalDays >= 30) return 'Đã thuộc'
@@ -41,6 +41,9 @@ function localIsoDateFromTimestamp(iso: string): string {
   const day = String(d.getDate()).padStart(2, '0')
   return `${d.getFullYear()}-${month}-${day}`
 }
+
+const backLinkClassName =
+  'mb-4 inline-block text-base text-[var(--color-text-muted)] no-underline hover:text-[var(--color-text)] dark:text-[var(--color-text-muted-dark)] dark:hover:text-[var(--color-text-dark)]'
 
 export function DeckDetailPage() {
   const { id } = useParams<{ id: string }>()
@@ -92,7 +95,8 @@ export function DeckDetailPage() {
         supabase
           .from('vocab_items')
           .select('id, finnish_word, translation')
-          .eq('deck_id', id),
+          .eq('deck_id', id)
+          .order('created_at', { ascending: true }),
         supabase
           .from('user_vocab_progress')
           .select('vocab_item_id, interval_days, due_date, last_reviewed_at, vocab_items!inner(deck_id)')
@@ -131,53 +135,60 @@ export function DeckDetailPage() {
 
   if (status === 'loading') {
     return (
-      <main>
-        <p>
-          <Link to="/decks">← Decks</Link>
-        </p>
-        <p>Đang tải...</p>
-      </main>
+      <p className="text-[var(--color-text-muted)] dark:text-[var(--color-text-muted-dark)]">Đang tải...</p>
     )
   }
 
   if (status === 'notfound') {
     return (
-      <main>
-        <p>
-          <Link to="/decks">← Decks</Link>
-        </p>
+      <div>
         <h1>Deck</h1>
-        <p>Không tìm thấy deck.</p>
-      </main>
+        <p className="text-[var(--color-text-muted)] dark:text-[var(--color-text-muted-dark)]">
+          Không tìm thấy deck.
+        </p>
+        <p className="mt-4">
+          <Link to="/decks" className={backLinkClassName}>
+            ← Decks
+          </Link>
+        </p>
+      </div>
     )
   }
 
   if (status === 'forbidden') {
     return (
-      <main>
-        <p>
-          <Link to="/decks">← Decks</Link>
-        </p>
+      <div>
         <h1>Deck</h1>
-        <p>Bạn không có quyền xem trang này. Trang chi tiết chỉ dành cho chủ deck.</p>
-        {id ? (
-          <p>
-            <Link to={`/decks/${id}/preview`}>Xem trước deck</Link>
-          </p>
-        ) : null}
-      </main>
+        <p className="text-[var(--color-text-muted)] dark:text-[var(--color-text-muted-dark)]">
+          Bạn không có quyền xem trang này. Trang chi tiết chỉ dành cho chủ deck.
+        </p>
+        <p className="mt-4 flex flex-wrap gap-x-4 gap-y-2">
+          {id ? (
+            <Link to={`/decks/${id}/preview`} className={backLinkClassName}>
+              Xem trước deck
+            </Link>
+          ) : null}
+          <Link to="/decks" className={backLinkClassName}>
+            ← Decks
+          </Link>
+        </p>
+      </div>
     )
   }
 
   if (status === 'error' || !deck || !id) {
     return (
-      <main>
-        <p>
-          <Link to="/decks">← Decks</Link>
-        </p>
+      <div>
         <h1>Deck</h1>
-        <p>{loadError ?? 'Không tải được dữ liệu.'}</p>
-      </main>
+        <p role="alert" className="text-[var(--color-danger)] dark:text-[var(--color-danger-dark)]">
+          {loadError ?? 'Không tải được dữ liệu.'}
+        </p>
+        <p className="mt-4">
+          <Link to="/decks" className={backLinkClassName}>
+            ← Decks
+          </Link>
+        </p>
+      </div>
     )
   }
 
@@ -196,75 +207,94 @@ export function DeckDetailPage() {
   )
   const estimatedDaysStudied = reviewedDates.size
 
+  const summaryStats: { label: string; value: number; success?: boolean }[] = [
+    { label: 'Tổng số từ', value: totalWords },
+    { label: 'Đã học', value: enrolledProgress },
+    { label: 'Chưa học', value: notEnrolledCount },
+    { label: 'Đã thuộc', value: graduatedCount, success: true },
+    { label: 'Đang học', value: activeCount },
+    { label: 'Đến hạn hôm nay', value: dueTodayCount },
+  ]
+
   return (
-    <main>
+    <div>
       <p>
-        <Link to="/decks">← Decks</Link>
-      </p>
-      <h1>{deck.name}</h1>
-      {deck.description ? <p>{deck.description}</p> : null}
-      <p>
-        Nghĩa: {languageLabel(deck.meaning_language)} · {totalWords} từ
+        <Link to="/decks" className={backLinkClassName}>
+          ← Decks
+        </Link>
       </p>
 
-      <p>
-        <button
-          type="button"
-          disabled={activeTab === 'words'}
-          onClick={() => setActiveTab('words')}
-        >
-          Từ vựng
-        </button>{' '}
-        <button
-          type="button"
-          disabled={activeTab === 'summary'}
-          onClick={() => setActiveTab('summary')}
-        >
-          Tổng kết
-        </button>{' '}
-        <Link to={`/review/${id}`}>Bắt đầu ôn tập</Link>
-      </p>
+      <DeckHeader
+        name={deck.name}
+        description={deck.description}
+        meaningLanguage={deck.meaning_language}
+        wordCount={words.length}
+        visibility={deck.visibility}
+        actions={
+          <>
+            <Link to={`/review/${id}`} className={`${buttonPrimaryClassName} no-underline`}>
+              Bắt đầu ôn tập
+            </Link>
+            <Link to={`/decks/${id}/edit`} className={`${buttonSecondaryClassName} no-underline`}>
+              Sửa
+            </Link>
+          </>
+        }
+      />
 
-      {activeTab === 'words' ? (
-        <table>
-          <thead>
-            <tr>
-              <th>Tiếng Phần Lan</th>
-              <th>Nghĩa</th>
-              <th>Trạng thái</th>
-            </tr>
-          </thead>
-          <tbody>
-            {words.map((item) => (
-              <tr key={item.id}>
-                <td>{item.finnish_word}</td>
-                <td>{item.translation}</td>
-                <td>{item.status}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      ) : (
-        <>
-          <ul>
-            <li>Tổng số từ: {totalWords}</li>
-            <li>
-              Đã học: {enrolledProgress} / Chưa học: {notEnrolledCount}
-            </li>
-            <li>
-              Đã thuộc: {graduatedCount} / Đang học: {activeCount}
-            </li>
-            <li>Due hôm nay: {dueTodayCount}</li>
-          </ul>
-          <p>Bắt đầu học từ: {startedLabel} (ước lượng theo ngày tạo deck)</p>
-          <p>Số ngày đã ôn (ước lượng): {estimatedDaysStudied} ngày</p>
-          <p>
-            <small>
-              Số liệu ước lượng dựa trên lần ôn gần nhất của mỗi từ, có thể thấp hơn thực tế.
-            </small>
-          </p>
-        </>
-      )}
-    </main>
+      <Tabs
+        idPrefix="deck-detail"
+        ariaLabel="Nội dung deck"
+        value={activeTab}
+        onChange={setActiveTab}
+        className="mt-8"
+        tabs={[
+          { id: 'words', label: 'Từ vựng' },
+          { id: 'summary', label: 'Tổng kết' },
+        ]}
+      />
+
+      <TabPanel idPrefix="deck-detail" labelledBy={activeTab} className="mt-6">
+        {activeTab === 'words' ? (
+          <VocabTable
+            items={words}
+            showStatus
+            caption={`Danh sách từ vựng của deck ${deck.name}`}
+          />
+        ) : (
+          <>
+            <div className="grid grid-cols-2 gap-x-8 gap-y-6 sm:grid-cols-3">
+              {summaryStats.map((stat) => (
+                <div key={stat.label}>
+                  <p className="text-xs text-[var(--color-text-muted)] dark:text-[var(--color-text-muted-dark)]">
+                    {stat.label}
+                  </p>
+                  <p
+                    className={
+                      stat.success
+                        ? 'mt-1 text-xl text-[var(--color-success)] dark:text-[var(--color-success-dark)]'
+                        : 'mt-1 text-xl text-[var(--color-text)] dark:text-[var(--color-text-dark)]'
+                    }
+                  >
+                    {stat.value}
+                  </p>
+                </div>
+              ))}
+            </div>
+            <div className="mt-8 space-y-1 border-t border-[var(--color-border)] pt-6 dark:border-[var(--color-border-dark)]">
+              <p className="text-sm text-[var(--color-text-muted)] dark:text-[var(--color-text-muted-dark)]">
+                Bắt đầu học từ: {startedLabel} (ước lượng theo ngày tạo deck)
+              </p>
+              <p className="text-sm text-[var(--color-text-muted)] dark:text-[var(--color-text-muted-dark)]">
+                Số ngày đã ôn (ước lượng): {estimatedDaysStudied} ngày
+              </p>
+              <p className="text-sm text-[var(--color-text-muted)] dark:text-[var(--color-text-muted-dark)]">
+                Số liệu ước lượng dựa trên lần ôn gần nhất của mỗi từ, có thể thấp hơn thực tế.
+              </p>
+            </div>
+          </>
+        )}
+      </TabPanel>
+    </div>
   )
 }

@@ -1,6 +1,8 @@
-import { useEffect, useRef, useState, type KeyboardEvent } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { buttonPrimaryClassName } from '../components/Button'
+import { TabPanel, Tabs } from '../components/Tabs'
+import { languageLabel, sharerNameFromEmail, visibilityLabel } from '../lib/deckLabels'
 import { supabase } from '../lib/supabase'
 import type { Deck, Profile } from '../types/database'
 
@@ -12,20 +14,6 @@ type DeckTab = 'mine' | 'public'
 
 function vocabCount(deck: DeckListRow): number {
   return deck.vocab_items?.[0]?.count ?? 0
-}
-
-function languageLabel(code: Deck['meaning_language']): string {
-  return code === 'en' ? 'Nghĩa: Anh' : 'Nghĩa: Việt'
-}
-
-function sharerNameFromEmail(email: string | null | undefined): string {
-  if (!email) return 'Ẩn danh'
-  const atIndex = email.indexOf('@')
-  return atIndex === -1 ? email : email.slice(0, atIndex)
-}
-
-function visibilityLabel(visibility: Deck['visibility']): string {
-  return visibility === 'public' ? 'Công khai' : 'Riêng tư'
 }
 
 function isOwned(deck: DeckListRow, userId: string | null): boolean {
@@ -43,9 +31,6 @@ export function DecksPage() {
   const [error, setError] = useState<string | null>(null)
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const [activeTab, setActiveTab] = useState<DeckTab>('mine')
-
-  const mineTabRef = useRef<HTMLButtonElement>(null)
-  const publicTabRef = useRef<HTMLButtonElement>(null)
 
   useEffect(() => {
     let cancelled = false
@@ -145,34 +130,6 @@ export function DecksPage() {
   const mineCount = decks.filter((deck) => isOwned(deck, userId)).length
   const publicCount = decks.filter((deck) => !isOwned(deck, userId)).length
 
-  function activateTab(tab: DeckTab) {
-    setActiveTab(tab)
-    const target = tab === 'mine' ? mineTabRef.current : publicTabRef.current
-    target?.focus()
-  }
-
-  function handleTabKeyDown(event: KeyboardEvent<HTMLButtonElement>) {
-    if (event.key === 'ArrowRight' || event.key === 'ArrowLeft') {
-      event.preventDefault()
-      activateTab(activeTab === 'mine' ? 'public' : 'mine')
-      return
-    }
-    if (event.key === 'Home') {
-      event.preventDefault()
-      activateTab('mine')
-      return
-    }
-    if (event.key === 'End') {
-      event.preventDefault()
-      activateTab('public')
-    }
-  }
-
-  const tabClass = (selected: boolean) =>
-    selected
-      ? 'relative -mb-px border-b-2 border-[var(--color-accent)] pb-2 text-sm text-[var(--color-text)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)] dark:border-[var(--color-accent-dark)] dark:text-[var(--color-text-dark)] dark:focus-visible:outline-[var(--color-accent-dark)]'
-      : 'pb-2 text-sm text-[var(--color-text-muted)] hover:text-[var(--color-text)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)] dark:text-[var(--color-text-muted-dark)] dark:hover:text-[var(--color-text-dark)] dark:focus-visible:outline-[var(--color-accent-dark)]'
-
   const textActionBase =
     'inline-flex min-h-8 items-center px-2 text-sm text-[var(--color-text-muted)] no-underline dark:text-[var(--color-text-muted-dark)]'
   const textActionClass = `${textActionBase} hover:text-[var(--color-text)] dark:hover:text-[var(--color-text-dark)]`
@@ -187,50 +144,17 @@ export function DecksPage() {
         </Link>
       </div>
 
-      <div
-        role="tablist"
-        aria-label="Loại deck"
-        className="mt-8 flex gap-6 border-b border-[var(--color-border)] dark:border-[var(--color-border-dark)]"
-      >
-        <button
-          ref={mineTabRef}
-          type="button"
-          role="tab"
-          id="decks-tab-mine"
-          aria-controls="decks-tabpanel"
-          aria-selected={activeTab === 'mine'}
-          tabIndex={activeTab === 'mine' ? 0 : -1}
-          className={tabClass(activeTab === 'mine')}
-          onClick={() => setActiveTab('mine')}
-          onKeyDown={handleTabKeyDown}
-        >
-          Cá nhân
-          {!loading ? (
-            <span className="ml-1.5 text-xs text-[var(--color-text-muted)] dark:text-[var(--color-text-muted-dark)]">
-              {mineCount}
-            </span>
-          ) : null}
-        </button>
-        <button
-          ref={publicTabRef}
-          type="button"
-          role="tab"
-          id="decks-tab-public"
-          aria-controls="decks-tabpanel"
-          aria-selected={activeTab === 'public'}
-          tabIndex={activeTab === 'public' ? 0 : -1}
-          className={tabClass(activeTab === 'public')}
-          onClick={() => setActiveTab('public')}
-          onKeyDown={handleTabKeyDown}
-        >
-          Public
-          {!loading ? (
-            <span className="ml-1.5 text-xs text-[var(--color-text-muted)] dark:text-[var(--color-text-muted-dark)]">
-              {publicCount}
-            </span>
-          ) : null}
-        </button>
-      </div>
+      <Tabs
+        idPrefix="decks"
+        ariaLabel="Loại deck"
+        value={activeTab}
+        onChange={setActiveTab}
+        className="mt-8"
+        tabs={[
+          { id: 'mine', label: 'Cá nhân', count: loading ? undefined : mineCount },
+          { id: 'public', label: 'Public', count: loading ? undefined : publicCount },
+        ]}
+      />
 
       {successMessage ? (
         <p
@@ -246,12 +170,7 @@ export function DecksPage() {
         </p>
       ) : null}
 
-      <div
-        role="tabpanel"
-        id="decks-tabpanel"
-        aria-labelledby={activeTab === 'mine' ? 'decks-tab-mine' : 'decks-tab-public'}
-        className="mt-6"
-      >
+      <TabPanel idPrefix="decks" labelledBy={activeTab} className="mt-6">
         {loading ? (
           <p className="text-[var(--color-text-muted)] dark:text-[var(--color-text-muted-dark)]">
             Đang tải...
@@ -278,8 +197,8 @@ export function DecksPage() {
             {visibleDecks.map((deck) => {
               const owned = isOwned(deck, userId)
               const meta = owned
-                ? `${languageLabel(deck.meaning_language)} · ${visibilityLabel(deck.visibility)}`
-                : `${languageLabel(deck.meaning_language)} · Chia sẻ bởi ${sharerNameFromEmail(emailByOwnerId.get(deck.owner_id))}`
+                ? `Nghĩa: ${languageLabel(deck.meaning_language)} · ${visibilityLabel(deck.visibility)}`
+                : `Nghĩa: ${languageLabel(deck.meaning_language)} · Chia sẻ bởi ${sharerNameFromEmail(emailByOwnerId.get(deck.owner_id))}`
 
               return (
                 <li
@@ -327,7 +246,7 @@ export function DecksPage() {
             })}
           </ul>
         )}
-      </div>
+      </TabPanel>
     </div>
   )
 }

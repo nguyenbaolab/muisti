@@ -7,7 +7,7 @@ Tài liệu kỹ thuật cho Cursor khi đọc/ghi code. Business: `REQUIREMENTS
 ## §1 Tech stack
 
 - **Frontend:** Vite + React + TypeScript, static SPA
-- **CSS:** Tailwind CSS v4 (`@tailwindcss/vite` + `@import "tailwindcss"` trong `index.css`). Token järvi trong `@theme`; dark mode class `.dark` trên `<html>` (`@custom-variant`). `AppLayout` / `HomePage` / `LoginPage` dùng `Button` / `Input` / `ThemeToggle`; trang chưa nâng cấp vẫn inline style + alias `--border` / `--text` / `--bg`
+- **CSS:** Tailwind CSS v4 (`@tailwindcss/vite` + `@import "tailwindcss"` trong `index.css`). Token järvi trong `@theme`; dark mode class `.dark` trên `<html>` (`@custom-variant`). `AppLayout` / `HomePage` / `LoginPage` / `DecksPage` / `DeckDetailPage` / `DeckPreviewPage` dùng token + `Button` / `Input` / `ThemeToggle` / `Tabs` / `DeckHeader` / `VocabTable`; Create/Edit/Review còn inline style + alias `--border` / `--text` / `--bg`
 - **Data / Auth:** Supabase (Postgres + Auth), client gọi `supabase-js`, bảo vệ bằng RLS
 - **Auth model:** admin invite (`inviteUserByEmail`); không form đăng ký công khai
 - **Deploy:** Cloudflare Pages
@@ -26,23 +26,27 @@ src/
   assets/               # vite.svg, react.svg, hero.png
   components/
     AppLayout.tsx       # header (wordmark + Decks/Ôn tập + ThemeToggle + Đăng xuất) + Outlet
-    Button.tsx          # variant primary/secondary/danger; prop loading
+    Button.tsx          # variant primary/secondary/danger; prop loading; export class primary/secondary
     Input.tsx           # forwardRef; optional label/error; w-full
     Card.tsx
     ThemeToggle.tsx     # gắn trong AppLayout
+    Tabs.tsx            # tablist ARIA + roving tabindex; TabPanel
+    DeckHeader.tsx      # h1 + mô tả + meta Nghĩa/visibility/số từ/sharer + actions
+    VocabTable.tsx      # bảng từ; cột trạng thái optional; empty copy; caption sr-only
   lib/
     supabase.ts         # Supabase client (createClient, requireEnv guard)
     srs.ts              # classifyAttempt + computeNextReview (SM-2 rút gọn)
     deckParser.ts       # parseDeckFile — split `;`, trim, max 500 dòng
+    deckLabels.ts       # languageLabel / visibilityLabel / sharerNameFromEmail
     useTheme.ts         # override | system; chỉ ghi localStorage khi toggle (KI-012 Closed)
   pages/
     LoginPage.tsx       # järvi; signInWithPassword; lỗi Việt hóa; ngoài AppLayout
     HomePage.tsx        # `/` — Tổng kết Tổng (query cũ từ AppShell)
-    DecksPage.tsx       # /decks järvi; tab ARIA Cá nhân/Public; hàng hairline; own → /:id; khác → /preview
+    DecksPage.tsx       # /decks järvi; Tabs Cá nhân/Public; hàng hairline; own → /:id; khác → /preview
     CreateDeckPage.tsx  # /decks/new — form + parse file + preview + lưu + active_pool_size
     EditDeckPage.tsx    # /decks/:id/edit — sửa metadata deck (owner); không sửa vocab_items
-    DeckPreviewPage.tsx # /decks/:id/preview — đọc-only + Clone (non-owner); «Chia sẻ bởi» nếu !owned
-    DeckDetailPage.tsx  # /decks/:id — owner: tab Từ vựng + Tổng kết; nút ôn → /review/:id
+    DeckPreviewPage.tsx # /decks/:id/preview järvi; đọc-only + Clone; DeckHeader + VocabTable
+    DeckDetailPage.tsx  # /decks/:id järvi; owner: Tabs Từ vựng/Tổng kết; ôn + Sửa; VocabTable
     ReviewPage.tsx      # ôn SRS; ngoài AppLayout (toàn màn hình); phím Enter + A–D MCQ; done = Session Summary
   types/
     database.ts         # Deck, VocabItem, UserVocabProgress, ReviewQueueItem, Profile
@@ -109,13 +113,13 @@ Hướng đã chốt (2026-09-14, cột pool 2026-09-16, profiles 2026-09-17):
 
 - `src/lib/supabase.ts`: `export const supabase` — Supabase client dùng chung toàn app; khởi tạo từ `VITE_SUPABASE_URL` + `VITE_SUPABASE_ANON_KEY`
 - Parse deck file: `parseDeckFile(content)` — `src/lib/deckParser.ts`
-- List decks: `decks.select('*, vocab_items(count)')` — RLS lọc own + public — `DecksPage`; filter client `activeTab` `'mine' | 'public'`; click own → `/decks/:id`, click không phải mình → `/decks/:id/preview`. UI järvi: không `<main>` (đã có `AppLayout`); hàng đầu `h1` + `<Link>` «Tạo deck mới» (class `buttonPrimaryClassName`); tablist ARIA (roving tabindex, ArrowLeft/Right, Home/End); hàng deck hairline `border-b`, không Card; owned hiện «Công khai»/«Riêng tư» (chỉ hiển thị); «Chia sẻ bởi {tên}» không dấu hai chấm; Sửa là `<Link>` `/edit`; Xóa `window.confirm` cũ. `useEffect` load có cờ `cancelled`; lỗi `profiles` → `console.error`, map rỗng → «Ẩn danh», không hiện UI.
-- Owner email (tên chia sẻ): query 2 — `profiles.select('id, email').in('id', ownerIds)` trên `DecksPage`; `profiles.select('email').eq('id', owner_id)` trên `DeckPreviewPage` nếu `!owned`. Không embed từ `decks` (không FK `decks`→`profiles`). UI cắt phần trước `@`.
+- List decks: `decks.select('*, vocab_items(count)')` — RLS lọc own + public — `DecksPage`; filter client `activeTab` `'mine' | 'public'`; click own → `/decks/:id`, click không phải mình → `/decks/:id/preview`. UI järvi: `Tabs` (`idPrefix="decks"`, aria-label «Loại deck») + `TabPanel`; hàng đầu `h1` + `<Link>` «Tạo deck mới»; hàng deck hairline; nhãn từ `src/lib/deckLabels.ts` (DecksPage tự thêm «Nghĩa: » khi render). Sửa `<Link>` `/edit`; Xóa `window.confirm` cũ. Lỗi `profiles` → `console.error`.
+- Owner email (tên chia sẻ): query 2 — `profiles.select('id, email').in('id', ownerIds)` trên `DecksPage`; `profiles.select('email').eq('id', owner_id)` trên `DeckPreviewPage` nếu `!owned`. Không embed từ `decks`. `sharerNameFromEmail` trong `deckLabels.ts`. Preview lỗi profiles → `console.error`, fallback «Ẩn danh».
 - Account summary: `decks.select('id, vocab_items(count)').eq('owner_id', user.id)` + `user_vocab_progress.select('interval_days, due_date').eq('user_id')` — `HomePage` `/`; `todayLocalIsoDate()`; không join vocab cho progress
-- Deck detail (owner): `decks.select('*')` rồi `vocab_items` + `user_vocab_progress` join `vocab_items!inner` lọc `deck_id` — `DeckDetailPage`; ngày «hôm nay» = `todayLocalIsoDate()`
+- Deck detail (owner): `decks.select('*')` rồi `vocab_items.select(...).eq('deck_id').order('created_at')` + `user_vocab_progress` join `vocab_items!inner` — `DeckDetailPage`; UI `DeckHeader` + `Tabs` («Nội dung deck») + `VocabTable` (`showStatus`) / lưới Tổng kết; actions Link ôn + Link Sửa `/edit`. Non-owner: `forbidden`, không bảng. Ngày «hôm nay» = `todayLocalIsoDate()`
 - Create deck: `decks.insert({ owner_id, name, meaning_language, description, visibility, active_pool_size }).select('id').single()` rồi `vocab_items.insert([...])` — `CreateDeckPage` (`owner_id` không có DEFAULT; `active_pool_size` 10–30, default 20)
 - Update deck metadata: `decks.update({ name, meaning_language, description, visibility, active_pool_size }).eq('id')` — `EditDeckPage` (không còn guard public→private)
-- Preview deck: `decks.select('*, vocab_items(finnish_word, translation)').eq('id').single()` — `DeckPreviewPage`
+- Preview deck: `decks.select('*, vocab_items(id, finnish_word, translation, created_at)').eq('id').single()` rồi sort client `created_at` tăng dần — `DeckPreviewPage`; UI `DeckHeader` + `VocabTable`; Clone `Button loading`; owner thấy visibility + Link ôn; `!owned` `sharedBy` không visibility
 - Clone deck: insert deck mới (`name` + ` (Copy)`, `visibility: 'private'`, `active_pool_size: 20`) rồi bulk insert vocab; rollback delete deck nếu vocab lỗi; không copy progress — `DeckPreviewPage`. Verified 2026-09-16 (tài khoản B, deck public của A): Clone + enroll Active Pool trên bản copy.
 - Delete deck: `decks.delete().eq('id')` — CASCADE vocab + progress — `DecksPage`
 - Active pool enroll (chỉ `/review/:deckId` **và** owner): `enrollActivePool` trả `{ fatalError, enrolledCount }`; `startReview` lưu `enrolledCount`. Mix `/review` không enroll.

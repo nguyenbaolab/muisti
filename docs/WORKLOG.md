@@ -4,6 +4,22 @@ Nhật ký thay đổi có ý nghĩa. Entry mới ở **đầu file** (sau tiêu
 
 ---
 
+## tinh chỉnh khoảng cách link quay lại và khối ước lượng Tổng kết
+
+---
+
+## Giai đoạn 1 — DeckDetail + DeckPreview järvi
+**Ngày:** 2026-09-19
+**Trạng thái:** Done
+
+**Đã làm:**
+- Tách `deckLabels.ts`, `Tabs`+`TabPanel`, `DeckHeader`, `VocabTable`; DecksPage chuyển sang Tabs/labels (copy list không đổi)
+- Detail: không `<main>`; Header + Tabs ARIA + VocabTable/lưới Tổng kết; Link ôn + Sửa; order vocab `created_at`
+- Preview: embed `id`+`created_at`, sort client; Clone `Button loading`; «Chia sẻ bởi» không `:`; profiles `console.error`
+- KI-014 / KI-015 Closed; AppShell.tsx không còn trong `src`
+
+---
+
 ## Giai đoạn 1 — DecksPage järvi
 **Ngày:** 2026-09-19
 **Trạng thái:** Done
