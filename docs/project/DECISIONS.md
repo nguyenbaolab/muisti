@@ -4,6 +4,20 @@ Ghi theo thời gian, mới nhất ở trên. Mỗi entry: tên ngắn, ngày, q
 
 ---
 
+## Tách AppLayout / HomePage; Review ngoài layout; dọn chrome #root
+
+**Ngày:** 2026-09-19
+
+**Quyết định:** `AppShell` tách thành `AppLayout` (header + `Outlet`) và `HomePage` (Tổng kết Tổng). Route session: layout bọc `/` + mọi `/decks*`. `ReviewPage` (`/review`, `/review/:deckId`) đứng ngoài layout — ôn tập toàn màn hình, không header. Header: wordmark, Decks, Ôn tập, `ThemeToggle`, Đăng xuất (`signOut` không confirm). Không hiện email/tên. `#root` bỏ `text-align: center`, `border-inline`, `width: 1126px`; `h1`/`h2` về cỡ base (1.5rem / 1.125rem). Alias CSS cũ (`--text`, `--bg`, `--border`…) giữ.
+
+**Lý do:** Nền UI järvi; nav dùng chung cho trang deck; phiên ôn không bị header chia sự chú ý.
+
+**Phạm vi:** `App.tsx`, `AppLayout.tsx`, `HomePage.tsx` (xóa `AppShell.tsx`), `index.css`. Query/công thức summary không đổi.
+
+**Không làm gì:** Không sửa `useTheme.ts` / `ThemeToggle.tsx` (hành vi ghi `localStorage` lúc mount — KI-012). Không nâng cấp UI từng trang deck/login/review trong slice này.
+
+---
+
 ## profiles + trigger sync email; tên chia sẻ = phần trước @
 
 **Ngày:** 2026-09-17

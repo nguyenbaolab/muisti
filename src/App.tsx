@@ -2,7 +2,8 @@ import { useEffect, useState } from 'react'
 import type { Session } from '@supabase/supabase-js'
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { supabase } from './lib/supabase'
-import { AppShell } from './pages/AppShell'
+import { AppLayout } from './components/AppLayout'
+import { HomePage } from './pages/HomePage'
 import { DecksPage } from './pages/DecksPage'
 import { CreateDeckPage } from './pages/CreateDeckPage'
 import { EditDeckPage } from './pages/EditDeckPage'
@@ -44,12 +45,14 @@ function AuthRoutes() {
   if (session) {
     return (
       <Routes>
-        <Route path="/" element={<AppShell />} />
-        <Route path="/decks/new" element={<CreateDeckPage />} />
-        <Route path="/decks/:id/edit" element={<EditDeckPage />} />
-        <Route path="/decks/:id/preview" element={<DeckPreviewPage />} />
-        <Route path="/decks/:id" element={<DeckDetailPage />} />
-        <Route path="/decks" element={<DecksPage />} />
+        <Route element={<AppLayout />}>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/decks/new" element={<CreateDeckPage />} />
+          <Route path="/decks/:id/edit" element={<EditDeckPage />} />
+          <Route path="/decks/:id/preview" element={<DeckPreviewPage />} />
+          <Route path="/decks/:id" element={<DeckDetailPage />} />
+          <Route path="/decks" element={<DecksPage />} />
+        </Route>
         <Route path="/review" element={<ReviewPage />} />
         <Route path="/review/:deckId" element={<ReviewPage />} />
         <Route path="/login" element={<Navigate to="/" replace />} />

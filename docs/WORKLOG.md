@@ -4,6 +4,19 @@ Nhật ký thay đổi có ý nghĩa. Entry mới ở **đầu file** (sau tiêu
 
 ---
 
+## Giai đoạn 1 — AppLayout + HomePage + ThemeToggle
+**Ngày:** 2026-09-19
+**Trạng thái:** Done
+
+**Đã làm:**
+- Nested route: `AppLayout` bọc `/` + `/decks*`; `ReviewPage` ngoài layout
+- Xóa `AppShell.tsx`; logic summary chuyển sang `HomePage` (query/công thức không đổi)
+- Header: wordmark, Decks, Ôn tập, `ThemeToggle`, Đăng xuất (`Button` secondary)
+- `index.css`: bỏ chrome `#root` Vite + h1 56px; giữ alias cũ
+- KI-012: `useTheme` ghi `localStorage` lúc mount — không sửa hook
+
+---
+
 ## Giai đoạn 0 — Tailwind + token järvi + dark/light
 **Ngày:** 2026-09-19
 **Trạng thái:** Done

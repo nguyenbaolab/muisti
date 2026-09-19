@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
+import { Button } from '../components/Button'
 import { supabase } from '../lib/supabase'
 import { todayLocalIsoDate } from '../lib/srs'
 
@@ -27,7 +28,8 @@ function vocabCount(deck: OwnedDeckRow): number {
   return deck.vocab_items?.[0]?.count ?? 0
 }
 
-export function AppShell() {
+export function HomePage() {
+  const navigate = useNavigate()
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [summary, setSummary] = useState<AccountSummary | null>(null)
@@ -93,42 +95,66 @@ export function AppShell() {
     }
   }, [])
 
+  if (loading) {
+    return <p className="text-[var(--color-text-muted)] dark:text-[var(--color-text-muted-dark)]">Đang tải...</p>
+  }
+
+  if (error) {
+    return <p className="text-[var(--color-danger)] dark:text-[var(--color-danger-dark)]">{error}</p>
+  }
+
+  if (!summary || summary.totalDecks === 0) {
+    return (
+      <p>
+        Chưa có deck nào — tạo deck đầu tiên của bạn.{' '}
+        <Link to="/decks/new">Tạo deck mới</Link>
+      </p>
+    )
+  }
+
+  const stats: { label: string; value: number; success?: boolean }[] = [
+    { label: 'Tổng số deck', value: summary.totalDecks },
+    { label: 'Tổng số từ', value: summary.totalWords },
+    { label: 'Đã học', value: summary.enrolledCount },
+    { label: 'Chưa học', value: summary.notEnrolledCount },
+    { label: 'Đã thuộc', value: summary.graduatedCount, success: true },
+    { label: 'Đang học', value: summary.activeCount },
+  ]
+
   return (
-    <main>
-      <h1>Muisti</h1>
+    <div>
+      <div className="flex flex-wrap items-end gap-6">
+        <div>
+          <p className="text-sm text-[var(--color-text-muted)] dark:text-[var(--color-text-muted-dark)]">
+            Đến hạn hôm nay
+          </p>
+          <p className="text-5xl font-light tracking-tight text-[var(--color-text)] dark:text-[var(--color-text-dark)]">
+            {summary.dueTodayCount}
+          </p>
+        </div>
+        <Button variant="primary" onClick={() => navigate('/review')}>
+          Ôn tập
+        </Button>
+      </div>
 
-      {loading ? (
-        <p>Đang tải...</p>
-      ) : error ? (
-        <p>{error}</p>
-      ) : summary && summary.totalDecks > 0 ? (
-        <ul>
-          <li>Tổng số deck: {summary.totalDecks}</li>
-          <li>Tổng số từ: {summary.totalWords}</li>
-          <li>
-            Đã học: {summary.enrolledCount} / Chưa học: {summary.notEnrolledCount}
-          </li>
-          <li>
-            Đã thuộc: {summary.graduatedCount} / Đang học: {summary.activeCount}
-          </li>
-          <li>Due hôm nay: {summary.dueTodayCount}</li>
-        </ul>
-      ) : (
-        <p>
-          Chưa có deck nào — tạo deck đầu tiên của bạn.{' '}
-          <Link to="/decks/new">Tạo deck mới</Link>
-        </p>
-      )}
-
-      <p>
-        <Link to="/decks">Decks</Link>
-      </p>
-      <p>
-        <Link to="/review">Ôn tập hôm nay</Link>
-      </p>
-      <button type="button" onClick={() => void supabase.auth.signOut()}>
-        Đăng xuất
-      </button>
-    </main>
+      <div className="mt-14 grid grid-cols-2 gap-x-8 gap-y-6 sm:grid-cols-3">
+        {stats.map((stat) => (
+          <div key={stat.label}>
+            <p className="text-xs text-[var(--color-text-muted)] dark:text-[var(--color-text-muted-dark)]">
+              {stat.label}
+            </p>
+            <p
+              className={
+                stat.success
+                  ? 'mt-1 text-xl text-[var(--color-success)] dark:text-[var(--color-success-dark)]'
+                  : 'mt-1 text-xl text-[var(--color-text)] dark:text-[var(--color-text-dark)]'
+              }
+            >
+              {stat.value}
+            </p>
+          </div>
+        ))}
+      </div>
+    </div>
   )
 }

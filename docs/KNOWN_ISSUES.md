@@ -13,6 +13,21 @@ Lỗi / sai lệch đã biết. Đánh số từ **KI-001**. Entry mới ở đ�
 
 ---
 
+## KI-012 — `useTheme` ghi `localStorage` ngay lúc mount, chốt cứng theme hệ thống
+
+**Mức độ:** Low  
+**File liên quan:** `src/lib/useTheme.ts`, `src/components/ThemeToggle.tsx`, `src/components/AppLayout.tsx`
+
+**Mô tả:** `useTheme` khởi tạo từ `localStorage['muisti-theme']` hoặc `prefers-color-scheme`. `useEffect` luôn `localStorage.setItem('muisti-theme', theme)` khi `theme` đổi — gồm lần mount đầu. Sau khi `ThemeToggle` gắn vào `AppLayout`, user chưa từng bấm toggle vẫn bị ghi light/dark theo OS lúc đó. Lần sau script `index.html` ưu tiên storage → không còn theo OS nếu user đổi theme hệ thống.
+
+**Cách tái hiện:** Xóa key `muisti-theme`, đăng nhập (vào route có `AppLayout`), reload. DevTools Application: key đã có `light` hoặc `dark`. Đổi OS theme, reload app — giao diện không đổi theo OS.
+
+**Hướng fix:** Chỉ `setItem` trong `toggleTheme` (hoặc khi user đã chọn rõ). Chưa sửa — chờ quyết định.
+
+**Trạng thái:** Open
+
+---
+
 ## KI-011 — Guard public→private không thấy progress user khác (RLS own-rows)
 
 **Mức độ:** Medium  

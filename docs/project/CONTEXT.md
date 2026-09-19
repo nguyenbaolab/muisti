@@ -7,7 +7,7 @@ Tài liệu kỹ thuật cho Cursor khi đọc/ghi code. Business: `REQUIREMENTS
 ## §1 Tech stack
 
 - **Frontend:** Vite + React + TypeScript, static SPA
-- **CSS:** Tailwind CSS v4 (`@tailwindcss/vite` + `@import "tailwindcss"` trong `index.css`). Token järvi trong `@theme`; dark mode class `.dark` trên `<html>` (`@custom-variant`). Component dùng chung (`Button` / `Input` / `Card` / `ThemeToggle`) **chưa gắn** vào `src/pages/` — trang cũ vẫn inline style + alias `--border` / `--text` / `--bg`
+- **CSS:** Tailwind CSS v4 (`@tailwindcss/vite` + `@import "tailwindcss"` trong `index.css`). Token järvi trong `@theme`; dark mode class `.dark` trên `<html>` (`@custom-variant`). `AppLayout` + `HomePage` dùng `Button` / `ThemeToggle`; trang chưa nâng cấp vẫn inline style + alias `--border` / `--text` / `--bg`
 - **Data / Auth:** Supabase (Postgres + Auth), client gọi `supabase-js`, bảo vệ bằng RLS
 - **Auth model:** admin invite (`inviteUserByEmail`); không form đăng ký công khai
 - **Deploy:** Cloudflare Pages
@@ -21,24 +21,29 @@ Tài liệu kỹ thuật cho Cursor khi đọc/ghi code. Business: `REQUIREMENTS
 ```
 src/
   main.tsx              # entry point
-  App.tsx               # BrowserRouter + session gate (onAuthStateChange)
-  index.css             # Tailwind + token järvi + alias CSS cũ
+  App.tsx               # BrowserRouter + session gate (onAuthStateChange); nested AppLayout
+  index.css             # Tailwind + token järvi + alias CSS cũ; #root không còn chrome Vite
   assets/               # vite.svg, react.svg, hero.png
-  components/           # Button, Input, Card, ThemeToggle — chưa dùng ở pages
+  components/
+    AppLayout.tsx       # header (wordmark + Decks/Ôn tập + ThemeToggle + Đăng xuất) + Outlet
+    Button.tsx
+    Input.tsx
+    Card.tsx
+    ThemeToggle.tsx     # gắn trong AppLayout
   lib/
     supabase.ts         # Supabase client (createClient, requireEnv guard)
     srs.ts              # classifyAttempt + computeNextReview (SM-2 rút gọn)
     deckParser.ts       # parseDeckFile — split `;`, trim, max 500 dòng
-    useTheme.ts         # light/dark + localStorage `muisti-theme`; chưa gắn UI
+    useTheme.ts         # light/dark + localStorage `muisti-theme` (mount ghi chốt theme — KI-012)
   pages/
-    LoginPage.tsx       # email/password — signInWithPassword, không sign-up
-    AppShell.tsx        # sau login: Tổng kết Tổng (fetch own decks + progress) + Link /decks + /review + Đăng xuất
+    LoginPage.tsx       # email/password — signInWithPassword, không sign-up; ngoài AppLayout
+    HomePage.tsx        # `/` — Tổng kết Tổng (query cũ từ AppShell)
     DecksPage.tsx       # /decks 2 tab Cá nhân/Public (activeTab); own → /decks/:id; khác → /preview + tên chia sẻ
     CreateDeckPage.tsx  # /decks/new — form + parse file + preview + lưu + active_pool_size
     EditDeckPage.tsx    # /decks/:id/edit — sửa metadata deck (owner); không sửa vocab_items
     DeckPreviewPage.tsx # /decks/:id/preview — đọc-only + Clone (non-owner); «Chia sẻ bởi» nếu !owned
     DeckDetailPage.tsx  # /decks/:id — owner: tab Từ vựng + Tổng kết; nút ôn → /review/:id
-    ReviewPage.tsx      # ôn SRS; phím Enter next + A–D MCQ (`submitMcqChoice`); done = Session Summary
+    ReviewPage.tsx      # ôn SRS; ngoài AppLayout (toàn màn hình); phím Enter + A–D MCQ; done = Session Summary
   types/
     database.ts         # Deck, VocabItem, UserVocabProgress, ReviewQueueItem, Profile
 public/                 # static assets
@@ -62,14 +67,15 @@ supabase/
 ## §3 Navigation skeleton
 
 - `/login` — `LoginPage` khi chưa có session; đã login thì redirect `/`
-- `/` — `AppShell` khi có session (Tổng kết Tổng + link Decks / Ôn tập + Đăng xuất); chưa login thì redirect `/login`
-- `/decks` — `DecksPage` khi có session (tab Cá nhân / Public, default Cá nhân); guest → `/login`
+- `/` — `HomePage` trong `AppLayout` khi có session (Tổng kết Tổng); chưa login thì redirect `/login`
+- `/decks` — `DecksPage` trong `AppLayout` khi có session (tab Cá nhân / Public, default Cá nhân); guest → `/login`
 - `/decks/new` — `CreateDeckPage` khi có session; guest → `/login`
 - `/decks/:id/edit` — `EditDeckPage` khi có session; guest → `/login`; chỉ owner thấy form
 - `/decks/:id/preview` — `DeckPreviewPage` khi có session; guest → `/login`; public hoặc own; Clone nếu không phải owner
 - `/decks/:id` — `DeckDetailPage` khi có session; guest → `/login`; chỉ owner (non-owner: thông báo + link preview, không redirect)
-- `/review` — `ReviewPage` mix tất cả từ due của user; guest → `/login`
-- `/review/:deckId` — `ReviewPage` chỉ owner: check `owner_id` rồi enroll Active Pool rồi ôn due; non-owner bị chặn (nhắn sang preview)
+- `/review` — `ReviewPage` mix; **ngoài** `AppLayout` (không header); guest → `/login`
+- `/review/:deckId` — `ReviewPage` chỉ owner: check `owner_id` rồi enroll Active Pool rồi ôn due; **ngoài** `AppLayout`; non-owner bị chặn (nhắn sang preview)
+- Layout session: `AppLayout` bọc `/`, `/decks`, `/decks/new`, `/decks/:id`, `/decks/:id/edit`, `/decks/:id/preview`. Header: Muisti → `/`, Decks, Ôn tập → `/review`, `ThemeToggle`, Đăng xuất (`signOut`). Không hiện email.
 - Session: `getSession` + `onAuthStateChange` trong `App.tsx`; lần đầu hiện `Loading...`
 - Chi tiết UI nghiệp vụ ở `REQUIREMENTS.md`.
 
@@ -105,7 +111,7 @@ Hướng đã chốt (2026-09-14, cột pool 2026-09-16, profiles 2026-09-17):
 - Parse deck file: `parseDeckFile(content)` — `src/lib/deckParser.ts`
 - List decks: `decks.select('*, vocab_items(count)')` — RLS lọc own + public — `DecksPage`; filter client `activeTab` `'mine' | 'public'`; click own → `/decks/:id`, click không phải mình → `/decks/:id/preview`
 - Owner email (tên chia sẻ): query 2 — `profiles.select('id, email').in('id', ownerIds)` trên `DecksPage`; `profiles.select('email').eq('id', owner_id)` trên `DeckPreviewPage` nếu `!owned`. Không embed từ `decks` (không FK `decks`→`profiles`). UI cắt phần trước `@`.
-- Account summary: `decks.select('id, vocab_items(count)').eq('owner_id', user.id)` + `user_vocab_progress.select('interval_days, due_date').eq('user_id')` — `AppShell` `/`; `todayLocalIsoDate()`; không join vocab cho progress
+- Account summary: `decks.select('id, vocab_items(count)').eq('owner_id', user.id)` + `user_vocab_progress.select('interval_days, due_date').eq('user_id')` — `HomePage` `/`; `todayLocalIsoDate()`; không join vocab cho progress
 - Deck detail (owner): `decks.select('*')` rồi `vocab_items` + `user_vocab_progress` join `vocab_items!inner` lọc `deck_id` — `DeckDetailPage`; ngày «hôm nay» = `todayLocalIsoDate()`
 - Create deck: `decks.insert({ owner_id, name, meaning_language, description, visibility, active_pool_size }).select('id').single()` rồi `vocab_items.insert([...])` — `CreateDeckPage` (`owner_id` không có DEFAULT; `active_pool_size` 10–30, default 20)
 - Update deck metadata: `decks.update({ name, meaning_language, description, visibility, active_pool_size }).eq('id')` — `EditDeckPage` (không còn guard public→private)
@@ -115,7 +121,7 @@ Hướng đã chốt (2026-09-14, cột pool 2026-09-16, profiles 2026-09-17):
 - Active pool enroll (chỉ `/review/:deckId` **và** owner): `enrollActivePool` trả `{ fatalError, enrolledCount }`; `startReview` lưu `enrolledCount`. Mix `/review` không enroll.
 - Session Summary: `completedCards` tích khi trả hết nợ; màn `done` đếm wrongCount 0/1/≥2, thời gian từ `sessionStartTime`, bảng từ quên; dòng từ mới chỉ khi `scopedDeckId && enrolledCount > 0`.
 - Review keyboard (`pageState === 'reviewing'` only): document `keydown` — Enter + `feedback` → `handleNext`; MCQ A–D → `submitMcqChoice(chosen)` (không đọc `selectedOption` vì stale). `handleSubmit` chuột/form không đổi.
-- Theme: `useTheme` + script chống FOUC trong `index.html`; key `localStorage['muisti-theme']`. `ThemeToggle` chưa mount.
+- Theme: `useTheme` + script chống FOUC trong `index.html`; key `localStorage['muisti-theme']`. `ThemeToggle` mount trong `AppLayout` (Login/Review không có toggle; class `.dark` vẫn do script + storage). Mount hook ghi storage ngay — KI-012.
 - SRS queue mix: `user_vocab_progress.select('..., vocab_items(*)').eq('user_id').lte('due_date', todayLocalIsoDate())` — không join `decks` — `ReviewPage` `/review`
 - SRS queue 1 deck: cùng query + `vocab_items!inner(*)` + `.eq('vocab_items.deck_id', deckId)` — `ReviewPage` `/review/:deckId`
 - SRS update: khi từ trả hết nợ (đúng lần cuối), `computeNextReview` rồi `update` ease/interval/due_date/review_count/last_reviewed_at. Sai chỉ đẩy lại cuối queue, không ghi DB. — `src/lib/srs.ts` + `ReviewPage`
