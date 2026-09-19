@@ -1,9 +1,14 @@
 import { useEffect, useState, type FormEvent } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
+import { Button } from '../components/Button'
+import { DeckForm } from '../components/DeckForm'
 import { supabase } from '../lib/supabase'
 import type { Deck } from '../types/database'
 
 type PageStatus = 'loading' | 'notfound' | 'forbidden' | 'ready'
+
+const backLinkClassName =
+  'mb-4 inline-block text-base text-[var(--color-text-muted)] no-underline hover:text-[var(--color-text)] dark:text-[var(--color-text-muted-dark)] dark:hover:text-[var(--color-text-dark)]'
 
 export function EditDeckPage() {
   const { id } = useParams<{ id: string }>()
@@ -98,7 +103,8 @@ export function EditDeckPage() {
       .eq('id', id)
 
     if (error) {
-      setSaveError(error.message)
+      console.error(error)
+      setSaveError('Không lưu được thay đổi. Thử lại sau.')
       setSaving(false)
       return
     }
@@ -108,136 +114,78 @@ export function EditDeckPage() {
 
   if (status === 'loading') {
     return (
-      <main>
-        <p>
-          <Link to="/decks">← Decks</Link>
-        </p>
-        <p>Đang tải...</p>
-      </main>
+      <p className="text-[var(--color-text-muted)] dark:text-[var(--color-text-muted-dark)]">Đang tải...</p>
     )
   }
 
   if (status === 'notfound') {
     return (
-      <main>
+      <div>
         <p>
-          <Link to="/decks">← Decks</Link>
+          <Link to="/decks" className={backLinkClassName}>
+            ← Decks
+          </Link>
         </p>
         <h1>Sửa deck</h1>
-        <p>{loadError ?? 'Không tìm thấy deck.'}</p>
-      </main>
+        <p className="text-[var(--color-text-muted)] dark:text-[var(--color-text-muted-dark)]">
+          {loadError ?? 'Không tìm thấy deck.'}
+        </p>
+      </div>
     )
   }
 
   if (status === 'forbidden') {
     return (
-      <main>
+      <div>
         <p>
-          <Link to="/decks">← Decks</Link>
+          <Link to="/decks" className={backLinkClassName}>
+            ← Decks
+          </Link>
         </p>
         <h1>Sửa deck</h1>
-        <p>Bạn không có quyền sửa deck này.</p>
-      </main>
+        <p className="text-[var(--color-text-muted)] dark:text-[var(--color-text-muted-dark)]">
+          Bạn không có quyền sửa deck này.
+        </p>
+      </div>
     )
   }
 
   return (
-    <main>
+    <div>
       <p>
-        <Link to="/decks">← Decks</Link>
+        <Link to="/decks" className={backLinkClassName}>
+          ← Decks
+        </Link>
       </p>
       <h1>Sửa deck</h1>
 
-      <form onSubmit={(e) => void handleSave(e)}>
-        <label style={{ display: 'block', marginBottom: 12 }}>
-          Tên deck
-          <input
-            type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            required
-            style={{ display: 'block', width: '100%', maxWidth: 480, marginTop: 4 }}
-          />
-        </label>
+      <form className="mt-6" onSubmit={(e) => void handleSave(e)}>
+        <DeckForm
+          values={{ name, meaningLanguage, description, visibility, activePoolSize }}
+          onNameChange={setName}
+          onMeaningLanguageChange={setMeaningLanguage}
+          onDescriptionChange={setDescription}
+          onVisibilityChange={setVisibility}
+          onActivePoolSizeChange={setActivePoolSize}
+          poolSizeValid={poolSizeValid}
+          disabled={saving}
+        />
 
-        <label style={{ display: 'block', marginBottom: 12 }}>
-          Ngôn ngữ nghĩa
-          <select
-            value={meaningLanguage}
-            onChange={(e) => setMeaningLanguage(e.target.value as Deck['meaning_language'])}
-            required
-            style={{ display: 'block', marginTop: 4 }}
-          >
-            <option value="vi">Tiếng Việt</option>
-            <option value="en">English</option>
-          </select>
-        </label>
-
-        <label style={{ display: 'block', marginBottom: 12 }}>
-          Mô tả (không bắt buộc)
-          <textarea
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            rows={3}
-            style={{ display: 'block', width: '100%', maxWidth: 480, marginTop: 4 }}
-          />
-        </label>
-
-        <fieldset style={{ border: 0, padding: 0, margin: '0 0 12px' }}>
-          <legend>Visibility</legend>
-          <label style={{ display: 'block' }}>
-            <input
-              type="radio"
-              name="visibility"
-              value="private"
-              checked={visibility === 'private'}
-              onChange={() => setVisibility('private')}
-            />{' '}
-            private
-          </label>
-          <label style={{ display: 'block' }}>
-            <input
-              type="radio"
-              name="visibility"
-              value="public"
-              checked={visibility === 'public'}
-              onChange={() => setVisibility('public')}
-            />{' '}
-            public
-          </label>
-        </fieldset>
-
-        <label style={{ display: 'block', marginBottom: 12 }}>
-          Số từ học cùng lúc
-          <input
-            type="number"
-            min={10}
-            max={30}
-            step={1}
-            value={activePoolSize}
-            onChange={(e) => setActivePoolSize(Number(e.target.value))}
-            required
-            style={{ display: 'block', marginTop: 4 }}
-          />
-        </label>
-        <p style={{ marginTop: -8, marginBottom: 12, maxWidth: 480 }}>
-          Hệ thống tự thêm từ mới khi bạn đã học vững các từ đang ôn.
-        </p>
-        {!poolSizeValid ? (
-          <p style={{ color: 'crimson' }}>Nhập số nguyên từ 10 đến 30.</p>
+        {saveError ? (
+          <p role="alert" className="!mt-6 text-sm text-[var(--color-danger)] dark:text-[var(--color-danger-dark)]">
+            {saveError}
+          </p>
         ) : null}
 
-        {saveError ? <p style={{ color: 'crimson' }}>{saveError}</p> : null}
-
-        <p>
-          <button type="submit" disabled={!canSave}>
+        <div className="mt-8 flex flex-wrap gap-2">
+          <Button type="submit" variant="primary" loading={saving} disabled={!canSave}>
             {saving ? 'Đang lưu…' : 'Lưu'}
-          </button>{' '}
-          <button type="button" onClick={() => navigate('/decks')} disabled={saving}>
+          </Button>
+          <Button type="button" variant="secondary" disabled={saving} onClick={() => navigate('/decks')}>
             Hủy
-          </button>
-        </p>
+          </Button>
+        </div>
       </form>
-    </main>
+    </div>
   )
 }

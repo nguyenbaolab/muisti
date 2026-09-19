@@ -13,6 +13,21 @@ Lỗi / sai lệch đã biết. Đánh số từ **KI-001**. Entry mới ở đ�
 
 ---
 
+## KI-016 — File kết thúc bằng newline bị lỗi «Dòng trống» và khóa Lưu
+
+**Mức độ:** Medium  
+**File liên quan:** `src/lib/deckParser.ts`, `src/pages/CreateDeckPage.tsx`
+
+**Mô tả:** `parseDeckFile` coi mọi dòng `trim() === ''` là lỗi «Dòng trống», kể cả dòng cuối do editor thêm `\n`. `canSave` yêu cầu `errors.length === 0` nên file sạch nhưng có newline cuối → Lưu khóa; UI hiện «Sửa các lỗi trong file rồi chọn lại file.»
+
+**Cách tái hiện:** Tạo file `koira;chó\n` (newline cuối) → Preview 1 từ hợp lệ + 1 lỗi Dòng trống → nút Lưu deck disabled.
+
+**Hướng fix (chưa làm):** Parser bỏ qua dòng trống cuối (hoặc mọi dòng trống); hoặc `canSave` bỏ qua lỗi dòng trống. Không sửa ở bước järvi Create/Edit — `deckParser` và `canSave` giữ nguyên.
+
+**Trạng thái:** Open (2026-09-19)
+
+---
+
 ## KI-015 — Thứ tự hàng từ vựng trên Detail/Preview không ổn định
 
 **Mức độ:** Low  

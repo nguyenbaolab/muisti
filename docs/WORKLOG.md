@@ -4,6 +4,22 @@ Nhật ký thay đổi có ý nghĩa. Entry mới ở **đầu file** (sau tiêu
 
 ---
 
+## tinh chỉnh khoảng cách ghi chú/hint/lý do khóa nút trong form Create/Edit
+
+---
+
+## Giai đoạn 1 — CreateDeck + EditDeck järvi
+**Ngày:** 2026-09-19
+**Trạng thái:** Done
+
+**Đã làm:**
+- Tách Select, Textarea, RadioGroup, FileField, DeckForm; Create/Edit dùng chung metadata
+- Create: FileField + Xem trước (lỗi trước, VocabTable hợp lệ); Lưu deck + lý do khóa; lỗi insert UI cố định
+- Edit: DeckForm + Lưu/Hủy; nhánh loading/notfound/forbidden không `<main>`
+- KI-016 Open: newline cuối file → Dòng trống khóa Lưu
+
+---
+
 ## tinh chỉnh khoảng cách link quay lại và khối ước lượng Tổng kết
 
 ---

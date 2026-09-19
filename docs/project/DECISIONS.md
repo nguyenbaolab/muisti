@@ -4,6 +4,24 @@ Ghi theo thời gian, mới nhất ở trên. Mỗi entry: tên ngắn, ngày, q
 
 ---
 
+## Create/Edit järvi; DeckForm + Select/Textarea/RadioGroup/FileField
+
+**Ngày:** 2026-09-19
+
+**Quyết định:**
+- Form metadata chung `DeckForm` (không `<form>`, không nút): Tên (`Input`), ngôn ngữ (`Select` vi/English), mô tả (`Textarea`), visibility (`RadioGroup` legend «Chế độ hiển thị», nhãn `visibilityLabel`, mô tả Riêng tư/Công khai), pool (`Input` number + ghi chú cũ). `max-w-lg`, `gap-5`.
+- `Select` / `Textarea` / `RadioGroup` / `FileField` bám style `Input` (token, rounded-base, label xs muted, error `role="alert"`). Select giữ mũi tên native (không `appearance-none`). Radio native + `accent-color` token. File: input `sr-only`, nút «Chọn file»/«Đổi file» secondary; reset `input.value` sau change để chọn lại cùng tên.
+- Create: Xem trước (Việt hóa); tóm tắt hợp lệ/lỗi; bảng lỗi trước VocabTable hợp lệ; mobile lỗi = danh sách xếp chồng, `sm+` = table; không nền vàng; không VocabTable khi 0 dòng hợp lệ; bỏ cột STT. Nút «Lưu deck»; dòng lý do khóa (chỉ hiển thị, `canSave` không đổi).
+- Lỗi Supabase không lộ UI: `console.error` + copy cố định. Value DB `vi`/`en`/`private`/`public` không đổi.
+
+**Lý do:** Hai form gần giống; Input không cover select/textarea/radio/file; preview cũ tràn mobile và hiện message thô.
+
+**Phạm vi:** component mới + `CreateDeckPage` / `EditDeckPage`. Không sửa `deckParser`, DecksPage logic, ReviewPage.
+
+**Không làm gì:** Không nới `canSave` (KI-016 dòng trống). Không kéo thả file. Không cảnh báo dirty Edit.
+
+---
+
 ## Detail + Preview järvi; tách Tabs / DeckHeader / VocabTable / deckLabels
 
 **Ngày:** 2026-09-19
