@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { Button, buttonPrimaryClassName, buttonSecondaryClassName } from '../components/Button'
 import { FocusLayout, focusBackLinkClassName } from '../components/FocusLayout'
+import { Input } from '../components/Input'
 import { VocabTable } from '../components/VocabTable'
 import { supabase } from '../lib/supabase'
 import { computeNextReview, todayLocalIsoDate } from '../lib/srs'
@@ -397,7 +398,11 @@ export function ReviewPage() {
       })
       .eq('id', card.progressId)
 
-    return updateError ? updateError.message : null
+    if (updateError) {
+      console.error(updateError)
+      return 'Không lưu được câu trả lời. Thử lại.'
+    }
+    return null
   }
 
   function checkAnswer(card: SessionCard): boolean {
@@ -750,70 +755,163 @@ export function ReviewPage() {
     !saving &&
     (askMode === 'type' ? typedAnswer.trim() !== '' : selectedOption !== null)
 
+  const completedCount = completedCards.length
+  const sessionTotal = completedCards.length + queue.length
+
   return (
     <FocusLayout>
-      <h1>Ôn tập hôm nay</h1>
-      <p>
-        Còn {queue.length} từ trong phiên này.
-      </p>
-      <p>
-        Nghĩa: <strong>{card.translation}</strong>
-      </p>
+      <div className="flex flex-col gap-6">
+        <h1 className="sr-only">Ôn tập hôm nay</h1>
 
-      <form onSubmit={(e) => void handleSubmit(e)}>
-        {askMode === 'type' ? (
-          <label>
-            Gõ từ tiếng Phần Lan
-            <input
-              type="text"
+        {sessionTotal > 0 ? (
+          <div>
+            <div className={`text-xs ${mutedTextClassName}`}>
+              {completedCount} / {sessionTotal} từ
+            </div>
+            <div
+              role="progressbar"
+              aria-valuemin={0}
+              aria-valuemax={sessionTotal}
+              aria-valuenow={completedCount}
+              aria-label="Tiến độ phiên ôn tập"
+              className="mt-2 h-0.5 w-full overflow-hidden rounded-base bg-[var(--color-border)] dark:bg-[var(--color-border-dark)]"
+            >
+              <div
+                className="h-full rounded-base bg-[var(--color-accent)] dark:bg-[var(--color-accent-dark)]"
+                style={{ width: `${(completedCount / sessionTotal) * 100}%` }}
+              />
+            </div>
+          </div>
+        ) : null}
+
+        <div>
+          <div className={`text-xs ${mutedTextClassName}`}>Nghĩa</div>
+          <div className="mt-1 break-words text-2xl font-medium leading-snug text-[var(--color-text)] dark:text-[var(--color-text-dark)]">
+            {card.translation}
+          </div>
+        </div>
+
+        <form className="flex flex-col gap-6" onSubmit={(e) => void handleSubmit(e)}>
+          {askMode === 'type' ? (
+            <Input
               ref={typedInputRef}
+              label="Gõ từ tiếng Phần Lan"
+              type="text"
               value={typedAnswer}
               onChange={(e) => setTypedAnswer(e.target.value)}
               disabled={Boolean(feedback) || saving}
               autoComplete="off"
-              style={{ display: 'block', marginTop: 4 }}
+              autoCapitalize="off"
+              autoCorrect="off"
+              spellCheck={false}
+              className="!text-base"
             />
-          </label>
-        ) : (
-          <fieldset disabled={Boolean(feedback) || saving}>
-            <legend>Chọn từ tiếng Phần Lan</legend>
-            {mcqOptions.map((option, index) => (
-              <label key={option} style={{ display: 'block' }}>
-                <input
-                  type="radio"
-                  name="mcq"
-                  value={option}
-                  checked={selectedOption === option}
-                  onChange={() => setSelectedOption(option)}
-                />{' '}
-                {String.fromCharCode(65 + index)}. {option}
-              </label>
-            ))}
-          </fieldset>
-        )}
+          ) : (
+            <fieldset
+              disabled={Boolean(feedback) || saving}
+              className="w-full border-0 p-0 disabled:opacity-60"
+            >
+              <legend className={`mb-2 block text-xs ${mutedTextClassName}`}>
+                Chọn từ tiếng Phần Lan
+              </legend>
+              <div>
+                {mcqOptions.map((option, index) => {
+                  const selected = selectedOption === option
+                  return (
+                    <label
+                      key={option}
+                      className={
+                        selected
+                          ? `flex min-h-11 cursor-pointer items-center gap-3 border-b border-l-2 border-[var(--color-border)] border-l-[var(--color-accent)] py-2 pl-2.5 font-medium last:border-b-0 dark:border-[var(--color-border-dark)] dark:border-l-[var(--color-accent-dark)]`
+                          : `flex min-h-11 cursor-pointer items-center gap-3 border-b border-l-2 border-[var(--color-border)] border-l-transparent py-2 pl-2.5 last:border-b-0 dark:border-[var(--color-border-dark)]`
+                      }
+                    >
+                      <input
+                        type="radio"
+                        name="mcq"
+                        value={option}
+                        checked={selected}
+                        onChange={() => setSelectedOption(option)}
+                        className="shrink-0 accent-[var(--color-accent)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)] dark:accent-[var(--color-accent-dark)] dark:focus-visible:outline-[var(--color-accent-dark)]"
+                      />
+                      <span
+                        className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-base border border-[var(--color-border)] text-xs ${mutedTextClassName} dark:border-[var(--color-border-dark)]`}
+                      >
+                        {String.fromCharCode(65 + index)}
+                      </span>
+                      <span className="break-words text-base text-[var(--color-text)] dark:text-[var(--color-text-dark)]">
+                        {option}
+                      </span>
+                    </label>
+                  )
+                })}
+              </div>
+            </fieldset>
+          )}
 
-        {error ? <p>{error}</p> : null}
+          {error && !feedback ? (
+            <div
+              className="text-sm text-[var(--color-danger)] dark:text-[var(--color-danger-dark)]"
+              role="alert"
+            >
+              {error}
+            </div>
+          ) : null}
 
-        {!feedback ? (
-          <p>
-            <button type="submit" disabled={!canSubmit}>
-              {saving ? 'Đang lưu…' : 'Trả lời'}
-            </button>
-          </p>
-        ) : (
-          <div>
-            <p>{feedback.correct ? 'Đúng!' : 'Sai.'}</p>
-            <p>
-              Đáp án: <strong>{card.finnishWord}</strong>
-            </p>
-            <p>
-              <button type="button" onClick={handleNext} disabled={saving}>
-                Tiếp theo
-              </button>
-            </p>
+          {!feedback ? (
+            <div>
+              <Button
+                type="submit"
+                variant="primary"
+                disabled={!canSubmit}
+                loading={saving}
+                className="w-full sm:w-auto"
+              >
+                {saving ? 'Đang lưu…' : 'Trả lời'}
+              </Button>
+            </div>
+          ) : (
+            <div
+              className="border-t border-[var(--color-border)] pt-6 dark:border-[var(--color-border-dark)]"
+              role="status"
+              aria-live="polite"
+            >
+              <div
+                className={
+                  feedback.correct
+                    ? 'text-lg font-medium text-[var(--color-success)] dark:text-[var(--color-success-dark)]'
+                    : 'text-lg font-medium text-[var(--color-danger)] dark:text-[var(--color-danger-dark)]'
+                }
+              >
+                {feedback.correct ? 'Đúng!' : 'Sai.'}
+              </div>
+              <div className="mt-2 text-base text-[var(--color-text)] dark:text-[var(--color-text-dark)]">
+                <span className={mutedTextClassName}>Đáp án: </span>
+                <strong>{card.finnishWord}</strong>
+              </div>
+              <div className="mt-6">
+                <Button
+                  type="button"
+                  variant="primary"
+                  onClick={handleNext}
+                  disabled={saving}
+                  className="w-full sm:w-auto"
+                >
+                  Tiếp theo
+                </Button>
+              </div>
+            </div>
+          )}
+
+          <div className={`hidden text-xs sm:block ${mutedTextClassName}`} aria-hidden="true">
+            {feedback
+              ? 'Enter để tiếp tục'
+              : askMode === 'type'
+                ? 'Enter để trả lời'
+                : 'Nhấn A–D để chọn đáp án'}
           </div>
-        )}
-      </form>
+        </form>
+      </div>
     </FocusLayout>
   )
 }

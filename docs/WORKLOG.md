@@ -4,6 +4,15 @@ Nhật ký thay đổi có ý nghĩa. Entry mới ở **đầu file** (sau tiêu
 
 ---
 
+## Giai đoạn 1 — ReviewPage Đợt B (màn học järvi)
+**Ngày:** 2026-09-19
+
+- JSX `reviewing`: h1 sr-only; tiến độ derived x/y + progressbar; khối Nghĩa; Input (ref + `!text-base`); MCQ tự dựng min-h-11; persist error chỉ khi `!feedback`; feedback `role="status"`; gợi ý phím sm+.
+- `persistCard`: `console.error(updateError)` + copy «Không lưu được câu trả lời. Thử lại.» Query/SRS/phím/autofocus không đổi.
+- Docs: CONTEXT, DECISIONS, KI-017 Partial, KI-018, REQUIREMENTS, WORKLOG.
+
+---
+
 ## Giai đoạn 1 — ReviewPage Đợt A (khung + setup/loading/error/empty/done)
 **Ngày:** 2026-09-19
 

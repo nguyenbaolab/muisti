@@ -13,21 +13,36 @@ Lỗi / sai lệch đã biết. Đánh số từ **KI-001**. Entry mới ở đ�
 
 ---
 
-## KI-017 — ReviewPage Đợt A: due count, lỗi persist thô, F5 mất phiên
+## KI-018 — Review keyboard listener gắn lại mỗi render
+
+**Mức độ:** Low  
+**File liên quan:** `src/pages/ReviewPage.tsx`
+
+**Mô tả:** `handleNext` và `submitMcqChoice` không `useCallback` nên identity đổi mỗi render. Effect `document` `keydown` phụ thuộc hai hàm đó → tháo/gắn listener mỗi lần render. Có cleanup, không leak; chỉ churn.
+
+**Cách tái hiện:** Mở màn `reviewing`, gõ / chọn đáp án — mỗi setState rebind listener (DevTools Event Listeners).
+
+**Hướng fix:** `useCallback` các handler (cẩn thận deps) hoặc đăng ký listener ổn định. Không sửa ở Đợt B.
+
+**Trạng thái:** Open (2026-09-19)
+
+---
+
+## KI-017 — ReviewPage: due count, lỗi persist, F5 mất phiên
 
 **Mức độ:** Low  
 **File liên quan:** `src/pages/ReviewPage.tsx`
 
 **Mô tả:**
-- Setup chưa hiện số từ đến hạn / số sẽ enroll — cần query mới (và enroll chỉ chạy khi bấm Bắt đầu nên số trước đó dễ lệch).
-- Lỗi persist lúc học (`handleSubmit` / `submitMcqChoice` khi `pageState` vẫn `reviewing`) vẫn `setError(message)` thô của Supabase, hiện `<p>{error}</p>` trong form. Chờ Đợt B.
+- Setup chưa hiện số từ đến hạn / số sẽ enroll — cần query mới (enroll chỉ chạy khi bấm Bắt đầu nên số trước đó dễ lệch).
+- Lỗi persist lúc học: Đợt B đã Việt hóa trong `persistCard` («Không lưu được câu trả lời. Thử lại.» + `console.error`). UI chỉ hiện khi `error && !feedback` nên không còn hiện lỗi cũ cùng «Đúng!» sau retry thành công. **Nguyên nhân gốc còn:** `handleSubmit` / `submitMcqChoice` không `setError(null)` khi bắt đầu / khi persist OK — `error` vẫn trong state đến `presentCard` / `startReview`.
 - F5 giữa phiên (`loading` / `reviewing`) mất queue — state chỉ trong memory; chưa có persist phiên.
 
-**Cách tái hiện:** Mở `/review` hoặc `/review/:id` setup — không thấy số due. Trong lúc học, nếu update progress fail — message tiếng Anh/Postgres. F5 giữa phiên → về setup.
+**Cách tái hiện:** Setup không thấy số due. Persist fail → copy Việt. Retry thành công → «Đúng!» không kèm alert lỗi (state `error` vẫn còn). F5 giữa phiên → về setup.
 
-**Hướng fix:** Query due (sau enroll) nếu muốn số chính xác; Việt hóa persist ở Đợt B; persist phiên nếu product muốn resume.
+**Hướng fix:** Query due nếu muốn số chính xác; `setError(null)` đầu `handleSubmit` / `submitMcqChoice` (và khi persist OK) nếu muốn xóa state; persist phiên nếu product muốn resume.
 
-**Trạng thái:** Open (2026-09-19)
+**Trạng thái:** Partial (2026-09-19) — Việt hóa + điều kiện hiển thị Đợt B; gốc `error` không xóa và F5/due count còn Open.
 
 ---
 

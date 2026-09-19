@@ -54,6 +54,7 @@ Chính là thuật toán đã chốt và implement ở T1.5 — **không thiết
 - 3 mức tự động theo `wrong_count`: Nhớ dễ (`0` → `easy`) / Nhớ (`1` → `good`) / Quên (`>=2` → `forgot`).
 - Điều kiện “sẵn sàng lên Level 2” (chỉ đánh dấu; Level 2 chưa build): 3 lần đúng liên tiếp trong SRS.
 - Hai chế độ trả lời: Gõ chữ; Trắc nghiệm (MCQ). Fallback về gõ chữ khi không đủ 3 distractor (`pickMcqOptions` trả `null`).
+- **Màn học (UI järvi Đợt B 2026-09-19):** tiến độ `{đã xong} / {tổng phiên} từ` derived (`completedCards.length` và `queue.length`), không state mới. Gợi ý phím (chỉ `sm+`, `aria-hidden`): Enter để trả lời / A–D / Enter để tiếp tục — không đổi logic phím.
 - **Phím tắt lúc ôn** (`pageState === 'reviewing'`): Gõ chữ — Enter submit form (lần 1), Enter lần 2 (đã có feedback) → câu tiếp. MCQ — A/B/C/D chọn + submit ngay; Enter sau feedback → câu tiếp. Chuột (radio / Trả lời / Tiếp theo) vẫn dùng được. Không áp dụng ở setup/done/error/empty.
 
 ### Level 2 (tương lai — không build giai đoạn này)

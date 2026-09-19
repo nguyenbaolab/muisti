@@ -4,6 +4,27 @@ Ghi theo thời gian, mới nhất ở trên. Mỗi entry: tên ngắn, ngày, q
 
 ---
 
+## ReviewPage Đợt B: màn học järvi
+
+**Ngày:** 2026-09-19
+
+**Quyết định:**
+- Tiến độ `{x} / {y} từ` derived: `x = completedCards.length`, `y = completedCards.length + queue.length`. Không state mới. Thanh `role="progressbar"`, fill `width` inline phần trăm; y = 0 không render.
+- h1 «Ôn tập hôm nay» giữ, `sr-only` trên màn học (tập trung vào thẻ).
+- Typing: `Input` `forwardRef` — `typedInputRef` vẫn trỏ `<input>` thật; `className="!text-base"` ghi đè `text-sm` (iOS không zoom); `autoCapitalize`/`autoCorrect`/`spellCheck` tắt.
+- MCQ không dùng `RadioGroup`: cần `fieldset disabled` và nhãn A–D đúng thứ tự `mcqOptions` (phím A–D đọc `mcqOptions[index]`). Tự dựng hàng `min-h-11`, radio native `name="mcq"`.
+- Lỗi persist: Việt hóa trong `persistCard` (`console.error` + «Không lưu được câu trả lời. Thử lại.»). UI chỉ hiện khi `error && !feedback` — không thêm `setError(null)` vào handler.
+- Gợi ý phím: `hidden sm:block` `aria-hidden="true"`; copy Enter / A–D theo ngữ cảnh. Không đổi keyboard/autofocus.
+- Nút Trả lời / Tiếp theo: `Button` primary; `disabled={!canSubmit}` là nguồn disable; `loading={saving}` thêm `aria-busy`.
+
+**Lý do:** Đồng bộ järvi; giữ Enter form-native và A–D theo mảng; che lỗi persist cũ hiện cùng «Đúng!» mà không đổi logic xóa error.
+
+**Phạm vi:** JSX nhánh `reviewing` + một chỗ return của `persistCard`. Không sửa `FocusLayout`, setup/done, `srs.ts`, phím, autofocus.
+
+**Không làm gì:** Không state tiến độ. Không `setError(null)` trong submit. Không `RadioGroup`. Không quản lý focus mới.
+
+---
+
 ## ReviewPage Đợt A: khung tập trung + setup/empty/error/done
 
 **Ngày:** 2026-09-19

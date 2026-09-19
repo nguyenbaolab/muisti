@@ -7,7 +7,7 @@ Tài liệu kỹ thuật cho Cursor khi đọc/ghi code. Business: `REQUIREMENTS
 ## §1 Tech stack
 
 - **Frontend:** Vite + React + TypeScript, static SPA
-- **CSS:** Tailwind CSS v4 (`@tailwindcss/vite` + `@import "tailwindcss"` trong `index.css`). Token järvi trong `@theme`; dark mode class `.dark` trên `<html>` (`@custom-variant`). Trang session dùng token + `Button` / `Input` / `Select` / `Textarea` / `RadioGroup` / `FileField` / `DeckForm` / `Tabs` / `DeckHeader` / `VocabTable` / `FocusLayout`. Review Đợt A (setup/loading/error/empty/done + khung) đã järvi; màn `reviewing` còn inline style chờ Đợt B
+- **CSS:** Tailwind CSS v4 (`@tailwindcss/vite` + `@import "tailwindcss"` trong `index.css`). Token järvi trong `@theme`; dark mode class `.dark` trên `<html>` (`@custom-variant`). Trang session dùng token + `Button` / `Input` / `Select` / `Textarea` / `RadioGroup` / `FileField` / `DeckForm` / `Tabs` / `DeckHeader` / `VocabTable` / `FocusLayout`. Review Đợt A + Đợt B (màn học) đã järvi
 - **Data / Auth:** Supabase (Postgres + Auth), client gọi `supabase-js`, bảo vệ bằng RLS
 - **Auth model:** admin invite (`inviteUserByEmail`); không form đăng ký công khai
 - **Deploy:** Cloudflare Pages
@@ -53,7 +53,7 @@ src/
     EditDeckPage.tsx    # /decks/:id/edit järvi; DeckForm; owner; Lưu/Hủy
     DeckPreviewPage.tsx # /decks/:id/preview järvi; đọc-only + Clone; DeckHeader + VocabTable
     DeckDetailPage.tsx  # /decks/:id järvi; owner: Tabs Từ vựng/Tổng kết; ôn + Sửa; VocabTable
-    ReviewPage.tsx      # ôn SRS; ngoài AppLayout; FocusLayout + ThemeToggle; setup/empty/error/done Đợt A; reviewing chờ Đợt B; phím Enter + A–D; done = Session Summary
+    ReviewPage.tsx      # ôn SRS; ngoài AppLayout; FocusLayout; setup/empty/error/done Đợt A; reviewing Đợt B (tiến độ derived, Input, MCQ tự dựng, feedback status); phím Enter + A–D; done = Session Summary
   types/
     database.ts         # Deck, VocabItem, UserVocabProgress, ReviewQueueItem, Profile
 public/                 # static assets
@@ -132,7 +132,8 @@ Hướng đã chốt (2026-09-14, cột pool 2026-09-16, profiles 2026-09-17):
 - Session Summary: `completedCards` tích khi trả hết nợ; màn `done` đếm wrongCount 0/1/≥2, thời gian từ `sessionStartTime`, bảng từ quên; dòng từ mới chỉ khi `scopedDeckId && enrolledCount > 0`.
 - Review keyboard (`pageState === 'reviewing'` only): document `keydown` — Enter + `feedback` → `handleNext`; MCQ A–D → `submitMcqChoice(chosen)` (không đọc `selectedOption` vì stale). `handleSubmit` chuột/form không đổi.
 - Theme: `useTheme` — override từ `localStorage['muisti-theme']` (`light`|`dark` only) hoặc theo OS sống (`matchMedia` change). Chỉ `setItem` trong `toggleTheme`. Script FOUC `index.html` cùng quy tắc. `ThemeToggle` trong `AppLayout` và `FocusLayout` (Review). Mount hook không ghi storage. Login không mount hook (class lúc load). KI-012 Closed.
-- Review UI Đợt A: một `<main>` qua `FocusLayout`; setup hiện tên deck (cùng query `checkOwner` `owner_id, name`), `ownerChecked` chỉ lớp hiển thị; loading/empty/error/done järvi; `startReview` lỗi fetch → copy cố định + `console.error`. Màn `reviewing` (câu hỏi/typing/MCQ) chưa đổi.
+- Review UI Đợt A: một `<main>` qua `FocusLayout`; setup hiện tên deck (cùng query `checkOwner` `owner_id, name`), `ownerChecked` chỉ lớp hiển thị; loading/empty/error/done järvi; `startReview` lỗi fetch → copy cố định + `console.error`.
+- Review UI Đợt B (màn `reviewing`): h1 sr-only; tiến độ derived `completedCards.length` / (`completedCards.length + queue.length`); khối Nghĩa lớn; Typing qua `Input` (`ref` → `<input>` thật, `!text-base`); MCQ tự dựng (không `RadioGroup`), fieldset disabled, A–D theo `mcqOptions.map` index; persist error chỉ hiện khi `!feedback`; feedback `role="status"` `aria-live="polite"`; gợi ý phím `hidden sm:block` `aria-hidden`. `persistCard` lỗi → copy cố định + `console.error`.
 - SRS queue mix: `user_vocab_progress.select('..., vocab_items(*)').eq('user_id').lte('due_date', todayLocalIsoDate())` — không join `decks` — `ReviewPage` `/review`
 - SRS queue 1 deck: cùng query + `vocab_items!inner(*)` + `.eq('vocab_items.deck_id', deckId)` — `ReviewPage` `/review/:deckId`
 - SRS update: khi từ trả hết nợ (đúng lần cuối), `computeNextReview` rồi `update` ease/interval/due_date/review_count/last_reviewed_at. Sai chỉ đẩy lại cuối queue, không ghi DB. — `src/lib/srs.ts` + `ReviewPage`
