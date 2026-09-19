@@ -23,6 +23,7 @@ type DeckFormProps = {
   poolSizeValid: boolean
   disabled?: boolean
   autoFocusName?: boolean
+  showEditPoolHint?: boolean
 }
 
 export function DeckForm({
@@ -35,6 +36,7 @@ export function DeckForm({
   poolSizeValid,
   disabled = false,
   autoFocusName = false,
+  showEditPoolHint = false,
 }: DeckFormProps) {
   return (
     <div className="flex max-w-lg flex-col gap-5">
@@ -95,9 +97,14 @@ export function DeckForm({
           error={poolSizeValid ? undefined : 'Nhập số nguyên từ 10 đến 30.'}
           onChange={(event) => onActivePoolSizeChange(Number(event.target.value))}
         />
-        <p className="mt-2 text-xs text-[var(--color-text-muted)] dark:text-[var(--color-text-muted-dark)]">
-          Hệ thống tự thêm từ mới khi bạn đã học vững các từ đang ôn.
+        <p className="mt-2 text-sm text-[var(--color-text-muted)] dark:text-[var(--color-text-muted-dark)]">
+          Mỗi lần vào ôn deck, hệ thống thêm từ mới cho đủ số này. Từ nhớ lâu rời khỏi nhóm đang học.
         </p>
+        {showEditPoolHint ? (
+          <p className="mt-1 text-sm text-[var(--color-text-muted)] dark:text-[var(--color-text-muted-dark)]">
+            Đổi số này không xóa từ đang học, chỉ ảnh hưởng số từ mới được thêm sau này.
+          </p>
+        ) : null}
       </div>
     </div>
   )

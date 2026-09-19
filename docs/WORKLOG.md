@@ -4,6 +4,13 @@ Nhật ký thay đổi có ý nghĩa. Entry mới ở **đầu file** (sau tiêu
 
 ---
 
+## Giai đoạn 1 — Copy giải thích nhịp học (mix vs deck)
+**Ngày:** 2026-09-19
+
+- Dòng mô tả muted trên Home (có dữ liệu), Decks, Detail, Preview `!owned`, Review setup/done. Nav `title`. Đổi hint pool trên DeckForm; Edit `showEditPoolHint`. Không query/state/phím tắt màn học.
+
+---
+
 ## Giai đoạn 1 — HomePage empty: copy + nút Tạo deck mới
 **Ngày:** 2026-09-19
 

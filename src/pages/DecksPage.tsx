@@ -143,13 +143,16 @@ export function DecksPage() {
           Tạo deck mới
         </Link>
       </div>
+      <p className="mt-2 text-sm text-[var(--color-text-muted)] dark:text-[var(--color-text-muted-dark)]">
+        Mỗi ngày vào một hoặc vài deck để học từ mới và ôn bài, sau đó vào Ôn tập để ôn thêm một lượt.
+      </p>
 
       <Tabs
         idPrefix="decks"
         ariaLabel="Loại deck"
         value={activeTab}
         onChange={setActiveTab}
-        className="mt-8"
+        className="mt-6"
         tabs={[
           { id: 'mine', label: 'Cá nhân', count: loading ? undefined : mineCount },
           { id: 'public', label: 'Public', count: loading ? undefined : publicCount },
@@ -175,8 +178,17 @@ export function DecksPage() {
           <p className="text-[var(--color-text-muted)] dark:text-[var(--color-text-muted-dark)]">
             Đang tải...
           </p>
-        ) : visibleDecks.length === 0 ? (
-          <p className="text-[var(--color-text-muted)] dark:text-[var(--color-text-muted-dark)]">
+        ) : (
+          <>
+            {activeTab === 'public' ? (
+              <p className="text-sm text-[var(--color-text-muted)] dark:text-[var(--color-text-muted-dark)]">
+                Deck công khai của người khác. Bấm vào để xem trước, rồi clone về để học.
+              </p>
+            ) : null}
+            {visibleDecks.length === 0 ? (
+          <p
+            className={`text-[var(--color-text-muted)] dark:text-[var(--color-text-muted-dark)]${activeTab === 'public' ? ' mt-2' : ''}`}
+          >
             {activeTab === 'mine' ? (
               <>
                 Bạn chưa có deck nào.{' '}
@@ -192,8 +204,8 @@ export function DecksPage() {
               'Chưa có deck công khai nào.'
             )}
           </p>
-        ) : (
-          <ul className="list-none p-0">
+            ) : (
+          <ul className={`list-none p-0${activeTab === 'public' ? ' mt-4' : ''}`}>
             {visibleDecks.map((deck) => {
               const owned = isOwned(deck, userId)
               const meta = owned
@@ -245,6 +257,8 @@ export function DecksPage() {
               )
             })}
           </ul>
+            )}
+          </>
         )}
       </TabPanel>
     </div>

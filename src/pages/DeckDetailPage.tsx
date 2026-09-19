@@ -239,13 +239,16 @@ export function DeckDetailPage() {
           </>
         }
       />
+      <p className="mt-2 text-sm text-[var(--color-text-muted)] dark:text-[var(--color-text-muted-dark)]">
+        Bắt đầu ôn tập sẽ ôn các từ đến hạn và thêm từ mới cho đủ số từ học cùng lúc của deck.
+      </p>
 
       <Tabs
         idPrefix="deck-detail"
         ariaLabel="Nội dung deck"
         value={activeTab}
         onChange={setActiveTab}
-        className="mt-8"
+        className="mt-6"
         tabs={[
           { id: 'words', label: 'Từ vựng' },
           { id: 'summary', label: 'Tổng kết' },
@@ -254,11 +257,16 @@ export function DeckDetailPage() {
 
       <TabPanel idPrefix="deck-detail" labelledBy={activeTab} className="mt-6">
         {activeTab === 'words' ? (
-          <VocabTable
-            items={words}
-            showStatus
-            caption={`Danh sách từ vựng của deck ${deck.name}`}
-          />
+          <>
+            <p className="mb-4 text-sm text-[var(--color-text-muted)] dark:text-[var(--color-text-muted-dark)]">
+              Chưa học: chưa bắt đầu. Đang học: đang ôn. Đã thuộc: nhớ chắc, được ôn thưa. Nếu sai lại thì từ quay về học.
+            </p>
+            <VocabTable
+              items={words}
+              showStatus
+              caption={`Danh sách từ vựng của deck ${deck.name}`}
+            />
+          </>
         ) : (
           <>
             <div className="grid grid-cols-2 gap-x-8 gap-y-6 sm:grid-cols-3">
@@ -280,6 +288,9 @@ export function DeckDetailPage() {
               ))}
             </div>
             <div className="mt-8 space-y-1 border-t border-[var(--color-border)] pt-6 dark:border-[var(--color-border-dark)]">
+              <p className="text-sm text-[var(--color-text-muted)] dark:text-[var(--color-text-muted-dark)]">
+                Đã học gồm cả Đã thuộc. Đến hạn hôm nay gồm cả từ đã quá hạn.
+              </p>
               <p className="text-sm text-[var(--color-text-muted)] dark:text-[var(--color-text-muted-dark)]">
                 Bắt đầu học từ: {startedLabel} (ước lượng theo ngày tạo deck)
               </p>

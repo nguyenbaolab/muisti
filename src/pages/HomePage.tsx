@@ -141,6 +141,9 @@ export function HomePage() {
           Ôn tập
         </Button>
       </div>
+      <p className="mt-2 text-sm text-[var(--color-text-muted)] dark:text-[var(--color-text-muted-dark)]">
+        Ôn những từ đến hạn của mọi deck. Muốn học từ mới thì vào một deck rồi bấm Bắt đầu ôn tập.
+      </p>
 
       <div className="mt-14 grid grid-cols-2 gap-x-8 gap-y-6 sm:grid-cols-3">
         {stats.map((stat) => (

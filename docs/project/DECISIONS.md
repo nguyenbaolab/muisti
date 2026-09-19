@@ -4,6 +4,26 @@ Ghi theo thời gian, mới nhất ở trên. Mỗi entry: tên ngắn, ngày, q
 
 ---
 
+## Copy giải thích nhịp học; thuật ngữ thống nhất trên UI
+
+**Ngày:** 2026-09-19
+
+**Quyết định:**
+
+- Nhịp học trên UI: mỗi ngày vào deck «Bắt đầu ôn tập» (ôn due + thêm từ mới cho đủ số từ học cùng lúc); sau đó «Ôn tập» mix (due mọi deck, không thêm từ mới).
+- Thuật ngữ: **Đang học** = đang ôn (`interval_days < 30`). **Đã thuộc** = nhớ chắc, ôn thưa (`>= 30`), không phải xong hẳn (sai thì quay về học). **Đã học** gồm Đã thuộc. **Đến hạn hôm nay** gồm cả quá hạn. Không hiện pool / enroll / graduate / due trên UI.
+- Setup Review: không hiện số due / số sẽ thêm (giữ Đợt A: enroll lúc Bắt đầu → lệch nếu hiện trước). Chỉ dòng mô tả mix vs deck. Gợi ý phím setup `hidden sm:block` `aria-hidden`.
+- Ghi chú «Số từ học cùng lúc»: đúng cơ chế (thêm từ khi vào ôn deck cho đủ số; từ nhớ lâu rời nhóm đang học). Edit: đổi số không xóa từ đang học.
+- Nav `title` hover (Decks / Ôn tập); không `aria-label` thêm. Title không hiện trên mobile (KI-025).
+
+**Lý do:** Recon: UI thiếu mô tả mix vs deck; hint pool cũ («học vững») sai cơ chế.
+
+**Phạm vi:** HomePage (có dữ liệu), AppLayout `title`, DecksPage, DeckDetailPage, DeckPreviewPage (`!owned`), DeckForm + `showEditPoolHint` trên Edit, Review setup/done. Không đổi query/state/phím tắt màn học.
+
+**Không làm gì:** Không thêm query số liệu setup. Không đổi Login / Empty / Error Review / màn học.
+
+---
+
 ## Deploy Cloudflare Workers Static Assets; SPA qua wrangler.jsonc
 
 **Ngày:** 2026-09-19

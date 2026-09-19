@@ -22,10 +22,10 @@ export function AppLayout() {
               Muisti
             </Link>
             <nav className="flex gap-4 text-sm">
-              <NavLink to="/decks" className={navClass}>
+              <NavLink to="/decks" className={navClass} title="Xem và học các deck của bạn">
                 Decks
               </NavLink>
-              <NavLink to="/review" className={navClass}>
+              <NavLink to="/review" className={navClass} title="Ôn các từ đến hạn trong mọi deck">
                 Ôn tập
               </NavLink>
             </nav>

@@ -24,14 +24,14 @@ src/
   App.tsx               # BrowserRouter + session gate (onAuthStateChange); nested AppLayout
   index.css             # Tailwind + token järvi; không alias cũ; #root không chrome Vite
   components/
-    AppLayout.tsx       # header (wordmark + Decks/Ôn tập + ThemeToggle + Đăng xuất) + Outlet
+    AppLayout.tsx       # header (wordmark + Decks/Ôn tập + title hover + ThemeToggle + Đăng xuất) + Outlet
     Button.tsx          # variant primary/secondary/danger; prop loading; export class primary/secondary
     Input.tsx           # forwardRef; optional label/error; w-full
     Select.tsx          # forwardRef; label/error; option children; mũi tên native
     Textarea.tsx        # forwardRef; label/error; resize-y; rows mặc định 3
     RadioGroup.tsx      # fieldset/legend; options value/label/description
     FileField.tsx       # input file ẩn + nút Chọn/Đổi file; hint/error
-    DeckForm.tsx        # 5 trường metadata Create/Edit; không <form>/submit
+    DeckForm.tsx        # 5 trường metadata Create/Edit; hint pool đúng cơ chế; `showEditPoolHint` chỉ Edit
     linkClasses.ts      # backLinkClassName (không mb-4) + backLinkBlockClassName
     ThemeToggle.tsx     # AppLayout + FocusLayout (Review); mount không ghi storage
     FocusLayout.tsx     # <main> max-w-xl + thanh ← Trang chủ / ThemeToggle; ngoài AppLayout
@@ -46,13 +46,13 @@ src/
     useTheme.ts         # override | system; chỉ ghi localStorage khi toggle (KI-012 Closed)
   pages/
     LoginPage.tsx       # järvi; signInWithPassword; lỗi Việt hóa; ngoài AppLayout
-    HomePage.tsx        # `/` — Tổng kết Tổng (query cũ từ AppShell)
-    DecksPage.tsx       # /decks järvi; Tabs Cá nhân/Public; hàng hairline; own → /:id; khác → /preview
+    HomePage.tsx        # `/` — Tổng kết Tổng; hero due + Ôn tập + dòng mix vs deck; empty tạo deck
+    DecksPage.tsx       # /decks järvi; dòng nhịp học; Tabs Cá nhân/Public; Public có dòng clone; hàng hairline; own → /:id; khác → /preview
     CreateDeckPage.tsx  # /decks/new järvi; DeckForm + FileField + Xem trước; Lưu deck
     EditDeckPage.tsx    # /decks/:id/edit järvi; DeckForm; owner; Lưu/Hủy
-    DeckPreviewPage.tsx # /decks/:id/preview järvi; đọc-only + Clone; DeckHeader + VocabTable
-    DeckDetailPage.tsx  # /decks/:id järvi; owner: Tabs Từ vựng/Tổng kết; ôn + Sửa; VocabTable
-    ReviewPage.tsx      # ôn SRS; ngoài AppLayout; FocusLayout; setup/empty/error/done Đợt A; reviewing Đợt B (tiến độ derived, Input, MCQ tự dựng, feedback status); phím Enter + A–D; done = Session Summary
+    DeckPreviewPage.tsx # /decks/:id/preview järvi; đọc-only + Clone; dòng clone không copy tiến độ nếu !owned
+    DeckDetailPage.tsx  # /decks/:id järvi; owner: dòng Bắt đầu ôn tập; Tabs Từ vựng (chú giải trạng thái)/Tổng kết (Đã học/quá hạn); ôn + Sửa; VocabTable
+    ReviewPage.tsx      # ôn SRS; ngoài AppLayout; FocusLayout; setup mô tả mix vs deck + phím sm+; empty/error/done Đợt A; reviewing Đợt B; done + dòng đến hạn lại
   types/
     database.ts         # Deck, VocabItem, UserVocabProgress, ReviewQueueItem, Profile
 public/                 # Vite copy nguyên vào dist/
@@ -89,7 +89,7 @@ supabase/
 - `/decks/:id` — `DeckDetailPage` khi có session; guest → `/login`; chỉ owner (non-owner: thông báo + link preview, không redirect)
 - `/review` — `ReviewPage` mix; **ngoài** `AppLayout`; tự khung `FocusLayout` (← Trang chủ + ThemeToggle, `max-w-xl`); guest → `/login`
 - `/review/:deckId` — `ReviewPage` chỉ owner: check `owner_id` rồi enroll Active Pool rồi ôn due; **ngoài** `AppLayout`, cùng `FocusLayout`; non-owner bị chặn (nhắn sang preview)
-- Layout session: `AppLayout` bọc `/`, `/decks`, `/decks/new`, `/decks/:id`, `/decks/:id/edit`, `/decks/:id/preview`. Header: Muisti → `/`, Decks, Ôn tập → `/review`, `ThemeToggle`, Đăng xuất (`signOut`). Không hiện email.
+- Layout session: `AppLayout` bọc `/`, `/decks`, `/decks/new`, `/decks/:id`, `/decks/:id/edit`, `/decks/:id/preview`. Header: Muisti → `/`, Decks (`title` xem/học deck), Ôn tập → `/review` (`title` ôn due mọi deck), `ThemeToggle`, Đăng xuất (`signOut`). Không hiện email.
 - Session: `getSession` + `onAuthStateChange` trong `App.tsx`; lần đầu hiện `Loading...`
 - Chi tiết UI nghiệp vụ ở `REQUIREMENTS.md`.
 
@@ -123,20 +123,20 @@ Hướng đã chốt (2026-09-14, cột pool 2026-09-16, profiles 2026-09-17):
 
 - `src/lib/supabase.ts`: `export const supabase` — Supabase client dùng chung toàn app; khởi tạo từ `VITE_SUPABASE_URL` + `VITE_SUPABASE_ANON_KEY`
 - Parse deck file: `parseDeckFile(content)` — `src/lib/deckParser.ts` (cắt dòng trống cuối; cap 500 sau cắt; dòng trống giữa file vẫn lỗi)
-- List decks: `decks.select('*, vocab_items(count)')` — RLS lọc own + public — `DecksPage`; filter client `activeTab` `'mine' | 'public'`; click own → `/decks/:id`, click không phải mình → `/decks/:id/preview`. UI järvi: `Tabs` (`idPrefix="decks"`, aria-label «Loại deck») + `TabPanel`; hàng đầu `h1` + `<Link>` «Tạo deck mới»; hàng deck hairline; nhãn từ `src/lib/deckLabels.ts` (DecksPage tự thêm «Nghĩa: » khi render). Sửa `<Link>` `/edit`; Xóa `window.confirm` cũ. Lỗi `profiles` → `console.error`.
+- List decks: `decks.select('*, vocab_items(count)')` — RLS lọc own + public — `DecksPage`; filter client `activeTab` `'mine' | 'public'`; click own → `/decks/:id`, click không phải mình → `/decks/:id/preview`. UI järvi: `Tabs` (`idPrefix="decks"`, aria-label «Loại deck») + `TabPanel`; hàng đầu `h1` + `<Link>` «Tạo deck mới» + dòng nhịp học; tab Public dòng clone (không lúc loading); hàng deck hairline; nhãn từ `src/lib/deckLabels.ts` (DecksPage tự thêm «Nghĩa: » khi render). Sửa `<Link>` `/edit`; Xóa `window.confirm` cũ. Lỗi `profiles` → `console.error`.
 - Owner email (tên chia sẻ): query 2 — `profiles.select('id, email').in('id', ownerIds)` trên `DecksPage`; `profiles.select('email').eq('id', owner_id)` trên `DeckPreviewPage` nếu `!owned`. Không embed từ `decks`. `sharerNameFromEmail` trong `deckLabels.ts`. Preview lỗi profiles → `console.error`, fallback «Ẩn danh».
-- Account summary: `decks.select('id, vocab_items(count)').eq('owner_id', user.id)` + `user_vocab_progress.select('interval_days, due_date').eq('user_id')` — `HomePage` `/`; `todayLocalIsoDate()`; không join vocab cho progress
-- Deck detail (owner): `decks.select('*')` rồi `vocab_items.select(...).eq('deck_id').order('created_at')` + `user_vocab_progress` join `vocab_items!inner` — `DeckDetailPage`; UI `DeckHeader` + `Tabs` («Nội dung deck») + `VocabTable` (`showStatus`) / lưới Tổng kết; actions Link ôn + Link Sửa `/edit`. Non-owner: `forbidden`, không bảng. Ngày «hôm nay» = `todayLocalIsoDate()`
+- Account summary: `decks.select('id, vocab_items(count)').eq('owner_id', user.id)` + `user_vocab_progress.select('interval_days, due_date').eq('user_id')` — `HomePage` `/`; `todayLocalIsoDate()`; không join vocab cho progress. Hero due + nút Ôn tập + dòng «Ôn những từ đến hạn của mọi deck…»
+- Deck detail (owner): `decks.select('*')` rồi `vocab_items.select(...).eq('deck_id').order('created_at')` + `user_vocab_progress` join `vocab_items!inner` — `DeckDetailPage`; UI `DeckHeader` + dòng Bắt đầu ôn tập + `Tabs` («Nội dung deck») + chú giải trạng thái / lưới Tổng kết + dòng Đã học/quá hạn; actions Link ôn + Link Sửa `/edit`. Non-owner: `forbidden`, không bảng. Ngày «hôm nay» = `todayLocalIsoDate()`
 - Create deck: `decks.insert({ owner_id, name, meaning_language, description, visibility, active_pool_size }).select('id').single()` rồi `vocab_items.insert([...])` — `CreateDeckPage` (`DeckForm` + `FileField` + Xem trước; rollback nếu vocab lỗi; lỗi insert UI cố định + `console.error`). `canSave` không đổi (mọi lỗi parse kể cả dòng trống khóa Lưu).
 - Update deck metadata: `decks.update({ name, meaning_language, description, visibility, active_pool_size }).eq('id')` — `EditDeckPage` (`DeckForm`; không còn guard public→private; lỗi lưu UI cố định + `console.error`)
-- Preview deck: `decks.select('*, vocab_items(id, finnish_word, translation, created_at)').eq('id').single()` rồi sort client `created_at` tăng dần — `DeckPreviewPage`; UI `DeckHeader` + `VocabTable`; Clone `Button loading`; owner thấy visibility + Link ôn; `!owned` `sharedBy` không visibility
+- Preview deck: `decks.select('*, vocab_items(id, finnish_word, translation, created_at)').eq('id').single()` rồi sort client `created_at` tăng dần — `DeckPreviewPage`; UI `DeckHeader` + `VocabTable`; Clone `Button loading`; owner thấy visibility + Link ôn + «Đây là deck của bạn.»; `!owned` `sharedBy` không visibility + dòng Clone không copy tiến độ
 - Clone deck: insert deck mới (`name` + ` (Copy)`, `visibility: 'private'`, `active_pool_size: 20`) rồi bulk insert vocab; rollback delete deck nếu vocab lỗi; không copy progress — `DeckPreviewPage`. Verified 2026-09-16 (tài khoản B, deck public của A): Clone + enroll Active Pool trên bản copy.
 - Delete deck: `decks.delete().eq('id')` — CASCADE vocab + progress — `DecksPage`
 - Active pool enroll (chỉ `/review/:deckId` **và** owner): `enrollActivePool` trả `{ fatalError, enrolledCount }`; `startReview` lưu `enrolledCount`. Mix `/review` không enroll.
 - Session Summary: `completedCards` tích khi trả hết nợ; màn `done` đếm wrongCount 0/1/≥2, thời gian từ `sessionStartTime`, bảng từ quên; dòng từ mới chỉ khi `scopedDeckId && enrolledCount > 0`.
 - Review keyboard (`pageState === 'reviewing'` only): document `keydown` — Enter + `feedback` → `handleNext`; MCQ A–D → `submitMcqChoice(chosen)` (không đọc `selectedOption` vì stale). `handleSubmit` chuột/form không đổi.
 - Theme: `useTheme` — override từ `localStorage['muisti-theme']` (`light`|`dark` only) hoặc theo OS sống (`matchMedia` change). Chỉ `setItem` trong `toggleTheme`. Script FOUC `index.html` cùng quy tắc. `ThemeToggle` trong `AppLayout` và `FocusLayout` (Review). Mount hook không ghi storage. Login không mount hook (class lúc load). KI-012 Closed.
-- Review UI Đợt A: một `<main>` qua `FocusLayout`; setup hiện tên deck (cùng query `checkOwner` `owner_id, name`), `ownerChecked` chỉ lớp hiển thị; loading/empty/error/done järvi; `startReview` lỗi fetch → copy cố định + `console.error`.
+- Review UI Đợt A: một `<main>` qua `FocusLayout`; setup hiện tên deck (cùng query `checkOwner` `owner_id, name`) + dòng mix vs deck (không số due); `ownerChecked` chỉ lớp hiển thị; gợi ý phím setup `hidden sm:block`; loading/empty/error/done järvi; done thêm dòng đến hạn lại; `startReview` lỗi fetch → copy cố định + `console.error`.
 - Review UI Đợt B (màn `reviewing`): h1 sr-only; tiến độ derived `completedCards.length` / (`completedCards.length + queue.length`); khối Nghĩa lớn; Typing qua `Input` (`ref` → `<input>` thật, `!text-base`); MCQ tự dựng (không `RadioGroup`), fieldset disabled, A–D theo `mcqOptions.map` index; persist error chỉ hiện khi `!feedback`; feedback `role="status"` `aria-live="polite"`; gợi ý phím `hidden sm:block` `aria-hidden`. `persistCard` lỗi → copy cố định + `console.error`.
 - SRS queue mix: `user_vocab_progress.select('..., vocab_items(*)').eq('user_id').lte('due_date', todayLocalIsoDate())` — không join `decks` — `ReviewPage` `/review`
 - SRS queue 1 deck: cùng query + `vocab_items!inner(*)` + `.eq('vocab_items.deck_id', deckId)` — `ReviewPage` `/review/:deckId`

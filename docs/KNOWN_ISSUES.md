@@ -13,6 +13,21 @@ Lỗi / sai lệch đã biết. Đánh số từ **KI-001**. Entry mới ở đ�
 
 ---
 
+## KI-025 — `title` trên nav AppLayout chỉ hiện khi hover desktop
+
+**Mức độ:** Low  
+**File liên quan:** `src/components/AppLayout.tsx`
+
+**Mô tả:** NavLink «Decks» / «Ôn tập» có `title` giải thích mix vs học trên deck. Tooltip native chỉ hiện hover chuột; không hiện trên mobile / touch.
+
+**Cách tái hiện:** Mở app trên điện thoại, nhấn giữ nav; không có tooltip.
+
+**Hướng fix:** Không bắt buộc. Copy giải thích nằm trên Home / Decks / Review setup.
+
+**Trạng thái:** Open (2026-09-19)
+
+---
+
 ## KI-024 — Đổi tên Worker trên Cloudflare lệch `wrangler.jsonc` `name`
 
 **Mức độ:** Medium  

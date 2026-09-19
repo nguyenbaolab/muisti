@@ -199,7 +199,11 @@ export function DeckPreviewPage() {
         <p className="mt-3 text-sm text-[var(--color-text-muted)] dark:text-[var(--color-text-muted-dark)]">
           Đây là deck của bạn.
         </p>
-      ) : null}
+      ) : (
+        <p className="mt-3 text-sm text-[var(--color-text-muted)] dark:text-[var(--color-text-muted-dark)]">
+          Clone tạo một bản sao riêng tư cho bạn. Tiến độ học không được sao chép.
+        </p>
+      )}
 
       {cloneError ? (
         <p role="alert" className="mt-3 text-sm text-[var(--color-danger)] dark:text-[var(--color-danger-dark)]">

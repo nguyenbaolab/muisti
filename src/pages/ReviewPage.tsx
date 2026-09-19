@@ -543,6 +543,11 @@ export function ReviewPage() {
       <FocusLayout>
         <h1>Ôn tập hôm nay</h1>
         <div className={mutedTextClassName}>{scopeLine}</div>
+        <p className={`mt-2 text-sm ${mutedTextClassName}`}>
+          {scopedDeckId
+            ? 'Ôn các từ đến hạn của deck này và tự thêm từ mới cho đủ số từ học cùng lúc.'
+            : 'Chỉ ôn các từ đến hạn trong mọi deck, không thêm từ mới. Muốn học từ mới, hãy vào một deck.'}
+        </p>
 
         <fieldset className="mt-8 w-full border-0 p-0">
           <legend className={`mb-2 block text-xs ${mutedTextClassName}`}>Hình thức hỏi</legend>
@@ -582,9 +587,12 @@ export function ReviewPage() {
           </div>
         </fieldset>
 
-        <div className={`mt-3 text-sm ${mutedTextClassName}`}>
-          Tick cả hai để mỗi từ random một hình thức.
-        </div>
+        <p className={`mt-3 text-sm ${mutedTextClassName}`}>
+          Chọn cả hai để mỗi từ được hỏi ngẫu nhiên theo một hình thức.
+        </p>
+        <p className={`mt-2 hidden text-sm sm:block ${mutedTextClassName}`} aria-hidden="true">
+          Gõ chữ: Enter để trả lời. Trắc nghiệm: nhấn A, B, C hoặc D.
+        </p>
 
         <div className="mt-8">
           <Button
@@ -694,6 +702,9 @@ export function ReviewPage() {
             Có {enrolledCount} từ mới được thêm vào hôm nay.
           </div>
         ) : null}
+        <p className={`mt-2 text-sm ${mutedTextClassName}`}>
+          Từ đã ôn sẽ hiện lại khi đến hạn, từ sai thường sớm hơn.
+        </p>
 
         <div className="mt-8 grid grid-cols-3 gap-x-8 gap-y-6">
           {summaryStats.map((stat) => (

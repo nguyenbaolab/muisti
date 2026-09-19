@@ -166,6 +166,7 @@ export function EditDeckPage() {
           onVisibilityChange={setVisibility}
           onActivePoolSizeChange={setActivePoolSize}
           poolSizeValid={poolSizeValid}
+          showEditPoolHint
           disabled={saving}
         />
 
