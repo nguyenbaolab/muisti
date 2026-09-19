@@ -13,6 +13,51 @@ Lỗi / sai lệch đã biết. Đánh số từ **KI-001**. Entry mới ở đ�
 
 ---
 
+## KI-021 — Chưa có Content-Security-Policy trên Pages
+
+**Mức độ:** Low  
+**File liên quan:** `index.html`, `public/_headers`
+
+**Mô tả:** `_headers` không gửi CSP. `index.html` có script inline chống FOUC theme (localStorage `muisti-theme`) và stylesheet Google Fonts. CSP cần nonce hoặc hash cho script inline; thiếu thì app/theme/font có thể hỏng.
+
+**Cách tái hiện:** Xem `public/_headers` — không có dòng `Content-Security-Policy`.
+
+**Hướng fix:** Thêm CSP sau khi hash script inline (và quyết định self-host font hoặc `style-src` cho `fonts.googleapis.com`).
+
+**Trạng thái:** Open (2026-09-19)
+
+---
+
+## KI-022 — Bundle một chunk ~495 KiB, chưa lazy-load route
+
+**Mức độ:** Low  
+**File liên quan:** `src/App.tsx`, output `dist/assets/*.js`
+
+**Mô tả:** `npm run build` ra một JS (~506690 bytes / ~495 KiB) gồm supabase-js + React + react-router. Vite có thể cảnh báo chunk > 500 kB. Không `React.lazy` / code-split theo route.
+
+**Cách tái hiện:** `npm run build`; xem kích thước `dist/assets/index-*.js`.
+
+**Hướng fix:** Tách chunk (lazy `ReviewPage` / trang deck) khi cần.
+
+**Trạng thái:** Open (2026-09-19)
+
+---
+
+## KI-023 — Google Fonts từ domain ngoài
+
+**Mức độ:** Low  
+**File liên quan:** `index.html`
+
+**Mô tả:** Inter tải từ `fonts.googleapis.com` / `fonts.gstatic.com`. Gọi domain ngoài lúc runtime; cân nhắc self-host nếu quan tâm quyền riêng tư hoặc muốn CSP chặt.
+
+**Cách tái hiện:** Mở app, Network thấy request tới hai domain trên.
+
+**Hướng fix:** Self-host file font trong `public/` / `@font-face` khi cần.
+
+**Trạng thái:** Open (2026-09-19)
+
+---
+
 ## KI-020 — `p { margin: 0 }` không layer thắng `mt-*` trên `<p>`
 
 **Mức độ:** Low  

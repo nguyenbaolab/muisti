@@ -4,6 +4,27 @@ Ghi theo thời gian, mới nhất ở trên. Mỗi entry: tên ngắn, ngày, q
 
 ---
 
+## Deploy Cloudflare Pages qua Git; `_redirects` + `_headers`; ghim Node 22
+
+**Ngày:** 2026-09-19
+
+**Quyết định:**
+
+- Deploy static SPA lên Cloudflare Pages bằng **Git integration** (repo `nguyenbaolab/muisti`, nhánh `main`). Không wrangler CLI, không GitHub Actions, không Pages Functions.
+- SPA fallback tường minh: `public/_redirects` một dòng `/* /index.html 200`. Không dựa hành vi ngầm của Pages. Không tạo `404.html` (file đó làm Pages bỏ chế độ SPA).
+- `public/_headers`: header bảo mật cơ bản trên `/*` (`X-Content-Type-Options: nosniff`, `Referrer-Policy: strict-origin-when-cross-origin`, `X-Frame-Options: DENY`, `Permissions-Policy: camera=(), microphone=(), geolocation=()`). Cache `public, max-age=31536000, immutable` chỉ cho `/assets/*` (Vite hash tên file). Không cache dài `index.html`.
+- **Không** Content-Security-Policy: `index.html` có script inline chống FOUC theme và Google Fonts; CSP cần nonce/hash, dễ làm hỏng app (KI-021).
+- Ghim Node 22 qua `.node-version` và `package.json` `"engines": { "node": "^20.19.0 || >=22.12.0" }` (khớp Vite 8 / `@vitejs/plugin-react` 6).
+- Env trên Pages (Production + Preview, trước build): `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`. Anon key là khóa công khai; quyền dữ liệu do RLS. Không đặt `SUPABASE_SERVICE_ROLE_KEY` trên Pages.
+
+**Lý do:** Handoff cũ ghi «deploy Cloudflare Pages» nhưng repo chưa có file host tĩnh. `BrowserRouter` không basename — F5 trên `/decks/:id` / `/review/:deckId` cần fallback. Git integration đủ cho SPA không có Worker.
+
+**Phạm vi:** `public/_redirects`, `public/_headers`, `.node-version`, `package.json` engines, `.gitignore` (`.env.*` + `!.env.example`), `.env.example` comment, RUNBOOK §1/§3, CONTEXT, KNOWN_ISSUES.
+
+**Không làm gì:** Không wrangler, không workflows, không CSP, không đổi `src/` / `index.html` / `vite.config.ts` / dependencies.
+
+---
+
 ## Parser bỏ qua dòng trống cuối file
 
 **Ngày:** 2026-09-19

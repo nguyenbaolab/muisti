@@ -1,35 +1,30 @@
 # RUNBOOK — Vận hành & phát triển
 
-Phần chưa verify ghi rõ. Sẽ update khi deploy lần đầu.
+Phần dashboard Cloudflare/Supabase chờ người dùng thực hiện. Repo đã chuẩn bị file Pages.
 
 ---
 
 ## §1 Setup môi trường dev
 
-**Yêu cầu (dự kiến, chưa verify trên máy mới):**
+**Yêu cầu:**
 
-- Node.js 20+ (LTS)
+- Node.js 22 (ghim trong `.node-version`; `package.json` `engines.node` = `^20.19.0 || >=22.12.0` — khớp Vite 8)
 - npm đi kèm Node
-- Tài khoản [Supabase](https://supabase.com) (khi bắt đầu schema)
-- Tài khoản [Cloudflare](https://dash.cloudflare.com) (khi deploy)
+- Tài khoản [Supabase](https://supabase.com) — project đã có; schema trong `supabase/schema.sql` + `supabase/migrations/`
+- Tài khoản [Cloudflare](https://dash.cloudflare.com) (khi deploy Pages)
 
-**Clone & cài (sau khi có git + `package.json`):**
+**Clone & cài:**
 
 ```bash
-git clone <repo-url>
+git clone https://github.com/nguyenbaolab/muisti.git
 cd muisti
-npm install
+npm ci
 cp .env.example .env
 ```
 
-Nội dung `.env` dự kiến (không commit):
+Điền `.env` (không commit). Hai biến `VITE_*` bắt buộc để app chạy. `SUPABASE_SERVICE_ROLE_KEY` chỉ cho script server local — không cần để `npm run dev` / `npm run build`.
 
-```
-VITE_SUPABASE_URL=https://<project-ref>.supabase.co
-VITE_SUPABASE_ANON_KEY=<anon-key>
-```
-
-**Chạy local (sau scaffold):**
+**Chạy local (đã scaffold Vite + React + TypeScript):**
 
 ```bash
 npm run dev      # thường http://localhost:5173
@@ -37,8 +32,6 @@ npm run build
 npm run preview
 npx tsc --noEmit
 ```
-
-Hiện **chưa scaffold** — các lệnh trên chưa chạy được cho đến khi có Vite + `package.json`.
 
 ---
 
@@ -59,16 +52,43 @@ Quy trình dự kiến:
 
 ## §3 Deploy (Cloudflare Pages)
 
-**Chưa verify, sẽ update khi deploy lần đầu.**
+**Trạng thái:** Chuẩn bị xong phía repo; các bước dashboard chờ người dùng thực hiện và xác nhận.
 
-Dự kiến:
+Repo dùng Git integration (push `main` → Cloudflare tự build). Không wrangler, không GitHub Actions. SPA fallback: `public/_redirects` (`/* /index.html 200`). Header: `public/_headers`. Node: `.node-version` = `22`.
 
-1. Push repo lên Git (branch `main`).
-2. Cloudflare Dashboard → Workers & Pages → Create → Connect Git → chọn repo.
-3. Build: command `npm run build`, output `dist` (Vite mặc định).
-4. Environment variables (Production và Preview): `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`.
-5. SPA fallback: mọi route trả `index.html`.
-6. Supabase → URL Configuration / Allowed Origins: thêm URL Pages + `http://localhost:5173`.
+### Cloudflare Dashboard (người dùng làm)
+
+1. [Cloudflare Dashboard](https://dash.cloudflare.com) → Workers & Pages → Create → Pages → Connect to Git.
+2. Chọn repo `nguyenbaolab/muisti`, nhánh production `main`.
+3. Build settings:
+   - Framework preset: **Vite** hoặc **None**
+   - Build command: `npm run build`
+   - Build output directory: `dist`
+   - Root directory: để trống
+4. Environment variables — đặt cho **cả Production và Preview, trước build đầu tiên** (Vite nhúng lúc build):
+   - `VITE_SUPABASE_URL`
+   - `VITE_SUPABASE_ANON_KEY`
+   - **Không** đặt `SUPABASE_SERVICE_ROLE_KEY`
+5. Cloudflare đọc `.node-version` (Node 22). Có thể thêm biến `NODE_VERSION=22` nếu cần — không bắt buộc.
+
+### Supabase Dashboard (phòng ngừa)
+
+Authentication → URL Configuration:
+
+- Site URL = URL production của Pages (`https://<project>.pages.dev` hoặc domain riêng)
+- Redirect URLs: URL production, `http://localhost:5173`, và wildcard preview nếu muốn (`https://*.<project>.pages.dev`)
+
+Hiện app chỉ dùng `signInWithPassword` — bước này phòng ngừa (OAuth / magic link / reset password chưa có trong `src/`).
+
+### Checklist sau deploy (người dùng làm)
+
+- Mở URL Pages: trang đăng nhập hiện đúng, font Inter tải, theme đúng.
+- Đăng nhập được; F5 trên `/decks`, `/decks/<id>`, `/review` đều không ra 404 (SPA fallback hoạt động).
+- Mở DevTools Network: `/assets/*.js` trả header `cache-control` immutable; `index.html` không cache dài; response có `X-Content-Type-Options: nosniff`.
+- Đăng xuất và đăng nhập lại; tạo deck nhỏ, ôn một phiên, kiểm tra dữ liệu ghi được (RLS hoạt động trên production).
+- Console không lỗi `Missing environment variable`.
+- Mở một deck của tài khoản khác bằng URL: bị chặn như local (RLS).
+- Xóa deck test sau khi kiểm.
 
 ---
 

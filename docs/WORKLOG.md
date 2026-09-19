@@ -4,6 +4,16 @@ Nhật ký thay đổi có ý nghĩa. Entry mới ở **đầu file** (sau tiêu
 
 ---
 
+## Giai đoạn 1 — Chuẩn bị repo deploy Cloudflare Pages
+**Ngày:** 2026-09-19
+
+- `public/_redirects` (`/* /index.html 200`); `public/_headers` (nosniff / referrer / DENY / Permissions-Policy; `/assets/*` immutable). Không CSP, không `404.html`.
+- `.node-version` = `22`; `package.json` `engines.node` khớp Vite 8. Không đổi dependencies / lockfile / scripts.
+- `.gitignore`: thêm `.env.*` và `!.env.example`. `.env.example`: comment VITE_* vs service role (không đặt trên Pages).
+- Docs: RUNBOOK §1/§3, DECISIONS, CONTEXT, KI-021/022/023. Không sửa `src/`, `index.html`, `vite.config.ts`, README, CURRENT. Không commit / không deploy.
+
+---
+
 ## Giai đoạn 1 — KI-016: cắt dòng trống cuối trong parseDeckFile
 **Ngày:** 2026-09-19
 
