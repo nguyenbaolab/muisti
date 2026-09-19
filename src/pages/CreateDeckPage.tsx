@@ -40,7 +40,7 @@ function ParseErrorList({ errors }: { errors: ParseError[] }) {
               Dòng {err.lineNumber ?? '—'} ·{' '}
               <span className="text-[var(--color-danger)] dark:text-[var(--color-danger-dark)]">{err.reason}</span>
             </p>
-            <p className="!mt-2 break-words font-mono text-xs text-[var(--color-text-muted)] dark:text-[var(--color-text-muted-dark)]">
+            <p className="mt-2 break-words font-mono text-xs text-[var(--color-text-muted)] dark:text-[var(--color-text-muted-dark)]">
               {err.rawLine}
             </p>
           </li>
@@ -281,7 +281,7 @@ export function CreateDeckPage() {
         ) : null}
 
         {saveError ? (
-          <p role="alert" className="!mt-6 text-sm text-[var(--color-danger)] dark:text-[var(--color-danger-dark)]">
+          <p role="alert" className="mt-6 text-sm text-[var(--color-danger)] dark:text-[var(--color-danger-dark)]">
             {saveError}
           </p>
         ) : null}
@@ -293,7 +293,7 @@ export function CreateDeckPage() {
           {!canSave && !saving && blockedReason ? (
             <p
               role="status"
-              className="!mt-2 text-xs text-[var(--color-text-muted)] dark:text-[var(--color-text-muted-dark)]"
+              className="mt-2 text-xs text-[var(--color-text-muted)] dark:text-[var(--color-text-muted-dark)]"
             >
               {blockedReason}
             </p>

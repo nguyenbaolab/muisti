@@ -18,13 +18,13 @@ Lỗi / sai lệch đã biết. Đánh số từ **KI-001**. Entry mới ở đ�
 **Mức độ:** Low  
 **File liên quan:** `src/index.css`, các `<p>` dùng `!mt-*` hoặc `mt-*`
 
-**Mô tả:** `p { margin: 0 }` ngoài `@layer` thắng utility `mt-*`. Đợt dọn alias (2026-09-19) **cố ý không đụng** rule này và không bỏ `!mt-*` (đổi sẽ làm lệch khoảng cách).
+**Mô tả:** `p { margin: 0 }` ngoài `@layer` thắng utility `mt-*`. Đã xóa rule (2026-09-19); Preflight `*` lo margin 0. `!mt-*` (thắng rule cũ) đổi thành `mt-*`. Các `<p>` có `mt-*` chết trước đây (Login subtitle, lưới số liệu, DeckHeader, back-link error, Decks status, Create preview, Preview owned/clone) **bắt đầu có khoảng cách theo class đã viết** — có chủ đích. `space-y-1` trên 3 dòng ước lượng Tổng kết Detail cũng bắt đầu có tác dụng.
 
-**Cách tái hiện:** `<p className="mt-4">` không có margin-top; cần `!mt-4`.
+**Cách tái hiện (cũ):** `<p className="mt-4">` không có margin-top.
 
-**Hướng fix:** Đưa vào `@layer base` hoặc xóa (Preflight `*` đã `margin: 0`) rồi rà các `<p>` đang có `mt-*` chết. Prompt riêng.
+**Hướng fix:** Đã làm. Nhìn trình duyệt nhóm trên nếu muốn tinh chỉnh sau.
 
-**Trạng thái:** Open (2026-09-19)
+**Trạng thái:** Closed (2026-09-19)
 
 ---
 

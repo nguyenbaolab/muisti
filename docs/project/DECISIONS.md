@@ -4,6 +4,20 @@ Ghi theo thời gian, mới nhất ở trên. Mỗi entry: tên ngắn, ngày, q
 
 ---
 
+## Xóa `p { margin: 0 }`; margin trên `<p>` dùng utility thường
+
+**Ngày:** 2026-09-19
+
+**Quyết định:** Xóa `p { margin: 0 }` khỏi `index.css`. Tailwind v4 Preflight (`@layer base`, `* { margin: 0 }`) đã zero mọi phần tử gồm `p`. Không thêm rule thay thế. Bỏ `!` khỏi `!mt-*` từng dùng để thắng rule unlayered. Quy ước: khoảng cách trên `<p>` dùng `mt-*` / `mb-*` bình thường, không `!` vì lý do margin global.
+
+**Lý do:** Rule unlayered thừa và làm `mt-*` trên `<p>` chết; nhóm đó được thiết kế có khoảng cách.
+
+**Phạm vi:** `index.css` + 10 chỗ `!mt-*` → `mt-*`. Không đổi giá trị `mt-*` nhóm từng bị vô hiệu. Không đụng h1/h2.
+
+**Không làm gì:** Không chỉnh cảm tính khoảng cách nhóm (2). Không sửa `!text-base` trên Input Review (thắng `text-sm`, không liên quan margin).
+
+---
+
 ## Dọn alias CSS cũ; gộp backLinkClassName
 
 **Ngày:** 2026-09-19

@@ -95,7 +95,7 @@ export function DeckForm({
           error={poolSizeValid ? undefined : 'Nhập số nguyên từ 10 đến 30.'}
           onChange={(event) => onActivePoolSizeChange(Number(event.target.value))}
         />
-        <p className="!mt-2 text-xs text-[var(--color-text-muted)] dark:text-[var(--color-text-muted-dark)]">
+        <p className="mt-2 text-xs text-[var(--color-text-muted)] dark:text-[var(--color-text-muted-dark)]">
           Hệ thống tự thêm từ mới khi bạn đã học vững các từ đang ôn.
         </p>
       </div>

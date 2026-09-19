@@ -39,7 +39,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
         <p
           id={errorId}
           role="alert"
-          className="!mt-2 text-xs text-[var(--color-danger)] dark:text-[var(--color-danger-dark)]"
+          className="mt-2 text-xs text-[var(--color-danger)] dark:text-[var(--color-danger-dark)]"
         >
           {error}
         </p>

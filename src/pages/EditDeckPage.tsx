@@ -170,7 +170,7 @@ export function EditDeckPage() {
         />
 
         {saveError ? (
-          <p role="alert" className="!mt-6 text-sm text-[var(--color-danger)] dark:text-[var(--color-danger-dark)]">
+          <p role="alert" className="mt-6 text-sm text-[var(--color-danger)] dark:text-[var(--color-danger-dark)]">
             {saveError}
           </p>
         ) : null}

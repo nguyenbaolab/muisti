@@ -66,7 +66,7 @@ export function FileField({
         className="sr-only"
       />
       {hint ? (
-        <p id={hintId} className="!mt-2 text-xs text-[var(--color-text-muted)] dark:text-[var(--color-text-muted-dark)]">
+        <p id={hintId} className="mt-2 text-xs text-[var(--color-text-muted)] dark:text-[var(--color-text-muted-dark)]">
           {hint}
         </p>
       ) : null}
@@ -74,7 +74,7 @@ export function FileField({
         <p
           id={errorId}
           role="alert"
-          className="!mt-2 text-xs text-[var(--color-danger)] dark:text-[var(--color-danger-dark)]"
+          className="mt-2 text-xs text-[var(--color-danger)] dark:text-[var(--color-danger-dark)]"
         >
           {error}
         </p>

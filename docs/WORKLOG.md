@@ -4,6 +4,15 @@ Nhật ký thay đổi có ý nghĩa. Entry mới ở **đầu file** (sau tiêu
 
 ---
 
+## Giai đoạn 1 — Xóa `p { margin: 0 }`, bỏ `!mt-*`
+**Ngày:** 2026-09-19
+
+- `index.css`: xóa `p { margin: 0 }`; Preflight lo margin 0.
+- 10 chỗ `!mt-2`/`!mt-6` → `mt-2`/`mt-6` (Input, Select, Textarea, FileField ×2, DeckForm, Create ×3, Edit). Giữ `!text-base` Review.
+- Nhóm `mt-*` trước đây chết: không đổi giá trị; rà không thấy cộng dồn kép chắc. KI-020 Closed.
+
+---
+
 ## Giai đoạn 1 — Dọn alias CSS + gộp backLink
 **Ngày:** 2026-09-19
 
