@@ -1,4 +1,4 @@
-import { useEffect, useState, type FormEvent } from 'react'
+import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { computeNextReview, todayLocalIsoDate } from '../lib/srs'
@@ -173,6 +173,7 @@ export function ReviewPage() {
   const [completedCards, setCompletedCards] = useState<SessionCard[]>([])
   const [sessionStartTime, setSessionStartTime] = useState<number | null>(null)
   const [enrolledCount, setEnrolledCount] = useState(0)
+  const typedInputRef = useRef<HTMLInputElement | null>(null)
 
   useEffect(() => {
     if (!scopedDeckId) return
@@ -434,6 +435,66 @@ export function ReviewPage() {
     presentCard(remaining, enabledModes, finnishPool)
   }
 
+  async function submitMcqChoice(chosen: string) {
+    const card = queue[0]
+    if (!card || feedback || saving) return
+
+    const correct = chosen === card.finnishWord
+    if (!correct) {
+      setQueue((prev) => {
+        const current = prev[0]
+        if (!current) return prev
+        return [{ ...current, wrongCount: current.wrongCount + 1 }, ...prev.slice(1)]
+      })
+      setFeedback({ correct: false })
+      return
+    }
+
+    setSaving(true)
+    const persistError = await persistCard(card)
+    setSaving(false)
+    if (persistError) {
+      setError(persistError)
+      return
+    }
+
+    setFeedback({ correct: true })
+  }
+
+  useEffect(() => {
+    function onKeyDown(event: KeyboardEvent) {
+      if (pageState !== 'reviewing') return
+
+      if (feedback) {
+        if (event.key === 'Enter') {
+          event.preventDefault()
+          handleNext()
+        }
+        return
+      }
+
+      if (askMode === 'mcq' && !saving) {
+        const key = event.key.toUpperCase()
+        const index = key.charCodeAt(0) - 65
+        if (key.length === 1 && index >= 0 && index < mcqOptions.length) {
+          event.preventDefault()
+          const chosen = mcqOptions[index]
+          setSelectedOption(chosen)
+          void submitMcqChoice(chosen)
+        }
+      }
+    }
+
+    document.addEventListener('keydown', onKeyDown)
+    return () => document.removeEventListener('keydown', onKeyDown)
+  }, [pageState, feedback, askMode, mcqOptions, saving, queue, handleNext, submitMcqChoice])
+
+  useEffect(() => {
+    if (pageState === 'reviewing' && askMode === 'type' && !feedback) {
+      typedInputRef.current?.focus()
+    }
+  }, [pageState, askMode, feedback, queue])
+
   const card = queue[0]
 
   if (pageState === 'setup') {
@@ -592,6 +653,7 @@ export function ReviewPage() {
             Gõ từ tiếng Phần Lan
             <input
               type="text"
+              ref={typedInputRef}
               value={typedAnswer}
               onChange={(e) => setTypedAnswer(e.target.value)}
               disabled={Boolean(feedback) || saving}
@@ -602,7 +664,7 @@ export function ReviewPage() {
         ) : (
           <fieldset disabled={Boolean(feedback) || saving}>
             <legend>Chọn từ tiếng Phần Lan</legend>
-            {mcqOptions.map((option) => (
+            {mcqOptions.map((option, index) => (
               <label key={option} style={{ display: 'block' }}>
                 <input
                   type="radio"
@@ -611,7 +673,7 @@ export function ReviewPage() {
                   checked={selectedOption === option}
                   onChange={() => setSelectedOption(option)}
                 />{' '}
-                {option}
+                {String.fromCharCode(65 + index)}. {option}
               </label>
             ))}
           </fieldset>

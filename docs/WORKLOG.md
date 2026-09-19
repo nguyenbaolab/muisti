@@ -4,6 +4,29 @@ Nhật ký thay đổi có ý nghĩa. Entry mới ở **đầu file** (sau tiêu
 
 ---
 
+## ReviewPage — auto-focus ô gõ chữ Typing
+**Ngày:** 2026-09-19
+**Trạng thái:** Done
+
+**Đã làm:**
+- `typedInputRef` gắn vào `<input>` Typing
+- `useEffect` focus khi `pageState === 'reviewing'` + `askMode === 'type'` + `!feedback`; deps gồm `queue` để focus lại mỗi câu mới
+- Không đụng phím tắt / `handleSubmit` / `handleNext` / `persistCard` / srs.ts
+
+---
+
+## ReviewPage — phím tắt Enter + A/B/C/D
+**Ngày:** 2026-09-19
+**Trạng thái:** Done
+
+**Đã làm:**
+- MCQ hiện nhãn A/B/C/D theo index `mcqOptions` (đã shuffle)
+- `useEffect` `document` keydown chỉ khi `pageState === 'reviewing'`: Enter sau feedback → `handleNext`; A–D khi MCQ chưa feedback → `submitMcqChoice(chosen)` (tránh stale `selectedOption`)
+- Không sửa `handleSubmit` / `checkAnswer` / `handleNext` / `persistCard`; Typing Enter lần 1 vẫn form submit HTML
+- Không đụng srs.ts / màn setup/done/empty/error
+
+---
+
 ## `/decks` — 2 tab Cá nhân / Public
 **Ngày:** 2026-09-18
 **Trạng thái:** Done
