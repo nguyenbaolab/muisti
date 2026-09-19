@@ -16,15 +16,17 @@ Lỗi / sai lệch đã biết. Đánh số từ **KI-001**. Entry mới ở đ�
 ## KI-012 — `useTheme` ghi `localStorage` ngay lúc mount, chốt cứng theme hệ thống
 
 **Mức độ:** Low  
-**File liên quan:** `src/lib/useTheme.ts`, `src/components/ThemeToggle.tsx`, `src/components/AppLayout.tsx`
+**File liên quan:** `src/lib/useTheme.ts`, `src/components/ThemeToggle.tsx`, `src/components/AppLayout.tsx`, `index.html`
 
-**Mô tả:** `useTheme` khởi tạo từ `localStorage['muisti-theme']` hoặc `prefers-color-scheme`. `useEffect` luôn `localStorage.setItem('muisti-theme', theme)` khi `theme` đổi — gồm lần mount đầu. Sau khi `ThemeToggle` gắn vào `AppLayout`, user chưa từng bấm toggle vẫn bị ghi light/dark theo OS lúc đó. Lần sau script `index.html` ưu tiên storage → không còn theo OS nếu user đổi theme hệ thống.
+**Mô tả:** Trước đây `useEffect` luôn `localStorage.setItem('muisti-theme', theme)` kể cả mount → user chưa toggle vẫn bị chốt theo OS lúc đó; lần sau script ưu tiên storage, không theo OS.
 
-**Cách tái hiện:** Xóa key `muisti-theme`, đăng nhập (vào route có `AppLayout`), reload. DevTools Application: key đã có `light` hoặc `dark`. Đổi OS theme, reload app — giao diện không đổi theo OS.
+**Cách tái hiện (cũ):** Xóa key `muisti-theme`, đăng nhập (route có `AppLayout`), reload → key đã có `light`/`dark`. Đổi OS theme, reload — giao diện không đổi.
 
-**Hướng fix:** Chỉ `setItem` trong `toggleTheme` (hoặc khi user đã chọn rõ). Chưa sửa — chờ quyết định.
+**Hướng fix (đã làm 2026-09-19):** State tách `override` (null nếu chưa chọn) và `systemDark`. Theme hiệu lực = override ?? OS. Listener `matchMedia('prefers-color-scheme: dark')` `change` + cleanup. Effect class `.dark` không ghi storage. `toggleTheme` mới `setItem` (try/catch). Script `index.html` chỉ tin `'light'|'dark'`, try/catch storage.
 
-**Trạng thái:** Open
+**Giới hạn còn lại:** `LoginPage` và `ReviewPage` không mount `useTheme` nên không có listener sống — theme lúc mở trang do script `index.html`; đổi OS khi đang đứng trên những trang đó không cập nhật cho đến khi reload hoặc vào route có `AppLayout`.
+
+**Trạng thái:** Closed (2026-09-19)
 
 ---
 

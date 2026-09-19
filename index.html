@@ -13,8 +13,14 @@
     />
     <script>
       (function () {
-        var stored = localStorage.getItem('muisti-theme');
-        var isDark = stored ? stored === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches;
+        var stored = null;
+        try {
+          stored = localStorage.getItem('muisti-theme');
+        } catch (e) {}
+        var isDark =
+          stored === 'light' || stored === 'dark'
+            ? stored === 'dark'
+            : window.matchMedia('(prefers-color-scheme: dark)').matches;
         if (isDark) document.documentElement.classList.add('dark');
       })();
     </script>

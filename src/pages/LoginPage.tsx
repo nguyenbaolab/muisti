@@ -1,5 +1,21 @@
 import { useState, type FormEvent } from 'react'
+import { Button } from '../components/Button'
+import { Input } from '../components/Input'
 import { supabase } from '../lib/supabase'
+
+function mapAuthError(message: string): string {
+  if (message.includes('Invalid login credentials')) {
+    return 'Email hoặc mật khẩu không đúng.'
+  }
+  if (message.includes('Email not confirmed')) {
+    return 'Email chưa được xác nhận.'
+  }
+  const lower = message.toLowerCase()
+  if (lower.includes('rate limit') || lower.includes('too many')) {
+    return 'Thử quá nhiều lần. Vui lòng đợi một lúc rồi thử lại.'
+  }
+  return 'Không đăng nhập được. Thử lại sau.'
+}
 
 export function LoginPage() {
   const [email, setEmail] = useState('')
@@ -12,48 +28,59 @@ export function LoginPage() {
     setError(null)
     setLoading(true)
 
-    const { error: signInError } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    })
+    try {
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      })
 
-    setLoading(false)
-    if (signInError) {
-      setError(signInError.message)
+      if (signInError) {
+        console.error(signInError)
+        setError(mapAuthError(signInError.message))
+      }
+    } catch (caught) {
+      console.error(caught)
+      setError('Không đăng nhập được. Thử lại sau.')
+    } finally {
+      setLoading(false)
     }
   }
 
   return (
-    <main style={{ maxWidth: 320, margin: '4rem auto', fontFamily: 'sans-serif' }}>
-      <h1>Đăng nhập</h1>
-      <form onSubmit={handleSubmit}>
-        <label style={{ display: 'block', marginBottom: 12 }}>
-          Email
-          <input
+    <main className="flex min-h-svh items-center justify-center px-4 sm:px-6">
+      <div className="w-full max-w-sm text-left">
+        <p className="text-sm font-medium text-[var(--color-text-muted)] dark:text-[var(--color-text-muted-dark)]">
+          Muisti
+        </p>
+        <h1>Đăng nhập</h1>
+        <p className="mt-1 text-sm text-[var(--color-text-muted)] dark:text-[var(--color-text-muted-dark)]">
+          Học từ vựng tiếng Phần Lan
+        </p>
+
+        <form className="mt-8 space-y-4" onSubmit={(e) => void handleSubmit(e)}>
+          <Input
+            label="Email"
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
             autoComplete="email"
-            style={{ display: 'block', width: '100%', marginTop: 4 }}
+            autoFocus
           />
-        </label>
-        <label style={{ display: 'block', marginBottom: 12 }}>
-          Mật khẩu
-          <input
+          <Input
+            label="Mật khẩu"
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
             autoComplete="current-password"
-            style={{ display: 'block', width: '100%', marginTop: 4 }}
+            error={error ?? undefined}
           />
-        </label>
-        {error ? <p style={{ color: 'crimson' }}>{error}</p> : null}
-        <button type="submit" disabled={loading}>
-          {loading ? 'Đang đăng nhập…' : 'Đăng nhập'}
-        </button>
-      </form>
+          <Button type="submit" variant="primary" className="w-full" loading={loading}>
+            {loading ? 'Đang đăng nhập…' : 'Đăng nhập'}
+          </Button>
+        </form>
+      </div>
     </main>
   )
 }

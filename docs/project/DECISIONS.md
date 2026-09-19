@@ -4,6 +4,22 @@ Ghi theo thời gian, mới nhất ở trên. Mỗi entry: tên ngắn, ngày, q
 
 ---
 
+## Input/Button form; Login järvi; theme chỉ persist khi user chọn
+
+**Ngày:** 2026-09-19
+
+**Quyết định:**
+- `Input`: `forwardRef`, prop tùy chọn `label` / `error`, `w-full`, `htmlFor`+`useId`, viền danger + `aria-invalid` / `aria-describedby` khi lỗi. Vẫn dùng được Input trần.
+- `Button`: prop `loading` (disabled + `aria-busy`); không spinner; caller đổi text.
+- `LoginPage` UI järvi, không Card/shadow; lỗi auth Việt hóa (`mapAuthError`), không hiện `signInError.message` thô; `console.error` để debug. Không đăng ký / quên mật khẩu / magic-link.
+- Theme: chưa toggle thì theo OS sống (`matchMedia` change); chỉ `localStorage.setItem('muisti-theme')` trong `toggleTheme`. Script FOUC chỉ nhận `'light'|'dark'`.
+
+**Phạm vi:** `Input.tsx`, `Button.tsx`, `LoginPage.tsx`, `useTheme.ts`, `index.html`. HomePage/AppLayout không đổi cách gọi Button.
+
+**Không làm gì:** Không nút «theo hệ thống». Không listener theme trên Login/Review. Không nâng cấp form Create/Edit deck.
+
+---
+
 ## Tách AppLayout / HomePage; Review ngoài layout; dọn chrome #root
 
 **Ngày:** 2026-09-19

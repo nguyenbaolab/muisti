@@ -4,6 +4,19 @@ Nhật ký thay đổi có ý nghĩa. Entry mới ở **đầu file** (sau tiêu
 
 ---
 
+## Login järvi + Input/Button form + đóng KI-012
+**Ngày:** 2026-09-19
+**Trạng thái:** Done
+
+**Đã làm:**
+- `Input`: forwardRef, label/error, w-full, aria lỗi
+- `Button`: `loading` (disabled + aria-busy); HomePage/AppLayout không truyền → hành vi cũ
+- `LoginPage`: Tailwind + token; `mapAuthError`; try/catch + finally; không hiện message thô
+- `useTheme`: override | system; listener OS; chỉ ghi storage khi toggle; script `index.html` chuẩn hóa `'light'|'dark'`
+- KI-012 Closed (còn giới hạn: Login/Review không có listener sống)
+
+---
+
 ## Giai đoạn 1 — AppLayout + HomePage + ThemeToggle
 **Ngày:** 2026-09-19
 **Trạng thái:** Done
