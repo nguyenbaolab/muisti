@@ -14,6 +14,10 @@ export function parseDeckFile(content: string): { validLines: ValidLine[]; error
   const text = content.replace(/^\uFEFF/, '')
   const lines = text.split(/\r?\n/)
 
+  while (lines.length > 0 && lines[lines.length - 1].trim() === '') {
+    lines.pop()
+  }
+
   if (lines.length > 500) {
     return {
       validLines: [],

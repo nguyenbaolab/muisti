@@ -81,13 +81,13 @@ Lỗi / sai lệch đã biết. Đánh số từ **KI-001**. Entry mới ở đ�
 **Mức độ:** Medium  
 **File liên quan:** `src/lib/deckParser.ts`, `src/pages/CreateDeckPage.tsx`
 
-**Mô tả:** `parseDeckFile` coi mọi dòng `trim() === ''` là lỗi «Dòng trống», kể cả dòng cuối do editor thêm `\n`. `canSave` yêu cầu `errors.length === 0` nên file sạch nhưng có newline cuối → Lưu khóa; UI hiện «Sửa các lỗi trong file rồi chọn lại file.»
+**Mô tả:** `parseDeckFile` coi mọi dòng `trim() === ''` là lỗi «Dòng trống», kể cả dòng cuối do editor thêm `\n`. `canSave` yêu cầu `errors.length === 0` nên file sạch nhưng có newline cuối → Lưu khóa.
 
-**Cách tái hiện:** Tạo file `koira;chó\n` (newline cuối) → Preview 1 từ hợp lệ + 1 lỗi Dòng trống → nút Lưu deck disabled.
+**Cách tái hiện (cũ):** File `koira;chó\n` → 1 từ hợp lệ + 1 lỗi Dòng trống → Lưu disabled.
 
-**Hướng fix (chưa làm):** Parser bỏ qua dòng trống cuối (hoặc mọi dòng trống); hoặc `canSave` bỏ qua lỗi dòng trống. Không sửa ở bước järvi Create/Edit — `deckParser` và `canSave` giữ nguyên.
+**Hướng fix (đã làm 2026-09-19):** Sau `split`, cắt đuôi các dòng `trim() === ''` liên tục. Dòng trống giữa file vẫn lỗi «Dòng trống». Cap 500 tính trên số dòng sau khi cắt. Không đổi `canSave` / UI.
 
-**Trạng thái:** Open (2026-09-19)
+**Trạng thái:** Closed (2026-09-19)
 
 ---
 
@@ -179,7 +179,7 @@ Lỗi / sai lệch đã biết. Đánh số từ **KI-001**. Entry mới ở đ�
 
 **Hướng fix:** Có thể bỏ qua đúng 1 trailing empty line, hoặc cho Lưu khi chỉ còn lỗi dòng trống cuối. Cần chốt vì khác spec hiện tại ("dòng trống = lỗi").
 
-**Trạng thái:** Open
+**Trạng thái:** Closed (2026-09-19) — cùng fix KI-016 (cắt dòng trống cuối trong `parseDeckFile`).
 
 ---
 

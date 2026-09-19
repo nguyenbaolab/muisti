@@ -4,6 +4,20 @@ Ghi theo thời gian, mới nhất ở trên. Mỗi entry: tên ngắn, ngày, q
 
 ---
 
+## Parser bỏ qua dòng trống cuối file
+
+**Ngày:** 2026-09-19
+
+**Quyết định:** `parseDeckFile` cắt các dòng `trim() === ''` ở đuôi (sau BOM + split `\r?\n`) trước khi cap 500 và trước vòng parse. Dòng trống *giữa* file vẫn lỗi «Dòng trống» (dữ liệu sai). File rỗng / chỉ dòng trống → `validLines` và `errors` rỗng (không thêm loại lỗi mới). `canSave` / UI không đổi.
+
+**Lý do:** Editor thường thêm newline cuối; KI-016 khóa Lưu dù từ đều hợp lệ. Cap phải đếm sau khi cắt kẻo 500 từ + `\n` thành 501.
+
+**Phạm vi:** `src/lib/deckParser.ts`. KI-016 / KI-010 Closed.
+
+**Không làm gì:** Không bỏ qua dòng trống giữa file. Không nới `canSave`.
+
+---
+
 ## Xóa `p { margin: 0 }`; margin trên `<p>` dùng utility thường
 
 **Ngày:** 2026-09-19

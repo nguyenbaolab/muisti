@@ -4,6 +4,14 @@ Nhật ký thay đổi có ý nghĩa. Entry mới ở **đầu file** (sau tiêu
 
 ---
 
+## Giai đoạn 1 — KI-016: cắt dòng trống cuối trong parseDeckFile
+**Ngày:** 2026-09-19
+
+- Sau BOM + `split(/\r?\n/)`, pop các dòng `trim() === ''` ở đuôi. Cap 500 trên số dòng còn lại. Dòng trống giữa file vẫn «Dòng trống».
+- Không sửa CreateDeckPage / `canSave`. KI-016 và KI-010 Closed.
+
+---
+
 ## Giai đoạn 1 — Xóa `p { margin: 0 }`, bỏ `!mt-*`
 **Ngày:** 2026-09-19
 

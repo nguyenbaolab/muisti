@@ -41,7 +41,7 @@ src/
   lib/
     supabase.ts         # Supabase client (createClient, requireEnv guard)
     srs.ts              # classifyAttempt + computeNextReview (SM-2 rút gọn)
-    deckParser.ts       # parseDeckFile — split `;`, trim, max 500 dòng
+    deckParser.ts       # parseDeckFile — split `;`, trim, cắt dòng trống cuối, max 500 sau cắt
     deckLabels.ts       # languageLabel / visibilityLabel / sharerNameFromEmail
     useTheme.ts         # override | system; chỉ ghi localStorage khi toggle (KI-012 Closed)
   pages/
@@ -117,7 +117,7 @@ Hướng đã chốt (2026-09-14, cột pool 2026-09-16, profiles 2026-09-17):
 ## §6 Store/API index
 
 - `src/lib/supabase.ts`: `export const supabase` — Supabase client dùng chung toàn app; khởi tạo từ `VITE_SUPABASE_URL` + `VITE_SUPABASE_ANON_KEY`
-- Parse deck file: `parseDeckFile(content)` — `src/lib/deckParser.ts`
+- Parse deck file: `parseDeckFile(content)` — `src/lib/deckParser.ts` (cắt dòng trống cuối; cap 500 sau cắt; dòng trống giữa file vẫn lỗi)
 - List decks: `decks.select('*, vocab_items(count)')` — RLS lọc own + public — `DecksPage`; filter client `activeTab` `'mine' | 'public'`; click own → `/decks/:id`, click không phải mình → `/decks/:id/preview`. UI järvi: `Tabs` (`idPrefix="decks"`, aria-label «Loại deck») + `TabPanel`; hàng đầu `h1` + `<Link>` «Tạo deck mới»; hàng deck hairline; nhãn từ `src/lib/deckLabels.ts` (DecksPage tự thêm «Nghĩa: » khi render). Sửa `<Link>` `/edit`; Xóa `window.confirm` cũ. Lỗi `profiles` → `console.error`.
 - Owner email (tên chia sẻ): query 2 — `profiles.select('id, email').in('id', ownerIds)` trên `DecksPage`; `profiles.select('email').eq('id', owner_id)` trên `DeckPreviewPage` nếu `!owned`. Không embed từ `decks`. `sharerNameFromEmail` trong `deckLabels.ts`. Preview lỗi profiles → `console.error`, fallback «Ẩn danh».
 - Account summary: `decks.select('id, vocab_items(count)').eq('owner_id', user.id)` + `user_vocab_progress.select('interval_days, due_date').eq('user_id')` — `HomePage` `/`; `todayLocalIsoDate()`; không join vocab cho progress
