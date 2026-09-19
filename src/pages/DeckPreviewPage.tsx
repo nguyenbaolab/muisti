@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { Button, buttonPrimaryClassName } from '../components/Button'
 import { DeckHeader } from '../components/DeckHeader'
+import { backLinkBlockClassName } from '../components/linkClasses'
 import { VocabTable } from '../components/VocabTable'
 import { sharerNameFromEmail } from '../lib/deckLabels'
 import { supabase } from '../lib/supabase'
@@ -19,9 +20,6 @@ type PreviewDeck = Deck & {
 }
 
 type PageStatus = 'loading' | 'notfound' | 'ready'
-
-const backLinkClassName =
-  'mb-4 inline-block text-base text-[var(--color-text-muted)] no-underline hover:text-[var(--color-text)] dark:text-[var(--color-text-muted-dark)] dark:hover:text-[var(--color-text-dark)]'
 
 export function DeckPreviewPage() {
   const { id } = useParams<{ id: string }>()
@@ -158,7 +156,7 @@ export function DeckPreviewPage() {
           Không tìm thấy deck hoặc bạn không có quyền xem.
         </p>
         <p className="mt-4">
-          <Link to="/decks" className={backLinkClassName}>
+          <Link to="/decks" className={backLinkBlockClassName}>
             ← Decks
           </Link>
         </p>
@@ -172,7 +170,7 @@ export function DeckPreviewPage() {
   return (
     <div>
       <p>
-        <Link to="/decks" className={backLinkClassName}>
+        <Link to="/decks" className={backLinkBlockClassName}>
           ← Decks
         </Link>
       </p>

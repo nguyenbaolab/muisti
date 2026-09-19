@@ -4,6 +4,23 @@ Ghi theo thời gian, mới nhất ở trên. Mỗi entry: tên ngắn, ngày, q
 
 ---
 
+## Dọn alias CSS cũ; gộp backLinkClassName
+
+**Ngày:** 2026-09-19
+
+**Quyết định:**
+- Xóa alias Vite (`--text`, `--bg`, `--border`, `--accent`…, `--sans`, `--heading`, `--mono`, `--text-h`, `--code-bg`) và các khối `prefers-color-scheme` / `html.dark` / `html:not(.dark)` chỉ gán lại alias. `h1,h2` dùng `var(--font-sans)` trực tiếp. Xóa rule `code` (không có `<code>` trong `src/`). Giữ `:root` font 18px / letter-spacing / color-scheme, `p { margin: 0 }`, `@theme`.
+- `backLinkClassName` nguồn chung `src/components/linkClasses.ts` (không `mb-4`); `backLinkBlockClassName = mb-4 ${base}` cho 4 trang deck. FocusLayout / Review error-empty dùng bản không `mb-4`.
+- Xóa `Card.tsx` và `src/assets/*` không import. `index.html` title Muisti, `lang="vi"`. Auth gate `Đang tải...`.
+
+**Lý do:** Mọi trang đã järvi; alias không còn người đọc; copy class back link dễ lệch.
+
+**Phạm vi:** `index.css`, `linkClasses.ts`, trang deck + FocusLayout + ReviewPage import, `App.tsx`, `index.html`. Không đổi `p { margin: 0 }` / `!mt-*`.
+
+**Không làm gì:** Không sửa `--color-accent-hover` thiếu cặp dark. Không đổi tab Public / nav Decks / Email / English / Clone / confirm xóa.
+
+---
+
 ## ReviewPage Đợt B: màn học järvi
 
 **Ngày:** 2026-09-19
@@ -125,7 +142,7 @@ Ghi theo thời gian, mới nhất ở trên. Mỗi entry: tên ngắn, ngày, q
 
 **Ngày:** 2026-09-19
 
-**Quyết định:** `AppShell` tách thành `AppLayout` (header + `Outlet`) và `HomePage` (Tổng kết Tổng). Route session: layout bọc `/` + mọi `/decks*`. `ReviewPage` (`/review`, `/review/:deckId`) đứng ngoài layout — ôn tập toàn màn hình, không header. Header: wordmark, Decks, Ôn tập, `ThemeToggle`, Đăng xuất (`signOut` không confirm). Không hiện email/tên. `#root` bỏ `text-align: center`, `border-inline`, `width: 1126px`; `h1`/`h2` về cỡ base (1.5rem / 1.125rem). Alias CSS cũ (`--text`, `--bg`, `--border`…) giữ.
+**Quyết định:** `AppShell` tách thành `AppLayout` (header + `Outlet`) và `HomePage` (Tổng kết Tổng). Route session: layout bọc `/` + mọi `/decks*`. `ReviewPage` (`/review`, `/review/:deckId`) đứng ngoài layout — ôn tập toàn màn hình, không header. Header: wordmark, Decks, Ôn tập, `ThemeToggle`, Đăng xuất (`signOut` không confirm). Không hiện email/tên. `#root` bỏ `text-align: center`, `border-inline`, `width: 1126px`; `h1`/`h2` về cỡ base (1.5rem / 1.125rem). Alias CSS cũ (`--text`, `--bg`, `--border`…) giữ **(đã dọn 2026-09-19 — xem entry «Dọn alias CSS cũ»)**.
 
 **Lý do:** Nền UI järvi; nav dùng chung cho trang deck; phiên ôn không bị header chia sự chú ý.
 

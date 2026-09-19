@@ -4,6 +4,16 @@ Nhật ký thay đổi có ý nghĩa. Entry mới ở **đầu file** (sau tiêu
 
 ---
 
+## Giai đoạn 1 — Dọn alias CSS + gộp backLink
+**Ngày:** 2026-09-19
+
+- `linkClasses.ts`: `backLinkClassName` / `backLinkBlockClassName`; 4 trang deck + FocusLayout + Review error/empty dùng chung.
+- `index.css`: xóa alias cũ, khối media/`html.dark`/`html:not(.dark)`, rule `code`. Giữ `p { margin: 0 }`, `:root` font qua `--font-sans`.
+- Xóa `Card.tsx`, `src/assets/*`. `index.html` title Muisti, `lang="vi"`. Auth `Đang tải...`.
+- Docs: CONTEXT, DECISIONS, KI-019, KI-020. Không đụng `!mt-*`.
+
+---
+
 ## Giai đoạn 1 — ReviewPage Đợt B (màn học järvi)
 **Ngày:** 2026-09-19
 

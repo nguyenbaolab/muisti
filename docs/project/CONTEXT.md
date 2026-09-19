@@ -7,7 +7,7 @@ Tài liệu kỹ thuật cho Cursor khi đọc/ghi code. Business: `REQUIREMENTS
 ## §1 Tech stack
 
 - **Frontend:** Vite + React + TypeScript, static SPA
-- **CSS:** Tailwind CSS v4 (`@tailwindcss/vite` + `@import "tailwindcss"` trong `index.css`). Token järvi trong `@theme`; dark mode class `.dark` trên `<html>` (`@custom-variant`). Trang session dùng token + `Button` / `Input` / `Select` / `Textarea` / `RadioGroup` / `FileField` / `DeckForm` / `Tabs` / `DeckHeader` / `VocabTable` / `FocusLayout`. Review Đợt A + Đợt B (màn học) đã järvi
+- **CSS:** Tailwind CSS v4 (`@tailwindcss/vite` + `@import "tailwindcss"` trong `index.css`). Token järvi trong `@theme`; dark mode class `.dark` trên `<html>` (`@custom-variant`). Không còn alias CSS cũ (`--text` / `--border`…). Trang session dùng token + `Button` / `Input` / `Select` / `Textarea` / `RadioGroup` / `FileField` / `DeckForm` / `Tabs` / `DeckHeader` / `VocabTable` / `FocusLayout`. Review Đợt A + Đợt B đã järvi
 - **Data / Auth:** Supabase (Postgres + Auth), client gọi `supabase-js`, bảo vệ bằng RLS
 - **Auth model:** admin invite (`inviteUserByEmail`); không form đăng ký công khai
 - **Deploy:** Cloudflare Pages
@@ -22,8 +22,7 @@ Tài liệu kỹ thuật cho Cursor khi đọc/ghi code. Business: `REQUIREMENTS
 src/
   main.tsx              # entry point
   App.tsx               # BrowserRouter + session gate (onAuthStateChange); nested AppLayout
-  index.css             # Tailwind + token järvi + alias CSS cũ; #root không còn chrome Vite
-  assets/               # vite.svg, react.svg, hero.png
+  index.css             # Tailwind + token järvi; không alias cũ; #root không chrome Vite
   components/
     AppLayout.tsx       # header (wordmark + Decks/Ôn tập + ThemeToggle + Đăng xuất) + Outlet
     Button.tsx          # variant primary/secondary/danger; prop loading; export class primary/secondary
@@ -33,7 +32,7 @@ src/
     RadioGroup.tsx      # fieldset/legend; options value/label/description
     FileField.tsx       # input file ẩn + nút Chọn/Đổi file; hint/error
     DeckForm.tsx        # 5 trường metadata Create/Edit; không <form>/submit
-    Card.tsx
+    linkClasses.ts      # backLinkClassName (không mb-4) + backLinkBlockClassName
     ThemeToggle.tsx     # AppLayout + FocusLayout (Review); mount không ghi storage
     FocusLayout.tsx     # <main> max-w-xl + thanh ← Trang chủ / ThemeToggle; ngoài AppLayout
     Tabs.tsx            # tablist ARIA + roving tabindex; TabPanel

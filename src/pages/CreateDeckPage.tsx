@@ -3,13 +3,11 @@ import { Link, useNavigate } from 'react-router-dom'
 import { Button } from '../components/Button'
 import { DeckForm } from '../components/DeckForm'
 import { FileField } from '../components/FileField'
+import { backLinkBlockClassName } from '../components/linkClasses'
 import { VocabTable } from '../components/VocabTable'
 import { parseDeckFile, type ParseError, type ValidLine } from '../lib/deckParser'
 import { supabase } from '../lib/supabase'
 import type { Deck } from '../types/database'
-
-const backLinkClassName =
-  'mb-4 inline-block text-base text-[var(--color-text-muted)] no-underline hover:text-[var(--color-text)] dark:text-[var(--color-text-muted-dark)] dark:hover:text-[var(--color-text-dark)]'
 
 function saveBlockedReason(args: {
   name: string
@@ -216,7 +214,7 @@ export function CreateDeckPage() {
   return (
     <div>
       <p>
-        <Link to="/decks" className={backLinkClassName}>
+          <Link to="/decks" className={backLinkBlockClassName}>
           ← Decks
         </Link>
       </p>

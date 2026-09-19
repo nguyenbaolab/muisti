@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router-dom'
 import { buttonPrimaryClassName, buttonSecondaryClassName } from '../components/Button'
 import { DeckHeader } from '../components/DeckHeader'
 import { TabPanel, Tabs } from '../components/Tabs'
+import { backLinkBlockClassName } from '../components/linkClasses'
 import { VocabTable } from '../components/VocabTable'
 import { supabase } from '../lib/supabase'
 import { todayLocalIsoDate } from '../lib/srs'
@@ -41,9 +42,6 @@ function localIsoDateFromTimestamp(iso: string): string {
   const day = String(d.getDate()).padStart(2, '0')
   return `${d.getFullYear()}-${month}-${day}`
 }
-
-const backLinkClassName =
-  'mb-4 inline-block text-base text-[var(--color-text-muted)] no-underline hover:text-[var(--color-text)] dark:text-[var(--color-text-muted-dark)] dark:hover:text-[var(--color-text-dark)]'
 
 export function DeckDetailPage() {
   const { id } = useParams<{ id: string }>()
@@ -147,7 +145,7 @@ export function DeckDetailPage() {
           Không tìm thấy deck.
         </p>
         <p className="mt-4">
-          <Link to="/decks" className={backLinkClassName}>
+          <Link to="/decks" className={backLinkBlockClassName}>
             ← Decks
           </Link>
         </p>
@@ -164,11 +162,11 @@ export function DeckDetailPage() {
         </p>
         <p className="mt-4 flex flex-wrap gap-x-4 gap-y-2">
           {id ? (
-            <Link to={`/decks/${id}/preview`} className={backLinkClassName}>
+            <Link to={`/decks/${id}/preview`} className={backLinkBlockClassName}>
               Xem trước deck
             </Link>
           ) : null}
-          <Link to="/decks" className={backLinkClassName}>
+          <Link to="/decks" className={backLinkBlockClassName}>
             ← Decks
           </Link>
         </p>
@@ -184,7 +182,7 @@ export function DeckDetailPage() {
           {loadError ?? 'Không tải được dữ liệu.'}
         </p>
         <p className="mt-4">
-          <Link to="/decks" className={backLinkClassName}>
+          <Link to="/decks" className={backLinkBlockClassName}>
             ← Decks
           </Link>
         </p>
@@ -219,7 +217,7 @@ export function DeckDetailPage() {
   return (
     <div>
       <p>
-        <Link to="/decks" className={backLinkClassName}>
+        <Link to="/decks" className={backLinkBlockClassName}>
           ← Decks
         </Link>
       </p>

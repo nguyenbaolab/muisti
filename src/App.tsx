@@ -39,7 +39,7 @@ function AuthRoutes() {
   }, [])
 
   if (loading) {
-    return <div>Loading...</div>
+    return <div>Đang tải...</div>
   }
 
   if (session) {

@@ -35,75 +35,10 @@
   --radius-base: 0.5rem;
 }
 
-/*
-  Legacy Vite-template aliases still used by unupgraded pages
-  (e.g. DecksPage var(--border)). Values follow the järvi palette.
-  prefers-color-scheme keeps current OS-driven behavior; html.dark /
-  html:not(.dark) follow the JS toggle when it is wired later.
-*/
 :root {
-  --text: var(--color-text);
-  --text-h: #2A2F35;
-  --bg: var(--color-bg);
-  --border: var(--color-border);
-  --code-bg: #F4F5F3;
-  --accent: var(--color-accent);
-  --accent-bg: rgba(61, 90, 108, 0.1);
-  --accent-border: rgba(61, 90, 108, 0.5);
-  --social-bg: rgba(244, 245, 243, 0.5);
-  --shadow:
-    rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
-  --sans: var(--font-sans);
-  --heading: var(--font-sans);
-  --mono: ui-monospace, Consolas, monospace;
-
-  font: 18px/145% var(--sans);
+  font: 18px/145% var(--font-sans);
   letter-spacing: 0.18px;
   color-scheme: light dark;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --text: var(--color-text-dark);
-    --text-h: #B8C4CC;
-    --bg: var(--color-bg-dark);
-    --border: var(--color-border-dark);
-    --code-bg: #1A2229;
-    --accent: var(--color-accent-dark);
-    --accent-bg: rgba(107, 140, 160, 0.15);
-    --accent-border: rgba(107, 140, 160, 0.5);
-    --social-bg: rgba(42, 51, 59, 0.5);
-    --shadow:
-      rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
-  }
-}
-
-html.dark {
-  --text: var(--color-text-dark);
-  --text-h: #B8C4CC;
-  --bg: var(--color-bg-dark);
-  --border: var(--color-border-dark);
-  --code-bg: #1A2229;
-  --accent: var(--color-accent-dark);
-  --accent-bg: rgba(107, 140, 160, 0.15);
-  --accent-border: rgba(107, 140, 160, 0.5);
-  --social-bg: rgba(42, 51, 59, 0.5);
-  --shadow:
-    rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
-}
-
-html:not(.dark) {
-  --text: var(--color-text);
-  --text-h: #2A2F35;
-  --bg: var(--color-bg);
-  --border: var(--color-border);
-  --code-bg: #F4F5F3;
-  --accent: var(--color-accent);
-  --accent-bg: rgba(61, 90, 108, 0.1);
-  --accent-border: rgba(61, 90, 108, 0.5);
-  --social-bg: rgba(244, 245, 243, 0.5);
-  --shadow:
-    rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
 }
 
 html {
@@ -132,7 +67,7 @@ body {
 
 h1,
 h2 {
-  font-family: var(--heading);
+  font-family: var(--font-sans);
   font-weight: 500;
   color: var(--color-text);
 }
@@ -154,15 +89,4 @@ h2 {
 
 p {
   margin: 0;
-}
-
-code {
-  font-family: var(--mono);
-  display: inline-flex;
-  border-radius: 4px;
-  color: var(--text-h);
-  font-size: 15px;
-  line-height: 135%;
-  padding: 4px 8px;
-  background: var(--code-bg);
 }

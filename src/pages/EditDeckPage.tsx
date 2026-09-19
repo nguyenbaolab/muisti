@@ -2,13 +2,11 @@ import { useEffect, useState, type FormEvent } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { Button } from '../components/Button'
 import { DeckForm } from '../components/DeckForm'
+import { backLinkBlockClassName } from '../components/linkClasses'
 import { supabase } from '../lib/supabase'
 import type { Deck } from '../types/database'
 
 type PageStatus = 'loading' | 'notfound' | 'forbidden' | 'ready'
-
-const backLinkClassName =
-  'mb-4 inline-block text-base text-[var(--color-text-muted)] no-underline hover:text-[var(--color-text)] dark:text-[var(--color-text-muted-dark)] dark:hover:text-[var(--color-text-dark)]'
 
 export function EditDeckPage() {
   const { id } = useParams<{ id: string }>()
@@ -122,7 +120,7 @@ export function EditDeckPage() {
     return (
       <div>
         <p>
-          <Link to="/decks" className={backLinkClassName}>
+          <Link to="/decks" className={backLinkBlockClassName}>
             ← Decks
           </Link>
         </p>
@@ -138,7 +136,7 @@ export function EditDeckPage() {
     return (
       <div>
         <p>
-          <Link to="/decks" className={backLinkClassName}>
+          <Link to="/decks" className={backLinkBlockClassName}>
             ← Decks
           </Link>
         </p>
@@ -153,7 +151,7 @@ export function EditDeckPage() {
   return (
     <div>
       <p>
-        <Link to="/decks" className={backLinkClassName}>
+        <Link to="/decks" className={backLinkBlockClassName}>
           ← Decks
         </Link>
       </p>

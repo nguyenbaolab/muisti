@@ -13,6 +13,36 @@ Lỗi / sai lệch đã biết. Đánh số từ **KI-001**. Entry mới ở đ�
 
 ---
 
+## KI-020 — `p { margin: 0 }` không layer thắng `mt-*` trên `<p>`
+
+**Mức độ:** Low  
+**File liên quan:** `src/index.css`, các `<p>` dùng `!mt-*` hoặc `mt-*`
+
+**Mô tả:** `p { margin: 0 }` ngoài `@layer` thắng utility `mt-*`. Đợt dọn alias (2026-09-19) **cố ý không đụng** rule này và không bỏ `!mt-*` (đổi sẽ làm lệch khoảng cách).
+
+**Cách tái hiện:** `<p className="mt-4">` không có margin-top; cần `!mt-4`.
+
+**Hướng fix:** Đưa vào `@layer base` hoặc xóa (Preflight `*` đã `margin: 0`) rồi rà các `<p>` đang có `mt-*` chết. Prompt riêng.
+
+**Trạng thái:** Open (2026-09-19)
+
+---
+
+## KI-019 — `--color-accent-hover` không có cặp dark
+
+**Mức độ:** Low  
+**File liên quan:** `src/index.css` `@theme`, `src/components/Button.tsx`, `src/pages/DecksPage.tsx`
+
+**Mô tả:** Token hover accent chỉ có bản sáng. Dark dùng `accent-dark` làm nền/chữ, không có `--color-accent-hover-dark`. Chưa sửa vì đổi hover dark sẽ lệch pixel.
+
+**Cách tái hiện:** Hover nút primary / link accent trên Decks khi `.dark`.
+
+**Hướng fix:** Thêm token hover-dark và gắn `dark:hover:…` khi chấp nhận đổi hiển thị.
+
+**Trạng thái:** Open (2026-09-19)
+
+---
+
 ## KI-018 — Review keyboard listener gắn lại mỗi render
 
 **Mức độ:** Low  

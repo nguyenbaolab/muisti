@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { Button, buttonPrimaryClassName, buttonSecondaryClassName } from '../components/Button'
-import { FocusLayout, focusBackLinkClassName } from '../components/FocusLayout'
+import { FocusLayout } from '../components/FocusLayout'
 import { Input } from '../components/Input'
+import { backLinkClassName } from '../components/linkClasses'
 import { VocabTable } from '../components/VocabTable'
 import { supabase } from '../lib/supabase'
 import { computeNextReview, todayLocalIsoDate } from '../lib/srs'
@@ -625,11 +626,11 @@ export function ReviewPage() {
         </div>
         <div className="mt-6 flex flex-wrap gap-4">
           {scopedDeckId ? (
-            <Link to={`/decks/${scopedDeckId}/preview`} className={focusBackLinkClassName}>
+            <Link to={`/decks/${scopedDeckId}/preview`} className={backLinkClassName}>
               Xem trước deck
             </Link>
           ) : null}
-          <Link to="/decks" className={focusBackLinkClassName}>
+          <Link to="/decks" className={backLinkClassName}>
             Decks
           </Link>
         </div>
@@ -650,11 +651,11 @@ export function ReviewPage() {
         </div>
         <div className="mt-6 flex flex-wrap gap-4">
           {scopedDeckId ? (
-            <Link to={`/decks/${scopedDeckId}`} className={focusBackLinkClassName}>
+            <Link to={`/decks/${scopedDeckId}`} className={backLinkClassName}>
               Xem deck
             </Link>
           ) : null}
-          <Link to="/decks" className={focusBackLinkClassName}>
+          <Link to="/decks" className={backLinkClassName}>
             Decks
           </Link>
         </div>
