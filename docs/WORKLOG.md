@@ -4,6 +4,13 @@ Nhật ký thay đổi có ý nghĩa. Entry mới ở **đầu file** (sau tiêu
 
 ---
 
+## Giai đoạn 1 — HomePage empty: copy + nút Tạo deck mới
+**Ngày:** 2026-09-19
+
+- Nhánh `!summary || totalDecks === 0`: dòng «Chưa có deck nào.»; phụ muted `text-sm`; `<Link>` `/decks/new` dùng `buttonPrimaryClassName` + `inline-block no-underline` (`mt-6`). Không đổi query/nhánh khác. DecksPage empty trong câu giữ nguyên.
+
+---
+
 ## Giai đoạn 1 — Sửa deploy: Workers Static Assets, bỏ `_redirects`
 **Ngày:** 2026-09-19
 

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { Button } from '../components/Button'
+import { Button, buttonPrimaryClassName } from '../components/Button'
 import { supabase } from '../lib/supabase'
 import { todayLocalIsoDate } from '../lib/srs'
 
@@ -105,10 +105,15 @@ export function HomePage() {
 
   if (!summary || summary.totalDecks === 0) {
     return (
-      <p>
-        Chưa có deck nào — tạo deck đầu tiên của bạn.{' '}
-        <Link to="/decks/new">Tạo deck mới</Link>
-      </p>
+      <div>
+        <p>Chưa có deck nào.</p>
+        <p className="mt-2 text-sm text-[var(--color-text-muted)] dark:text-[var(--color-text-muted-dark)]">
+          Tạo deck đầu tiên bằng cách tải lên một file từ vựng, mỗi dòng một từ dạng từ tiếng Phần Lan;nghĩa.
+        </p>
+        <Link to="/decks/new" className={`${buttonPrimaryClassName} mt-6 inline-block no-underline`}>
+          Tạo deck mới
+        </Link>
+      </div>
     )
   }
 
