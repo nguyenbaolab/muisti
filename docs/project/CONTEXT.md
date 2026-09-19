@@ -10,7 +10,7 @@ Tài liệu kỹ thuật cho Cursor khi đọc/ghi code. Business: `REQUIREMENTS
 - **CSS:** Tailwind CSS v4 (`@tailwindcss/vite` + `@import "tailwindcss"` trong `index.css`). Token järvi trong `@theme`; dark mode class `.dark` trên `<html>` (`@custom-variant`). Không còn alias CSS cũ (`--text` / `--border`…). Trang session dùng token + `Button` / `Input` / `Select` / `Textarea` / `RadioGroup` / `FileField` / `DeckForm` / `Tabs` / `DeckHeader` / `VocabTable` / `FocusLayout`. Review Đợt A + Đợt B đã järvi
 - **Data / Auth:** Supabase (Postgres + Auth), client gọi `supabase-js`, bảo vệ bằng RLS
 - **Auth model:** admin invite (`inviteUserByEmail`); không form đăng ký công khai
-- **Deploy:** Cloudflare Pages qua Git integration (nhánh `main`). Repo có `public/_redirects` (SPA `/* → /index.html 200`), `public/_headers` (header bảo mật cơ bản + cache immutable `/assets/*`), `.node-version` = 22, `package.json` `engines.node` khớp Vite 8. Không wrangler, không GitHub Actions. Env Pages: `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY` (không đặt `SUPABASE_SERVICE_ROLE_KEY`)
+- **Deploy:** Cloudflare Workers Static Assets qua Git integration (nhánh `main`, Worker `name` = `muisti`). SPA: `wrangler.jsonc` `assets.not_found_handling = "single-page-application"`, `directory` = `./dist`. Không `public/_redirects` (rule `/* /index.html 200` lỗi 100324 trên Workers). `public/_headers` (bảo mật + cache immutable `/assets/*`). `.node-version` = 22. Không thêm wrangler vào `package.json`. Env **Build** variables: `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY` (không đặt `SUPABASE_SERVICE_ROLE_KEY`)
 - **AI content:** app v0.1 không gọi LLM lúc runtime; nội dung deck do user upload
 - **Phân công:** Claude thiết kế + prompt; Cursor thực thi code/data; chủ dự án test và quyết định cuối
 
@@ -56,11 +56,11 @@ src/
   types/
     database.ts         # Deck, VocabItem, UserVocabProgress, ReviewQueueItem, Profile
 public/                 # Vite copy nguyên vào dist/
-  _redirects            # Cloudflare Pages SPA fallback: /* /index.html 200
   _headers              # nosniff / referrer / DENY / Permissions-Policy; /assets/* immutable
   favicon.svg
   icons.svg
-.node-version           # 22 — Cloudflare Pages đọc file này
+wrangler.jsonc          # Worker muisti; assets.directory ./dist; SPA not_found_handling
+.node-version           # 22 — Cloudflare Builds đọc file này
 supabase/
   schema.sql              # full DDL — dùng setup project mới
   migrations/
@@ -73,7 +73,7 @@ supabase/
     20260914_007_deck_based_schema.sql   # wipe units/exercises → decks
     20260916_008_deck_active_pool_size.sql  # decks.active_pool_size 10–30 default 20
     20260916_009_profiles.sql               # profiles + trigger auth.users — CHƯA APPLY (owner SQL Editor)
-.env.example            # VITE_* (nhúng bundle / đặt trên Pages); SUPABASE_SERVICE_ROLE_KEY local-only, không đặt trên Pages
+.env.example            # VITE_* (nhúng bundle / đặt Build variables trên Worker); SUPABASE_SERVICE_ROLE_KEY local-only, không đặt trên Cloudflare
 ```
 
 ---

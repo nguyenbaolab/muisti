@@ -4,6 +4,14 @@ Nhật ký thay đổi có ý nghĩa. Entry mới ở **đầu file** (sau tiêu
 
 ---
 
+## Giai đoạn 1 — Sửa deploy: Workers Static Assets, bỏ `_redirects`
+**Ngày:** 2026-09-19
+
+- Xóa `public/_redirects` (lỗi 100324 infinite loop trên luồng Workers). Thêm `wrangler.jsonc`: `name` muisti, `assets.directory` `./dist`, `not_found_handling` `single-page-application`. Không `main`, không thêm wrangler vào package.json.
+- Giữ `public/_headers`. Docs: RUNBOOK §3 Workers, DECISIONS (supersede Pages + `_redirects`), CONTEXT, KI-024, KI-021 wording. Không commit / không deploy.
+
+---
+
 ## Giai đoạn 1 — Chuẩn bị repo deploy Cloudflare Pages
 **Ngày:** 2026-09-19
 

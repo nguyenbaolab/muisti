@@ -4,7 +4,31 @@ Ghi theo thời gian, mới nhất ở trên. Mỗi entry: tên ngắn, ngày, q
 
 ---
 
+## Deploy Cloudflare Workers Static Assets; SPA qua wrangler.jsonc
+
+**Ngày:** 2026-09-19
+
+**Quyết định:**
+
+- Project trên Cloudflare là **Workers + Static Assets** (Git integration), không phải Pages cổ điển. Tên Worker `"muisti"` khớp `wrangler.jsonc` `name`.
+- SPA fallback: `assets.not_found_handling = "single-page-application"` trong `wrangler.jsonc`, `assets.directory = "./dist"`. Không `main` (không có mã Worker). Không thêm wrangler vào `package.json` — Cloudflare tự chạy wrangler lúc deploy.
+- **Xóa** `public/_redirects`. Rule `/* /index.html 200` bị Workers từ chối: *Infinite loop detected* (code 100324) — rewrite 200 về `/index.html` kích hoạt lại cùng rule sau khi strip `.html`/`/index`.
+- Giữ `public/_headers` (cú pháp Workers Static Assets: path + header thụt lề). Vite copy vào `dist/_headers`. Không CSP (KI-021).
+- Env Vite đặt ở **Build** variables (Settings → Build → Variables and secrets), không chỉ Runtime — Vite nhúng lúc `npm run build`. Không đặt `SUPABASE_SERVICE_ROLE_KEY`.
+
+**Lý do:** Deploy thật gọi `/workers/scripts/muisti/versions`. Tài liệu: [SPA](https://developers.cloudflare.com/workers/static-assets/routing/single-page-application/), [Static Assets](https://developers.cloudflare.com/workers/static-assets/), [_headers](https://developers.cloudflare.com/workers/static-assets/headers/).
+
+**Phạm vi:** `wrangler.jsonc`, xóa `public/_redirects`, RUNBOOK §3, CONTEXT, KI-021 wording, KI-024.
+
+**Không làm gì:** Không `wrangler login` / deploy từ máy local. Không thêm wrangler vào dependencies. Không đổi `src/` / `index.html` / `vite.config.ts`.
+
+**Thay thế:** entry «Deploy Cloudflare Pages qua Git; `_redirects` + `_headers`» (cùng ngày) — đánh dấu Superseded bên dưới.
+
+---
+
 ## Deploy Cloudflare Pages qua Git; `_redirects` + `_headers`; ghim Node 22
+
+**[SUPERSEDED 2026-09-19]** bởi «Deploy Cloudflare Workers Static Assets; SPA qua wrangler.jsonc». `_redirects` `/* /index.html 200` gây lỗi 100324 trên luồng Workers. Phần còn đúng: `_headers`, ghim Node 22, anon key + RLS, không CSP, không `404.html`.
 
 **Ngày:** 2026-09-19
 

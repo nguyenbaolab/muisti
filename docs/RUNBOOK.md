@@ -1,6 +1,6 @@
 # RUNBOOK — Vận hành & phát triển
 
-Phần dashboard Cloudflare/Supabase chờ người dùng thực hiện. Repo đã chuẩn bị file Pages.
+Phần dashboard Cloudflare/Supabase chờ người dùng thực hiện. Repo đã chuẩn bị Workers Static Assets (`wrangler.jsonc`).
 
 ---
 
@@ -11,7 +11,7 @@ Phần dashboard Cloudflare/Supabase chờ người dùng thực hiện. Repo đ
 - Node.js 22 (ghim trong `.node-version`; `package.json` `engines.node` = `^20.19.0 || >=22.12.0` — khớp Vite 8)
 - npm đi kèm Node
 - Tài khoản [Supabase](https://supabase.com) — project đã có; schema trong `supabase/schema.sql` + `supabase/migrations/`
-- Tài khoản [Cloudflare](https://dash.cloudflare.com) (khi deploy Pages)
+- Tài khoản [Cloudflare](https://dash.cloudflare.com) (khi deploy Worker)
 
 **Clone & cài:**
 
@@ -50,45 +50,51 @@ Quy trình dự kiến:
 
 ---
 
-## §3 Deploy (Cloudflare Pages)
+## §3 Deploy (Cloudflare Workers Static Assets)
 
 **Trạng thái:** Chuẩn bị xong phía repo; các bước dashboard chờ người dùng thực hiện và xác nhận.
 
-Repo dùng Git integration (push `main` → Cloudflare tự build). Không wrangler, không GitHub Actions. SPA fallback: `public/_redirects` (`/* /index.html 200`). Header: `public/_headers`. Node: `.node-version` = `22`.
+Project là **Cloudflare Workers với Static Assets**, không phải Pages cổ điển. Tên Worker `muisti` khớp `wrangler.jsonc` `"name"`. Git integration: push `main` → Cloudflare tự build rồi `npx wrangler deploy`. Không thêm wrangler vào `package.json`. SPA fallback do `assets.not_found_handling = "single-page-application"`. **Không** dùng `_redirects`. Header: `public/_headers`. Node: `.node-version` = `22`.
 
 ### Cloudflare Dashboard (người dùng làm)
 
-1. [Cloudflare Dashboard](https://dash.cloudflare.com) → Workers & Pages → Create → Pages → Connect to Git.
-2. Chọn repo `nguyenbaolab/muisti`, nhánh production `main`.
-3. Build settings:
-   - Framework preset: **Vite** hoặc **None**
+1. [Cloudflare Dashboard](https://dash.cloudflare.com) → Workers & Pages → Create application → kết nối Git (repo `nguyenbaolab/muisti`, nhánh `main`). Worker đã tạo tên `muisti`.
+2. Build / deploy:
    - Build command: `npm run build`
-   - Build output directory: `dist`
+   - Deploy command: `npx wrangler deploy` (mặc định luồng Workers)
    - Root directory: để trống
-4. Environment variables — đặt cho **cả Production và Preview, trước build đầu tiên** (Vite nhúng lúc build):
+3. Biến môi trường — **Build** variables (Settings → **Build** → Variables and secrets), đặt **trước** build đầu tiên (Vite nhúng lúc build). Cũng đặt cho preview/production builds nếu tách môi trường:
    - `VITE_SUPABASE_URL`
    - `VITE_SUPABASE_ANON_KEY`
    - **Không** đặt `SUPABASE_SERVICE_ROLE_KEY`
-5. Cloudflare đọc `.node-version` (Node 22). Có thể thêm biến `NODE_VERSION=22` nếu cần — không bắt buộc.
+   - Chỉ đặt Runtime variables thì app trắng trang (`Missing environment variable`) vì bundle không chứa URL/anon key.
+4. Cloudflare đọc `.node-version` (Node 22). Có thể thêm `NODE_VERSION=22` nếu cần — không bắt buộc.
 
 ### Supabase Dashboard (phòng ngừa)
 
 Authentication → URL Configuration:
 
-- Site URL = URL production của Pages (`https://<project>.pages.dev` hoặc domain riêng)
-- Redirect URLs: URL production, `http://localhost:5173`, và wildcard preview nếu muốn (`https://*.<project>.pages.dev`)
+- Site URL = URL production của Worker (`https://muisti.<subdomain>.workers.dev` hoặc domain riêng)
+- Redirect URLs: URL production, `http://localhost:5173`, và wildcard preview nếu dùng
 
 Hiện app chỉ dùng `signInWithPassword` — bước này phòng ngừa (OAuth / magic link / reset password chưa có trong `src/`).
 
 ### Checklist sau deploy (người dùng làm)
 
-- Mở URL Pages: trang đăng nhập hiện đúng, font Inter tải, theme đúng.
+- Mở URL Worker: trang đăng nhập hiện đúng, font Inter tải, theme đúng.
 - Đăng nhập được; F5 trên `/decks`, `/decks/<id>`, `/review` đều không ra 404 (SPA fallback hoạt động).
-- Mở DevTools Network: `/assets/*.js` trả header `cache-control` immutable; `index.html` không cache dài; response có `X-Content-Type-Options: nosniff`.
+- Gõ thẳng `https://<url>/decks` trên thanh địa chỉ (không qua nút trong app) để kiểm SPA fallback.
+- Mở DevTools Network: `/assets/*.js` trả header `cache-control` immutable; `index.html` không cache dài; response có `X-Content-Type-Options: nosniff`. Không cần mở `https://<url>/_headers` — file `_headers` không phải URL công khai; chỉ đọc header trong DevTools.
 - Đăng xuất và đăng nhập lại; tạo deck nhỏ, ôn một phiên, kiểm tra dữ liệu ghi được (RLS hoạt động trên production).
 - Console không lỗi `Missing environment variable`.
 - Mở một deck của tài khoản khác bằng URL: bị chặn như local (RLS).
 - Xóa deck test sau khi kiểm.
+
+### Sự cố đã gặp
+
+- **100324 — Invalid `_redirects` configuration:** *Line 1: Infinite loop detected in this rule. This would cause a redirect to strip `.html` or `/index` and end up triggering this rule again.*  
+  Deploy gọi `/workers/scripts/muisti/versions` (luồng Workers, không phải Pages). Rule `/* /index.html 200` trong `_redirects` bị từ chối.  
+  **Cách giải:** xóa `public/_redirects`; SPA bằng `wrangler.jsonc` `assets.not_found_handling = "single-page-application"`.
 
 ---
 

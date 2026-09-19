@@ -13,7 +13,22 @@ Lỗi / sai lệch đã biết. Đánh số từ **KI-001**. Entry mới ở đ�
 
 ---
 
-## KI-021 — Chưa có Content-Security-Policy trên Pages
+## KI-024 — Đổi tên Worker trên Cloudflare lệch `wrangler.jsonc` `name`
+
+**Mức độ:** Medium  
+**File liên quan:** `wrangler.jsonc`
+
+**Mô tả:** `name` hiện là `"muisti"` — khớp Worker đã tạo. Nếu đổi tên Worker trên dashboard mà không đổi `name` trong `wrangler.jsonc` (hoặc ngược lại), lần deploy sau có thể tạo Worker **mới** thay vì cập nhật Worker cũ.
+
+**Cách tái hiện:** Đổi tên trên Cloudflare, giữ `wrangler.jsonc` `"name": "muisti"`, deploy.
+
+**Hướng fix:** Giữ hai bên trùng. Không đổi trừ khi cố ý tách Worker.
+
+**Trạng thái:** Open (2026-09-19)
+
+---
+
+## KI-021 — Chưa có Content-Security-Policy trên Worker
 
 **Mức độ:** Low  
 **File liên quan:** `index.html`, `public/_headers`
