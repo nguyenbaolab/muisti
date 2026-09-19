@@ -4,6 +4,19 @@ Nhật ký thay đổi có ý nghĩa. Entry mới ở **đầu file** (sau tiêu
 
 ---
 
+## Giai đoạn 1 — DecksPage järvi
+**Ngày:** 2026-09-19
+**Trạng thái:** Done
+
+**Đã làm:**
+- Bỏ `<main>` và link «← Trang chủ»; `h1` + `<Link>` «Tạo deck mới» (`buttonPrimaryClassName`)
+- Tab Cá nhân/Public: tablist ARIA, roving tabindex, mũi tên + Home/End; số lượng khi đã load
+- Hàng deck hairline, không Card; Link tên+meta; owned: Công khai/Riêng tư + Sửa Link + Xóa confirm cũ
+- `useEffect` load có cờ `cancelled`; lỗi profiles `console.error`, không hiện UI
+- KI-013 Open: F5 giữ `location.state.success`
+
+---
+
 ## Login järvi + Input/Button form + đóng KI-012
 **Ngày:** 2026-09-19
 **Trạng thái:** Done

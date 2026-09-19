@@ -16,6 +16,8 @@ const variantClasses: Record<ButtonVariant, string> = {
     'bg-[var(--color-danger)] text-white hover:opacity-90 dark:bg-[var(--color-danger-dark)]',
 }
 
+export const buttonPrimaryClassName = `rounded-base px-4 py-2 text-sm font-medium transition-colors ${variantClasses.primary}`
+
 export function Button({
   variant = 'primary',
   className = '',

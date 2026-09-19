@@ -1,11 +1,14 @@
-import { useEffect, useState } from 'react'
-import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { useEffect, useRef, useState, type KeyboardEvent } from 'react'
+import { Link, useLocation } from 'react-router-dom'
+import { buttonPrimaryClassName } from '../components/Button'
 import { supabase } from '../lib/supabase'
 import type { Deck, Profile } from '../types/database'
 
 type DeckListRow = Deck & {
   vocab_items: { count: number }[] | null
 }
+
+type DeckTab = 'mine' | 'public'
 
 function vocabCount(deck: DeckListRow): number {
   return deck.vocab_items?.[0]?.count ?? 0
@@ -21,9 +24,16 @@ function sharerNameFromEmail(email: string | null | undefined): string {
   return atIndex === -1 ? email : email.slice(0, atIndex)
 }
 
+function visibilityLabel(visibility: Deck['visibility']): string {
+  return visibility === 'public' ? 'Công khai' : 'Riêng tư'
+}
+
+function isOwned(deck: DeckListRow, userId: string | null): boolean {
+  return userId !== null && deck.owner_id === userId
+}
+
 export function DecksPage() {
   const location = useLocation()
-  const navigate = useNavigate()
   const successMessage = (location.state as { success?: string } | null)?.success
 
   const [userId, setUserId] = useState<string | null>(null)
@@ -32,56 +42,79 @@ export function DecksPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [deletingId, setDeletingId] = useState<string | null>(null)
-  const [activeTab, setActiveTab] = useState<'mine' | 'public'>('mine')
+  const [activeTab, setActiveTab] = useState<DeckTab>('mine')
 
-  async function loadDecks() {
-    setLoading(true)
-    setError(null)
-
-    const {
-      data: { user },
-    } = await supabase.auth.getUser()
-    if (!user) {
-      setError('Không có phiên đăng nhập.')
-      setUserId(null)
-      setDecks([])
-      setEmailByOwnerId(new Map())
-      setLoading(false)
-      return
-    }
-
-    setUserId(user.id)
-
-    // Two queries: decks.owner_id FKs auth.users, not profiles — PostgREST cannot embed profiles(email).
-    const { data, error: fetchError } = await supabase
-      .from('decks')
-      .select('*, vocab_items(count)')
-      .order('created_at', { ascending: false })
-
-    if (fetchError) {
-      setError(fetchError.message)
-      setDecks([])
-      setEmailByOwnerId(new Map())
-      setLoading(false)
-      return
-    }
-
-    const deckRows = (data ?? []) as DeckListRow[]
-    const ownerIds = [...new Set(deckRows.map((d) => d.owner_id))]
-
-    let emailMap = new Map<string, string>()
-    if (ownerIds.length > 0) {
-      const { data: profilesData } = await supabase.from('profiles').select('id, email').in('id', ownerIds)
-      emailMap = new Map(((profilesData ?? []) as Profile[]).map((p) => [p.id, p.email]))
-    }
-
-    setDecks(deckRows)
-    setEmailByOwnerId(emailMap)
-    setLoading(false)
-  }
+  const mineTabRef = useRef<HTMLButtonElement>(null)
+  const publicTabRef = useRef<HTMLButtonElement>(null)
 
   useEffect(() => {
+    let cancelled = false
+
+    async function loadDecks() {
+      setLoading(true)
+      setError(null)
+
+      const {
+        data: { user },
+      } = await supabase.auth.getUser()
+      if (!user) {
+        if (!cancelled) {
+          setError('Không có phiên đăng nhập.')
+          setUserId(null)
+          setDecks([])
+          setEmailByOwnerId(new Map())
+          setLoading(false)
+        }
+        return
+      }
+
+      if (cancelled) return
+      setUserId(user.id)
+
+      // Two queries: decks.owner_id FKs auth.users, not profiles — PostgREST cannot embed profiles(email).
+      const { data, error: fetchError } = await supabase
+        .from('decks')
+        .select('*, vocab_items(count)')
+        .order('created_at', { ascending: false })
+
+      if (cancelled) return
+
+      if (fetchError) {
+        setError(fetchError.message)
+        setDecks([])
+        setEmailByOwnerId(new Map())
+        setLoading(false)
+        return
+      }
+
+      const deckRows = (data ?? []) as DeckListRow[]
+      const ownerIds = [...new Set(deckRows.map((d) => d.owner_id))]
+
+      let emailMap = new Map<string, string>()
+      if (ownerIds.length > 0) {
+        const { data: profilesData, error: profilesError } = await supabase
+          .from('profiles')
+          .select('id, email')
+          .in('id', ownerIds)
+
+        if (profilesError) {
+          console.error(profilesError)
+        } else {
+          emailMap = new Map(((profilesData ?? []) as Profile[]).map((p) => [p.id, p.email]))
+        }
+      }
+
+      if (cancelled) return
+
+      setDecks(deckRows)
+      setEmailByOwnerId(emailMap)
+      setLoading(false)
+    }
+
     void loadDecks()
+    return () => {
+      cancelled = true
+    }
   }, [])
 
   async function handleDelete(deck: DeckListRow) {
@@ -105,96 +138,196 @@ export function DecksPage() {
   }
 
   const visibleDecks = decks.filter((deck) => {
-    const owned = userId !== null && deck.owner_id === userId
+    const owned = isOwned(deck, userId)
     return activeTab === 'mine' ? owned : !owned
   })
 
-  return (
-    <main>
-      <p>
-        <Link to="/">← Trang chủ</Link>
-      </p>
-      <h1>Decks</h1>
-      <p>
-        <Link to="/decks/new">Tạo deck mới</Link>
-      </p>
+  const mineCount = decks.filter((deck) => isOwned(deck, userId)).length
+  const publicCount = decks.filter((deck) => !isOwned(deck, userId)).length
 
-      <p>
+  function activateTab(tab: DeckTab) {
+    setActiveTab(tab)
+    const target = tab === 'mine' ? mineTabRef.current : publicTabRef.current
+    target?.focus()
+  }
+
+  function handleTabKeyDown(event: KeyboardEvent<HTMLButtonElement>) {
+    if (event.key === 'ArrowRight' || event.key === 'ArrowLeft') {
+      event.preventDefault()
+      activateTab(activeTab === 'mine' ? 'public' : 'mine')
+      return
+    }
+    if (event.key === 'Home') {
+      event.preventDefault()
+      activateTab('mine')
+      return
+    }
+    if (event.key === 'End') {
+      event.preventDefault()
+      activateTab('public')
+    }
+  }
+
+  const tabClass = (selected: boolean) =>
+    selected
+      ? 'relative -mb-px border-b-2 border-[var(--color-accent)] pb-2 text-sm text-[var(--color-text)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)] dark:border-[var(--color-accent-dark)] dark:text-[var(--color-text-dark)] dark:focus-visible:outline-[var(--color-accent-dark)]'
+      : 'pb-2 text-sm text-[var(--color-text-muted)] hover:text-[var(--color-text)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)] dark:text-[var(--color-text-muted-dark)] dark:hover:text-[var(--color-text-dark)] dark:focus-visible:outline-[var(--color-accent-dark)]'
+
+  const textActionBase =
+    'inline-flex min-h-8 items-center px-2 text-sm text-[var(--color-text-muted)] no-underline dark:text-[var(--color-text-muted-dark)]'
+  const textActionClass = `${textActionBase} hover:text-[var(--color-text)] dark:hover:text-[var(--color-text-dark)]`
+  const deleteActionClass = `${textActionBase} hover:text-[var(--color-danger)] disabled:cursor-not-allowed disabled:opacity-50 dark:hover:text-[var(--color-danger-dark)]`
+
+  return (
+    <div>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <h1 className="mb-0">Decks</h1>
+        <Link to="/decks/new" className={`${buttonPrimaryClassName} no-underline`}>
+          Tạo deck mới
+        </Link>
+      </div>
+
+      <div
+        role="tablist"
+        aria-label="Loại deck"
+        className="mt-8 flex gap-6 border-b border-[var(--color-border)] dark:border-[var(--color-border-dark)]"
+      >
         <button
+          ref={mineTabRef}
           type="button"
+          role="tab"
+          id="decks-tab-mine"
+          aria-controls="decks-tabpanel"
+          aria-selected={activeTab === 'mine'}
+          tabIndex={activeTab === 'mine' ? 0 : -1}
+          className={tabClass(activeTab === 'mine')}
           onClick={() => setActiveTab('mine')}
-          style={{ fontWeight: activeTab === 'mine' ? 'bold' : 'normal' }}
+          onKeyDown={handleTabKeyDown}
         >
           Cá nhân
-        </button>{' '}
+          {!loading ? (
+            <span className="ml-1.5 text-xs text-[var(--color-text-muted)] dark:text-[var(--color-text-muted-dark)]">
+              {mineCount}
+            </span>
+          ) : null}
+        </button>
         <button
+          ref={publicTabRef}
           type="button"
+          role="tab"
+          id="decks-tab-public"
+          aria-controls="decks-tabpanel"
+          aria-selected={activeTab === 'public'}
+          tabIndex={activeTab === 'public' ? 0 : -1}
+          className={tabClass(activeTab === 'public')}
           onClick={() => setActiveTab('public')}
-          style={{ fontWeight: activeTab === 'public' ? 'bold' : 'normal' }}
+          onKeyDown={handleTabKeyDown}
         >
           Public
+          {!loading ? (
+            <span className="ml-1.5 text-xs text-[var(--color-text-muted)] dark:text-[var(--color-text-muted-dark)]">
+              {publicCount}
+            </span>
+          ) : null}
         </button>
-      </p>
+      </div>
 
-      {successMessage ? <p>{successMessage}</p> : null}
-      {error ? <p>{error}</p> : null}
-
-      {loading ? (
-        <p>Đang tải...</p>
-      ) : visibleDecks.length === 0 ? (
-        <p>
-          {activeTab === 'mine'
-            ? 'Bạn chưa có deck nào. Tạo deck mới để bắt đầu.'
-            : 'Chưa có deck công khai nào.'}
+      {successMessage ? (
+        <p
+          role="status"
+          className="mt-4 text-sm text-[var(--color-success)] dark:text-[var(--color-success-dark)]"
+        >
+          {successMessage}
         </p>
-      ) : (
-        <ul style={{ listStyle: 'none', padding: 0 }}>
-          {visibleDecks.map((deck) => {
-            const owned = userId !== null && deck.owner_id === userId
-            return (
-              <li
-                key={deck.id}
-                style={{
-                  border: '1px solid var(--border)',
-                  padding: 12,
-                  marginBottom: 12,
-                }}
-              >
+      ) : null}
+      {error ? (
+        <p role="alert" className="mt-4 text-sm text-[var(--color-danger)] dark:text-[var(--color-danger-dark)]">
+          {error}
+        </p>
+      ) : null}
+
+      <div
+        role="tabpanel"
+        id="decks-tabpanel"
+        aria-labelledby={activeTab === 'mine' ? 'decks-tab-mine' : 'decks-tab-public'}
+        className="mt-6"
+      >
+        {loading ? (
+          <p className="text-[var(--color-text-muted)] dark:text-[var(--color-text-muted-dark)]">
+            Đang tải...
+          </p>
+        ) : visibleDecks.length === 0 ? (
+          <p className="text-[var(--color-text-muted)] dark:text-[var(--color-text-muted-dark)]">
+            {activeTab === 'mine' ? (
+              <>
+                Bạn chưa có deck nào.{' '}
                 <Link
-                  to={owned ? `/decks/${deck.id}` : `/decks/${deck.id}/preview`}
-                  style={{ display: 'block' }}
+                  to="/decks/new"
+                  className="text-[var(--color-accent)] underline decoration-1 underline-offset-2 hover:text-[var(--color-accent-hover)] dark:text-[var(--color-accent-dark)]"
                 >
-                  <strong>{deck.name}</strong>
-                  <span style={{ display: 'block' }}>{vocabCount(deck)} từ</span>
-                  <span style={{ display: 'block' }}>
-                    {deck.visibility === 'public' ? 'public' : 'private'} ·{' '}
-                    {languageLabel(deck.meaning_language)}
-                  </span>
-                  {!owned ? (
-                    <span style={{ display: 'block' }}>
-                      Chia sẻ bởi: {sharerNameFromEmail(emailByOwnerId.get(deck.owner_id))}
+                  Tạo deck mới
+                </Link>{' '}
+                để bắt đầu.
+              </>
+            ) : (
+              'Chưa có deck công khai nào.'
+            )}
+          </p>
+        ) : (
+          <ul className="list-none p-0">
+            {visibleDecks.map((deck) => {
+              const owned = isOwned(deck, userId)
+              const meta = owned
+                ? `${languageLabel(deck.meaning_language)} · ${visibilityLabel(deck.visibility)}`
+                : `${languageLabel(deck.meaning_language)} · Chia sẻ bởi ${sharerNameFromEmail(emailByOwnerId.get(deck.owner_id))}`
+
+              return (
+                <li
+                  key={deck.id}
+                  className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-2 border-b border-[var(--color-border)] py-4 last:border-b-0 hover:bg-[var(--color-surface)] dark:border-[var(--color-border-dark)] dark:hover:bg-[var(--color-surface-dark)]"
+                >
+                  <Link
+                    to={owned ? `/decks/${deck.id}` : `/decks/${deck.id}/preview`}
+                    className="min-w-0 flex-1 no-underline"
+                  >
+                    <span className="block break-words font-medium text-[var(--color-text)] dark:text-[var(--color-text-dark)]">
+                      {deck.name}
                     </span>
-                  ) : null}
-                </Link>
-                {owned ? (
-                  <p>
-                    <button type="button" onClick={() => navigate(`/decks/${deck.id}/edit`)}>
-                      Sửa
-                    </button>{' '}
-                    <button
-                      type="button"
-                      disabled={deletingId === deck.id}
-                      onClick={() => void handleDelete(deck)}
-                    >
-                      {deletingId === deck.id ? 'Đang xóa…' : 'Xóa'}
-                    </button>
-                  </p>
-                ) : null}
-              </li>
-            )
-          })}
-        </ul>
-      )}
-    </main>
+                    <span className="mt-0.5 block text-sm text-[var(--color-text-muted)] dark:text-[var(--color-text-muted-dark)]">
+                      {meta}
+                    </span>
+                  </Link>
+                  <div className="flex shrink-0 flex-wrap items-center gap-1">
+                    <span className="whitespace-nowrap text-sm text-[var(--color-text-muted)] dark:text-[var(--color-text-muted-dark)]">
+                      {vocabCount(deck)} từ
+                    </span>
+                    {owned ? (
+                      <>
+                        <Link
+                          to={`/decks/${deck.id}/edit`}
+                          aria-label={`Sửa deck ${deck.name}`}
+                          className={textActionClass}
+                        >
+                          Sửa
+                        </Link>
+                        <button
+                          type="button"
+                          aria-label={`Xóa deck ${deck.name}`}
+                          disabled={deletingId === deck.id}
+                          onClick={() => void handleDelete(deck)}
+                          className={deleteActionClass}
+                        >
+                          {deletingId === deck.id ? 'Đang xóa…' : 'Xóa'}
+                        </button>
+                      </>
+                    ) : null}
+                  </div>
+                </li>
+              )
+            })}
+          </ul>
+        )}
+      </div>
+    </div>
   )
 }

@@ -13,6 +13,21 @@ Lỗi / sai lệch đã biết. Đánh số từ **KI-001**. Entry mới ở đ�
 
 ---
 
+## KI-013 — F5 làm thông báo clone hiện lại vì `location.state`
+
+**Mức độ:** Low  
+**File liên quan:** `src/pages/DecksPage.tsx`, `src/pages/DeckPreviewPage.tsx` (navigate state, không sửa ở bước này)
+
+**Mô tả:** `DecksPage` đọc `location.state.success` (shape `{ success?: string }`) và hiện một dòng status. `DeckPreviewPage` clone xong `navigate('/decks', { replace: true, state: { success: … } })`. History state được giữ khi F5 / reload trên `/decks` → thông báo clone hiện lại.
+
+**Cách tái hiện:** Clone một deck public → về `/decks` thấy thông báo thành công → F5 → thông báo vẫn hiện.
+
+**Hướng fix (chưa làm):** Sau khi đọc `success`, xóa state bằng `navigate('.', { replace: true, state: {} })` (hoặc `navigate(location.pathname, { replace: true })`), hoặc copy vào state cục bộ rồi clear history state. Không đổi shape `location.state` phía `DeckPreviewPage` nếu không cần.
+
+**Trạng thái:** Open (2026-09-19) — ghi nhận, chưa sửa.
+
+---
+
 ## KI-012 — `useTheme` ghi `localStorage` ngay lúc mount, chốt cứng theme hệ thống
 
 **Mức độ:** Low  

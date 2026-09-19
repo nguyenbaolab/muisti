@@ -38,7 +38,7 @@ src/
   pages/
     LoginPage.tsx       # järvi; signInWithPassword; lỗi Việt hóa; ngoài AppLayout
     HomePage.tsx        # `/` — Tổng kết Tổng (query cũ từ AppShell)
-    DecksPage.tsx       # /decks 2 tab Cá nhân/Public (activeTab); own → /decks/:id; khác → /preview + tên chia sẻ
+    DecksPage.tsx       # /decks järvi; tab ARIA Cá nhân/Public; hàng hairline; own → /:id; khác → /preview
     CreateDeckPage.tsx  # /decks/new — form + parse file + preview + lưu + active_pool_size
     EditDeckPage.tsx    # /decks/:id/edit — sửa metadata deck (owner); không sửa vocab_items
     DeckPreviewPage.tsx # /decks/:id/preview — đọc-only + Clone (non-owner); «Chia sẻ bởi» nếu !owned
@@ -109,7 +109,7 @@ Hướng đã chốt (2026-09-14, cột pool 2026-09-16, profiles 2026-09-17):
 
 - `src/lib/supabase.ts`: `export const supabase` — Supabase client dùng chung toàn app; khởi tạo từ `VITE_SUPABASE_URL` + `VITE_SUPABASE_ANON_KEY`
 - Parse deck file: `parseDeckFile(content)` — `src/lib/deckParser.ts`
-- List decks: `decks.select('*, vocab_items(count)')` — RLS lọc own + public — `DecksPage`; filter client `activeTab` `'mine' | 'public'`; click own → `/decks/:id`, click không phải mình → `/decks/:id/preview`
+- List decks: `decks.select('*, vocab_items(count)')` — RLS lọc own + public — `DecksPage`; filter client `activeTab` `'mine' | 'public'`; click own → `/decks/:id`, click không phải mình → `/decks/:id/preview`. UI järvi: không `<main>` (đã có `AppLayout`); hàng đầu `h1` + `<Link>` «Tạo deck mới» (class `buttonPrimaryClassName`); tablist ARIA (roving tabindex, ArrowLeft/Right, Home/End); hàng deck hairline `border-b`, không Card; owned hiện «Công khai»/«Riêng tư» (chỉ hiển thị); «Chia sẻ bởi {tên}» không dấu hai chấm; Sửa là `<Link>` `/edit`; Xóa `window.confirm` cũ. `useEffect` load có cờ `cancelled`; lỗi `profiles` → `console.error`, map rỗng → «Ẩn danh», không hiện UI.
 - Owner email (tên chia sẻ): query 2 — `profiles.select('id, email').in('id', ownerIds)` trên `DecksPage`; `profiles.select('email').eq('id', owner_id)` trên `DeckPreviewPage` nếu `!owned`. Không embed từ `decks` (không FK `decks`→`profiles`). UI cắt phần trước `@`.
 - Account summary: `decks.select('id, vocab_items(count)').eq('owner_id', user.id)` + `user_vocab_progress.select('interval_days, due_date').eq('user_id')` — `HomePage` `/`; `todayLocalIsoDate()`; không join vocab cho progress
 - Deck detail (owner): `decks.select('*')` rồi `vocab_items` + `user_vocab_progress` join `vocab_items!inner` lọc `deck_id` — `DeckDetailPage`; ngày «hôm nay» = `todayLocalIsoDate()`

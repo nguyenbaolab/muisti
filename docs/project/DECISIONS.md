@@ -4,6 +4,26 @@ Ghi theo thời gian, mới nhất ở trên. Mỗi entry: tên ngắn, ngày, q
 
 ---
 
+## DecksPage järvi: tab gạch chân ARIA; hàng hairline; Link tạo deck
+
+**Ngày:** 2026-09-19
+
+**Quyết định:**
+- Tab Cá nhân / Public: dạng gạch chân (một hairline `border-b` dưới thanh; tab chọn gạch ~2px `accent` / `accent-dark`). `role="tablist"` + `tab` + một `tabpanel`; `aria-selected` / `aria-controls` / `aria-labelledby`; roving tabindex; ArrowLeft/Right chuyển tab và focus; Home/End tùy chọn. Số lượng tab tính từ `decks` đã fetch (mine = owned, public = !owned); không hiện số khi loading.
+- Hàng deck: không Card, không box-shadow, không viền bao quanh từng hàng. Hairline ngăn giữa hàng (`border-b`, hàng cuối không viền). Tên + dòng phụ là một `<Link>` lớn.
+- Nhãn visibility Việt hóa chỉ ở hiển thị trên list: `public` → «Công khai», `private` → «Riêng tư». Không đổi giá trị DB. «Chia sẻ bởi {tên}» (bỏ dấu hai chấm).
+- «Tạo deck mới» là `<Link to="/decks/new">` dùng `buttonPrimaryClassName` (cùng token/class với `Button` variant primary). Không dùng `Button` + `navigate`.
+- «Sửa» là `<Link to="/decks/:id/edit">` (điều hướng = link). «Xóa» là text button; `window.confirm` giữ copy cũ.
+- Không search / sort / pagination. Query, công thức owned, route đích, `location.state.success` không đổi. Không sửa `DeckPreviewPage`.
+
+**Lý do:** Đồng bộ UI järvi với AppLayout; tab và hàng deck đọc được bằng bàn phím / screen reader; điều hướng dùng link.
+
+**Phạm vi:** `DecksPage.tsx`; export `buttonPrimaryClassName` từ `Button.tsx` (không đổi hành vi/giao diện `Button`).
+
+**Không làm gì:** Không variant ghost/link cho `Button`. Không sửa F5 làm thông báo clone hiện lại (KI-013). Không đồng bộ nhãn visibility trên Create/Edit/Preview ở slice này.
+
+---
+
 ## Input/Button form; Login järvi; theme chỉ persist khi user chọn
 
 **Ngày:** 2026-09-19
