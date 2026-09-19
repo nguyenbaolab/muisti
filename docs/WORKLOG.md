@@ -4,6 +4,17 @@ Nhật ký thay đổi có ý nghĩa. Entry mới ở **đầu file** (sau tiêu
 
 ---
 
+## Giai đoạn 1 — ReviewPage Đợt A (khung + setup/loading/error/empty/done)
+**Ngày:** 2026-09-19
+
+- `FocusLayout`: một `<main>` `max-w-xl`, thanh ← Trang chủ + ThemeToggle; Review ngoài AppLayout.
+- Setup: tên deck từ `checkOwner` (`owner_id, name`); `ownerChecked` chỉ UI; checkbox Gõ chữ / Trắc nghiệm; không UUID, không số due.
+- Loading/empty/error/done järvi. `startReview` lỗi fetch → copy cố định + `console.error`. Done: lưới 3 ô + VocabTable + hai Link.
+- Màn `reviewing` giữ nguyên nội dung (Đợt B). Logic SRS/enroll/phím/autofocus không đổi.
+- Docs: CONTEXT, DECISIONS, KNOWN_ISSUES (KI-017), REQUIREMENTS Session Summary.
+
+---
+
 ## tinh chỉnh khoảng cách ghi chú/hint/lý do khóa nút trong form Create/Edit
 
 ---

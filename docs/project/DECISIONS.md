@@ -4,6 +4,27 @@ Ghi theo thời gian, mới nhất ở trên. Mỗi entry: tên ngắn, ngày, q
 
 ---
 
+## ReviewPage Đợt A: khung tập trung + setup/empty/error/done
+
+**Ngày:** 2026-09-19
+
+**Quyết định:**
+- Review ngoài `AppLayout` dùng `FocusLayout`: một `<main>` `max-w-xl`, thanh trên «← Trang chủ» + `ThemeToggle`, không hairline, không wordmark. `useTheme` chỉ `setItem` khi bấm toggle — mount trên trang này không tự ghi storage.
+- Setup: hiện tên deck từ cùng query `checkOwner` (`select('owner_id, name')`), không UUID. Mix: «Tất cả từ đang đến hạn». Không hiện số từ due / số enroll (cần query mới; enroll chỉ chạy lúc Bắt đầu → dễ lệch nếu hiện trước).
+- Chặn flash setup: `ownerChecked` chỉ lớp hiển thị — deck-scoped disable «Bắt đầu ôn tập» đến khi check xong; mix coi như đã checked. Không đổi điều kiện gọi `startReview`.
+- Lỗi thô Supabase lúc tải phiên (`enroll.fatalError`, `progressResult.error`, `vocabResult.error`): `console.error` + chuỗi cố định «Không tải được dữ liệu ôn tập. Thử lại sau.» Query/thứ tự/điều kiện `startReview` không đổi.
+- Empty: copy phụ mix vs scoped + link Decks / Xem deck. Error: `role="alert"` danger + link preview (nếu scoped) + Decks.
+- Done: công thức Session Summary không đổi; lưới 3 ô (Nhớ dễ / Nhớ / Quên); VocabTable khi có từ quên; hai Link «Về trang chủ» / «Xem decks». Không nút «ôn tiếp».
+- Màn `reviewing` (nội dung học) giữ nguyên — Đợt B.
+
+**Lý do:** Trang tập trung, không header chung; UUID không đọc được; lỗi Postgres không nên hiện cho user.
+
+**Phạm vi:** `FocusLayout.tsx`, `ReviewPage.tsx` (khung + nhánh A). Không sửa `srs.ts`, enroll, persist, phím tắt, autofocus.
+
+**Không làm gì:** Không số due trên setup. Không Việt hóa lỗi persist lúc học. Không persist phiên khi F5.
+
+---
+
 ## Create/Edit järvi; DeckForm + Select/Textarea/RadioGroup/FileField
 
 **Ngày:** 2026-09-19

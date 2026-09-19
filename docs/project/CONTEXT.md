@@ -7,7 +7,7 @@ Tài liệu kỹ thuật cho Cursor khi đọc/ghi code. Business: `REQUIREMENTS
 ## §1 Tech stack
 
 - **Frontend:** Vite + React + TypeScript, static SPA
-- **CSS:** Tailwind CSS v4 (`@tailwindcss/vite` + `@import "tailwindcss"` trong `index.css`). Token järvi trong `@theme`; dark mode class `.dark` trên `<html>` (`@custom-variant`). Trang session (trừ Review) dùng token + `Button` / `Input` / `Select` / `Textarea` / `RadioGroup` / `FileField` / `DeckForm` / `Tabs` / `DeckHeader` / `VocabTable`; Review còn inline style + alias `--border` / `--text` / `--bg`
+- **CSS:** Tailwind CSS v4 (`@tailwindcss/vite` + `@import "tailwindcss"` trong `index.css`). Token järvi trong `@theme`; dark mode class `.dark` trên `<html>` (`@custom-variant`). Trang session dùng token + `Button` / `Input` / `Select` / `Textarea` / `RadioGroup` / `FileField` / `DeckForm` / `Tabs` / `DeckHeader` / `VocabTable` / `FocusLayout`. Review Đợt A (setup/loading/error/empty/done + khung) đã järvi; màn `reviewing` còn inline style chờ Đợt B
 - **Data / Auth:** Supabase (Postgres + Auth), client gọi `supabase-js`, bảo vệ bằng RLS
 - **Auth model:** admin invite (`inviteUserByEmail`); không form đăng ký công khai
 - **Deploy:** Cloudflare Pages
@@ -34,7 +34,8 @@ src/
     FileField.tsx       # input file ẩn + nút Chọn/Đổi file; hint/error
     DeckForm.tsx        # 5 trường metadata Create/Edit; không <form>/submit
     Card.tsx
-    ThemeToggle.tsx     # gắn trong AppLayout
+    ThemeToggle.tsx     # AppLayout + FocusLayout (Review); mount không ghi storage
+    FocusLayout.tsx     # <main> max-w-xl + thanh ← Trang chủ / ThemeToggle; ngoài AppLayout
     Tabs.tsx            # tablist ARIA + roving tabindex; TabPanel
     DeckHeader.tsx      # h1 + mô tả + meta Nghĩa/visibility/số từ/sharer + actions
     VocabTable.tsx      # bảng từ; cột trạng thái optional; empty copy; caption sr-only
@@ -52,7 +53,7 @@ src/
     EditDeckPage.tsx    # /decks/:id/edit järvi; DeckForm; owner; Lưu/Hủy
     DeckPreviewPage.tsx # /decks/:id/preview järvi; đọc-only + Clone; DeckHeader + VocabTable
     DeckDetailPage.tsx  # /decks/:id järvi; owner: Tabs Từ vựng/Tổng kết; ôn + Sửa; VocabTable
-    ReviewPage.tsx      # ôn SRS; ngoài AppLayout (toàn màn hình); phím Enter + A–D MCQ; done = Session Summary
+    ReviewPage.tsx      # ôn SRS; ngoài AppLayout; FocusLayout + ThemeToggle; setup/empty/error/done Đợt A; reviewing chờ Đợt B; phím Enter + A–D; done = Session Summary
   types/
     database.ts         # Deck, VocabItem, UserVocabProgress, ReviewQueueItem, Profile
 public/                 # static assets
@@ -82,8 +83,8 @@ supabase/
 - `/decks/:id/edit` — `EditDeckPage` khi có session; guest → `/login`; chỉ owner thấy form
 - `/decks/:id/preview` — `DeckPreviewPage` khi có session; guest → `/login`; public hoặc own; Clone nếu không phải owner
 - `/decks/:id` — `DeckDetailPage` khi có session; guest → `/login`; chỉ owner (non-owner: thông báo + link preview, không redirect)
-- `/review` — `ReviewPage` mix; **ngoài** `AppLayout` (không header); guest → `/login`
-- `/review/:deckId` — `ReviewPage` chỉ owner: check `owner_id` rồi enroll Active Pool rồi ôn due; **ngoài** `AppLayout`; non-owner bị chặn (nhắn sang preview)
+- `/review` — `ReviewPage` mix; **ngoài** `AppLayout`; tự khung `FocusLayout` (← Trang chủ + ThemeToggle, `max-w-xl`); guest → `/login`
+- `/review/:deckId` — `ReviewPage` chỉ owner: check `owner_id` rồi enroll Active Pool rồi ôn due; **ngoài** `AppLayout`, cùng `FocusLayout`; non-owner bị chặn (nhắn sang preview)
 - Layout session: `AppLayout` bọc `/`, `/decks`, `/decks/new`, `/decks/:id`, `/decks/:id/edit`, `/decks/:id/preview`. Header: Muisti → `/`, Decks, Ôn tập → `/review`, `ThemeToggle`, Đăng xuất (`signOut`). Không hiện email.
 - Session: `getSession` + `onAuthStateChange` trong `App.tsx`; lần đầu hiện `Loading...`
 - Chi tiết UI nghiệp vụ ở `REQUIREMENTS.md`.
@@ -130,7 +131,8 @@ Hướng đã chốt (2026-09-14, cột pool 2026-09-16, profiles 2026-09-17):
 - Active pool enroll (chỉ `/review/:deckId` **và** owner): `enrollActivePool` trả `{ fatalError, enrolledCount }`; `startReview` lưu `enrolledCount`. Mix `/review` không enroll.
 - Session Summary: `completedCards` tích khi trả hết nợ; màn `done` đếm wrongCount 0/1/≥2, thời gian từ `sessionStartTime`, bảng từ quên; dòng từ mới chỉ khi `scopedDeckId && enrolledCount > 0`.
 - Review keyboard (`pageState === 'reviewing'` only): document `keydown` — Enter + `feedback` → `handleNext`; MCQ A–D → `submitMcqChoice(chosen)` (không đọc `selectedOption` vì stale). `handleSubmit` chuột/form không đổi.
-- Theme: `useTheme` — override từ `localStorage['muisti-theme']` (`light`|`dark` only) hoặc theo OS sống (`matchMedia` change). Chỉ `setItem` trong `toggleTheme`. Script FOUC `index.html` cùng quy tắc. `ThemeToggle` trong `AppLayout`; Login/Review không mount hook (class lúc load). KI-012 Closed.
+- Theme: `useTheme` — override từ `localStorage['muisti-theme']` (`light`|`dark` only) hoặc theo OS sống (`matchMedia` change). Chỉ `setItem` trong `toggleTheme`. Script FOUC `index.html` cùng quy tắc. `ThemeToggle` trong `AppLayout` và `FocusLayout` (Review). Mount hook không ghi storage. Login không mount hook (class lúc load). KI-012 Closed.
+- Review UI Đợt A: một `<main>` qua `FocusLayout`; setup hiện tên deck (cùng query `checkOwner` `owner_id, name`), `ownerChecked` chỉ lớp hiển thị; loading/empty/error/done järvi; `startReview` lỗi fetch → copy cố định + `console.error`. Màn `reviewing` (câu hỏi/typing/MCQ) chưa đổi.
 - SRS queue mix: `user_vocab_progress.select('..., vocab_items(*)').eq('user_id').lte('due_date', todayLocalIsoDate())` — không join `decks` — `ReviewPage` `/review`
 - SRS queue 1 deck: cùng query + `vocab_items!inner(*)` + `.eq('vocab_items.deck_id', deckId)` — `ReviewPage` `/review/:deckId`
 - SRS update: khi từ trả hết nợ (đúng lần cuối), `computeNextReview` rồi `update` ease/interval/due_date/review_count/last_reviewed_at. Sai chỉ đẩy lại cuối queue, không ghi DB. — `src/lib/srs.ts` + `ReviewPage`

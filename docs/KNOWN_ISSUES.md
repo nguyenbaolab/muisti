@@ -13,6 +13,24 @@ Lỗi / sai lệch đã biết. Đánh số từ **KI-001**. Entry mới ở đ�
 
 ---
 
+## KI-017 — ReviewPage Đợt A: due count, lỗi persist thô, F5 mất phiên
+
+**Mức độ:** Low  
+**File liên quan:** `src/pages/ReviewPage.tsx`
+
+**Mô tả:**
+- Setup chưa hiện số từ đến hạn / số sẽ enroll — cần query mới (và enroll chỉ chạy khi bấm Bắt đầu nên số trước đó dễ lệch).
+- Lỗi persist lúc học (`handleSubmit` / `submitMcqChoice` khi `pageState` vẫn `reviewing`) vẫn `setError(message)` thô của Supabase, hiện `<p>{error}</p>` trong form. Chờ Đợt B.
+- F5 giữa phiên (`loading` / `reviewing`) mất queue — state chỉ trong memory; chưa có persist phiên.
+
+**Cách tái hiện:** Mở `/review` hoặc `/review/:id` setup — không thấy số due. Trong lúc học, nếu update progress fail — message tiếng Anh/Postgres. F5 giữa phiên → về setup.
+
+**Hướng fix:** Query due (sau enroll) nếu muốn số chính xác; Việt hóa persist ở Đợt B; persist phiên nếu product muốn resume.
+
+**Trạng thái:** Open (2026-09-19)
+
+---
+
 ## KI-016 — File kết thúc bằng newline bị lỗi «Dòng trống» và khóa Lưu
 
 **Mức độ:** Medium  

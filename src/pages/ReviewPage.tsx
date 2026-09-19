@@ -1,5 +1,8 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { Link, useParams } from 'react-router-dom'
+import { Button, buttonPrimaryClassName, buttonSecondaryClassName } from '../components/Button'
+import { FocusLayout, focusBackLinkClassName } from '../components/FocusLayout'
+import { VocabTable } from '../components/VocabTable'
 import { supabase } from '../lib/supabase'
 import { computeNextReview, todayLocalIsoDate } from '../lib/srs'
 import type { ReviewQueueItem, VocabItem } from '../types/database'
@@ -17,6 +20,14 @@ type ProgressJoinRow = {
   review_count: number
   vocab_items: VocabItem | VocabItem[] | null
 }
+
+const LOAD_ERROR_COPY = 'Không tải được dữ liệu ôn tập. Thử lại sau.'
+
+const mutedTextClassName =
+  'text-[var(--color-text-muted)] dark:text-[var(--color-text-muted-dark)]'
+
+const checkboxClassName =
+  'mt-1 accent-[var(--color-accent)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)] dark:accent-[var(--color-accent-dark)] dark:focus-visible:outline-[var(--color-accent-dark)]'
 
 function shuffle<T>(items: T[]): T[] {
   const next = [...items]
@@ -173,10 +184,19 @@ export function ReviewPage() {
   const [completedCards, setCompletedCards] = useState<SessionCard[]>([])
   const [sessionStartTime, setSessionStartTime] = useState<number | null>(null)
   const [enrolledCount, setEnrolledCount] = useState(0)
+  const [deckName, setDeckName] = useState<string | null>(null)
+  const [ownerChecked, setOwnerChecked] = useState(() => !scopedDeckId)
   const typedInputRef = useRef<HTMLInputElement | null>(null)
 
   useEffect(() => {
-    if (!scopedDeckId) return
+    if (!scopedDeckId) {
+      setDeckName(null)
+      setOwnerChecked(true)
+      return
+    }
+
+    setDeckName(null)
+    setOwnerChecked(false)
 
     let cancelled = false
 
@@ -188,7 +208,7 @@ export function ReviewPage() {
 
       const { data: deckOwnerData, error: deckOwnerError } = await supabase
         .from('decks')
-        .select('owner_id')
+        .select('owner_id, name')
         .eq('id', scopedDeckId)
         .single()
 
@@ -205,7 +225,11 @@ export function ReviewPage() {
           'Đây là deck của người khác. Vào trang xem trước để Clone về deck của bạn trước khi học.',
         )
         setPageState('error')
+        return
       }
+
+      setDeckName(deckOwnerData.name)
+      setOwnerChecked(true)
     }
 
     void checkOwner()
@@ -289,7 +313,8 @@ export function ReviewPage() {
     if (scopedDeckId) {
       const enroll = await enrollActivePool(user.id, scopedDeckId, today)
       if (enroll.fatalError) {
-        setError(enroll.fatalError)
+        console.error(enroll.fatalError)
+        setError(LOAD_ERROR_COPY)
         setPageState('error')
         return
       }
@@ -320,12 +345,14 @@ export function ReviewPage() {
     const [progressResult, vocabResult] = await Promise.all([progressQuery, vocabQuery])
 
     if (progressResult.error) {
-      setError(progressResult.error.message)
+      console.error(progressResult.error)
+      setError(LOAD_ERROR_COPY)
       setPageState('error')
       return
     }
     if (vocabResult.error) {
-      setError(vocabResult.error.message)
+      console.error(vocabResult.error)
+      setError(LOAD_ERROR_COPY)
       setPageState('error')
       return
     }
@@ -496,74 +523,137 @@ export function ReviewPage() {
   }, [pageState, askMode, feedback, queue])
 
   const card = queue[0]
+  const startDisabled = enabledModes.length === 0 || (Boolean(scopedDeckId) && !ownerChecked)
 
   if (pageState === 'setup') {
+    const scopeLine =
+      reviewMode === 'deck'
+        ? deckName
+          ? `Deck: ${deckName}`
+          : 'Đang kiểm tra deck…'
+        : 'Tất cả từ đang đến hạn'
+
     return (
-      <main>
-        <p>
-          <Link to="/">← Trang chủ</Link>
-        </p>
+      <FocusLayout>
         <h1>Ôn tập hôm nay</h1>
-        <p>
-          {reviewMode === 'deck'
-            ? `Chế độ: ôn một deck (${scopedDeckId}).`
-            : 'Chế độ: mix tất cả từ đang đến hạn.'}
-        </p>
-        <p>Chọn hình thức hỏi (có thể tick cả hai — mỗi từ random một hình thức):</p>
-        <label>
-          <input
-            type="checkbox"
-            checked={typeEnabled}
-            onChange={(e) => setTypeEnabled(e.target.checked)}
-          />{' '}
-          Gõ chữ
-        </label>
-        <br />
-        <label>
-          <input
-            type="checkbox"
-            checked={mcqEnabled}
-            onChange={(e) => setMcqEnabled(e.target.checked)}
-          />{' '}
-          Trắc nghiệm
-        </label>
-        <p>
-          <button type="button" disabled={enabledModes.length === 0} onClick={() => void startReview()}>
+        <div className={mutedTextClassName}>{scopeLine}</div>
+
+        <fieldset className="mt-8 w-full border-0 p-0">
+          <legend className={`mb-2 block text-xs ${mutedTextClassName}`}>Hình thức hỏi</legend>
+          <div className="flex flex-col gap-3">
+            <label className="flex cursor-pointer items-start gap-2.5">
+              <input
+                type="checkbox"
+                checked={typeEnabled}
+                onChange={(e) => setTypeEnabled(e.target.checked)}
+                className={checkboxClassName}
+              />
+              <span>
+                <span className="block text-sm font-medium text-[var(--color-text)] dark:text-[var(--color-text-dark)]">
+                  Gõ chữ
+                </span>
+                <span className={`mt-0.5 block text-xs ${mutedTextClassName}`}>
+                  Nhập từ tiếng Phần Lan theo nghĩa.
+                </span>
+              </span>
+            </label>
+            <label className="flex cursor-pointer items-start gap-2.5">
+              <input
+                type="checkbox"
+                checked={mcqEnabled}
+                onChange={(e) => setMcqEnabled(e.target.checked)}
+                className={checkboxClassName}
+              />
+              <span>
+                <span className="block text-sm font-medium text-[var(--color-text)] dark:text-[var(--color-text-dark)]">
+                  Trắc nghiệm
+                </span>
+                <span className={`mt-0.5 block text-xs ${mutedTextClassName}`}>
+                  Chọn một trong bốn đáp án.
+                </span>
+              </span>
+            </label>
+          </div>
+        </fieldset>
+
+        <div className={`mt-3 text-sm ${mutedTextClassName}`}>
+          Tick cả hai để mỗi từ random một hình thức.
+        </div>
+
+        <div className="mt-8">
+          <Button
+            type="button"
+            variant="primary"
+            disabled={startDisabled}
+            onClick={() => void startReview()}
+          >
             Bắt đầu ôn tập
-          </button>
-        </p>
-      </main>
+          </Button>
+          {enabledModes.length === 0 ? (
+            <div className={`mt-2 text-sm ${mutedTextClassName}`} role="status">
+              Chọn ít nhất một hình thức hỏi.
+            </div>
+          ) : null}
+        </div>
+      </FocusLayout>
     )
   }
 
   if (pageState === 'loading') {
-    return <p>Đang tải...</p>
+    return (
+      <FocusLayout>
+        <div className={mutedTextClassName} role="status">
+          Đang chuẩn bị phiên ôn tập…
+        </div>
+      </FocusLayout>
+    )
   }
 
   if (pageState === 'error') {
     return (
-      <main>
-        <p>{error}</p>
-        {scopedDeckId ? (
-          <p>
-            <Link to={`/decks/${scopedDeckId}/preview`}>Xem trước deck</Link>
-          </p>
-        ) : null}
-        <p>
-          <Link to="/">← Trang chủ</Link>
-        </p>
-      </main>
+      <FocusLayout>
+        <div
+          className="text-[var(--color-danger)] dark:text-[var(--color-danger-dark)]"
+          role="alert"
+        >
+          {error}
+        </div>
+        <div className="mt-6 flex flex-wrap gap-4">
+          {scopedDeckId ? (
+            <Link to={`/decks/${scopedDeckId}/preview`} className={focusBackLinkClassName}>
+              Xem trước deck
+            </Link>
+          ) : null}
+          <Link to="/decks" className={focusBackLinkClassName}>
+            Decks
+          </Link>
+        </div>
+      </FocusLayout>
     )
   }
 
   if (pageState === 'empty') {
     return (
-      <main>
-        <p>Không có từ nào cần ôn hôm nay.</p>
-        <p>
-          <Link to="/">← Trang chủ</Link>
-        </p>
-      </main>
+      <FocusLayout>
+        <div className="font-medium text-[var(--color-text)] dark:text-[var(--color-text-dark)]">
+          Không có từ nào cần ôn hôm nay.
+        </div>
+        <div className={`mt-2 text-sm ${mutedTextClassName}`}>
+          {reviewMode === 'deck'
+            ? 'Deck này chưa có từ nào đến hạn.'
+            : 'Quay lại sau khi có từ đến hạn.'}
+        </div>
+        <div className="mt-6 flex flex-wrap gap-4">
+          {scopedDeckId ? (
+            <Link to={`/decks/${scopedDeckId}`} className={focusBackLinkClassName}>
+              Xem deck
+            </Link>
+          ) : null}
+          <Link to="/decks" className={focusBackLinkClassName}>
+            Decks
+          </Link>
+        </div>
+      </FocusLayout>
     )
   }
 
@@ -579,54 +669,80 @@ export function ReviewPage() {
     const elapsedSeconds = Math.floor((elapsedMs % 60000) / 1000)
     const elapsedLabel = `${elapsedMinutes}:${elapsedSeconds.toString().padStart(2, '0')}`
 
+    const summaryStats: { label: string; value: number; tone: 'success' | 'danger' | 'plain' }[] =
+      [
+        { label: 'Nhớ dễ', value: easyCount, tone: easyCount > 0 ? 'success' : 'plain' },
+        { label: 'Nhớ', value: okCount, tone: 'plain' },
+        { label: 'Quên', value: forgotCount, tone: forgotCount > 0 ? 'danger' : 'plain' },
+      ]
+
     return (
-      <main>
+      <FocusLayout>
         <h1>Hoàn thành!</h1>
-        <p>
+        <div className="font-medium text-[var(--color-text)] dark:text-[var(--color-text-dark)]">
           Đã ôn xong {total} từ hôm nay trong {elapsedLabel}.
-        </p>
+        </div>
 
         {scopedDeckId && enrolledCount > 0 ? (
-          <p>Có {enrolledCount} từ mới được thêm vào hôm nay.</p>
+          <div className={`mt-2 text-sm ${mutedTextClassName}`}>
+            Có {enrolledCount} từ mới được thêm vào hôm nay.
+          </div>
         ) : null}
 
-        <ul>
-          <li>Nhớ dễ: {easyCount}</li>
-          <li>Nhớ: {okCount}</li>
-          <li>Quên: {forgotCount}</li>
-        </ul>
+        <div className="mt-8 grid grid-cols-3 gap-x-8 gap-y-6">
+          {summaryStats.map((stat) => (
+            <div key={stat.label}>
+              <div className={`text-xs ${mutedTextClassName}`}>{stat.label}</div>
+              <div
+                className={
+                  stat.tone === 'success'
+                    ? 'mt-1 text-xl font-light text-[var(--color-success)] dark:text-[var(--color-success-dark)]'
+                    : stat.tone === 'danger'
+                      ? 'mt-1 text-xl font-light text-[var(--color-danger)] dark:text-[var(--color-danger-dark)]'
+                      : `mt-1 text-xl font-light text-[var(--color-text)] dark:text-[var(--color-text-dark)]`
+                }
+              >
+                {stat.value}
+              </div>
+            </div>
+          ))}
+        </div>
 
         {forgotCards.length > 0 ? (
-          <>
+          <div className="mt-10">
             <h2>Từ cần chú ý</h2>
-            <table>
-              <thead>
-                <tr>
-                  <th>Tiếng Phần Lan</th>
-                  <th>Nghĩa</th>
-                </tr>
-              </thead>
-              <tbody>
-                {forgotCards.map((card) => (
-                  <tr key={card.progressId}>
-                    <td>{card.finnishWord}</td>
-                    <td>{card.translation}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </>
+            <VocabTable
+              items={forgotCards.map((forgotCard) => ({
+                id: forgotCard.progressId,
+                finnish_word: forgotCard.finnishWord,
+                translation: forgotCard.translation,
+              }))}
+              showStatus={false}
+              caption="Danh sách từ cần chú ý trong phiên này"
+            />
+          </div>
         ) : null}
 
-        <p>
-          <Link to="/">← Trang chủ</Link>
-        </p>
-      </main>
+        <div className="mt-10 flex flex-wrap gap-3">
+          <Link to="/" className={buttonPrimaryClassName}>
+            Về trang chủ
+          </Link>
+          <Link to="/decks" className={buttonSecondaryClassName}>
+            Xem decks
+          </Link>
+        </div>
+      </FocusLayout>
     )
   }
 
   if (!card) {
-    return <p>Đang tải...</p>
+    return (
+      <FocusLayout>
+        <div className={mutedTextClassName} role="status">
+          Đang chuẩn bị phiên ôn tập…
+        </div>
+      </FocusLayout>
+    )
   }
 
   const canSubmit =
@@ -635,10 +751,7 @@ export function ReviewPage() {
     (askMode === 'type' ? typedAnswer.trim() !== '' : selectedOption !== null)
 
   return (
-    <main>
-      <p>
-        <Link to="/">← Trang chủ</Link>
-      </p>
+    <FocusLayout>
       <h1>Ôn tập hôm nay</h1>
       <p>
         Còn {queue.length} từ trong phiên này.
@@ -701,6 +814,6 @@ export function ReviewPage() {
           </div>
         )}
       </form>
-    </main>
+    </FocusLayout>
   )
 }
