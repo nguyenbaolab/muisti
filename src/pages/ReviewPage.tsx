@@ -24,6 +24,7 @@ type ProgressJoinRow = {
 }
 
 const LOAD_ERROR_COPY = 'Không tải được dữ liệu ôn tập. Thử lại sau.'
+const ENROLL_ERROR_COPY = 'Không thêm được từ mới. Thử lại sau.'
 
 const mutedTextClassName =
   'text-[var(--color-text-muted)] dark:text-[var(--color-text-muted-dark)]'
@@ -98,7 +99,8 @@ async function enrollActivePool(
     .single()
 
   if (deckError) {
-    return { fatalError: deckError.message, enrolledCount: 0 }
+    console.error('enrollActivePool: deck', deckError)
+    return { fatalError: ENROLL_ERROR_COPY, enrolledCount: 0 }
   }
 
   const poolSize = deckData?.active_pool_size as number
@@ -111,7 +113,8 @@ async function enrollActivePool(
     .lt('interval_days', 30)
 
   if (activeError) {
-    return { fatalError: null, enrolledCount: 0 }
+    console.error('enrollActivePool: active', activeError)
+    return { fatalError: ENROLL_ERROR_COPY, enrolledCount: 0 }
   }
 
   const activeCount = (activeRows ?? []).length
@@ -131,8 +134,13 @@ async function enrollActivePool(
     .select('id')
     .eq('deck_id', deckId)
 
-  if (existingError || vocabIdsError) {
-    return { fatalError: null, enrolledCount: 0 }
+  if (existingError) {
+    console.error('enrollActivePool: existing', existingError)
+    return { fatalError: ENROLL_ERROR_COPY, enrolledCount: 0 }
+  }
+  if (vocabIdsError) {
+    console.error('enrollActivePool: vocabIds', vocabIdsError)
+    return { fatalError: ENROLL_ERROR_COPY, enrolledCount: 0 }
   }
 
   const enrolled = new Set(
@@ -160,7 +168,13 @@ async function enrollActivePool(
   const { error: insertError } = await supabase.from('user_vocab_progress').insert(rowsToInsert)
 
   if (insertError) {
-    return { fatalError: null, enrolledCount: 0 }
+    // Concurrent tab may have already inserted the same (user_id, vocab_item_id).
+    // Unique violation (23505) is expected then — continue; due queue still works.
+    if (insertError.code === '23505') {
+      return { fatalError: null, enrolledCount: 0 }
+    }
+    console.error('enrollActivePool: insert', insertError)
+    return { fatalError: ENROLL_ERROR_COPY, enrolledCount: 0 }
   }
 
   return { fatalError: null, enrolledCount: rowsToInsert.length }
@@ -315,9 +329,8 @@ export function ReviewPage() {
     if (scopedDeckId) {
       const enroll = await enrollActivePool(user.id, scopedDeckId, today)
       if (enroll.fatalError) {
-        console.error(enroll.fatalError)
-        setError(LOAD_ERROR_COPY)
-        setPageState('error')
+        setError(enroll.fatalError)
+        setPageState('setup')
         return
       }
       setEnrolledCount(enroll.enrolledCount)
@@ -603,6 +616,14 @@ export function ReviewPage() {
           >
             Bắt đầu ôn tập
           </Button>
+          {error ? (
+            <div
+              className="mt-2 text-sm text-[var(--color-danger)] dark:text-[var(--color-danger-dark)]"
+              role="alert"
+            >
+              {error}
+            </div>
+          ) : null}
           {enabledModes.length === 0 ? (
             <div className={`mt-2 text-sm ${mutedTextClassName}`} role="status">
               Chọn ít nhất một hình thức hỏi.
