@@ -13,6 +13,51 @@ Lỗi / sai lệch đã biết. Đánh số từ **KI-001**. Entry mới ở đ�
 
 ---
 
+## KI-028 — Số «Đến hạn hôm nay» trên Home/Detail có thể nhỏ hơn phiên ôn deck
+
+**Mức độ:** Low  
+**File liên quan:** `src/pages/HomePage.tsx`, `src/pages/DeckDetailPage.tsx`, `src/pages/ReviewPage.tsx`
+
+**Mô tả:** Home và Detail đếm `due_date <= hôm nay` trên progress hiện có, **không** enroll. «Bắt đầu ôn tập» trên `/review/:deckId` gọi `enrollActivePool` trước khi fetch due — từ mới được `due_date = hôm nay` và vào cùng phiên. Session deck có thể **dài hơn** số «Đến hạn hôm nay» vừa thấy trên Home/Detail. Mix `/review` không enroll nên gần khớp hơn với hero Home.
+
+**Cách tái hiện:** Deck còn slot pool và từ chưa enroll; so sánh số trên Detail với độ dài phiên sau «Bắt đầu ôn tập».
+
+**Hướng fix:** Copy UI đã gợi ý; nếu cần số khớp thì hiện số sẽ thêm trên setup (tránh lệch lúc Bắt đầu — KI-017) hoặc ghi chú rõ trên Detail.
+
+**Trạng thái:** Open (2026-09-21)
+
+---
+
+## KI-027 — Không có test tự động cho `srs.ts`
+
+**Mức độ:** Low  
+**File liên quan:** `src/lib/srs.ts`, `package.json`
+
+**Mô tả:** `package.json` không có script `test`. Không có file `*.test.*` / vitest / jest trong repo. DECISIONS (entry SRS) từng ghi «test toán học exhaustive» lúc chốt công thức (2026-09-08) nhưng artifact đó **không** nằm trong repo.
+
+**Cách tái hiện:** `npm run` / glob `**/*.{test,spec}.*` — không có harness.
+
+**Hướng fix:** Thêm vitest (hoặc tương đương) + unit test `classifyAttempt` / `computeNextReview` nếu muốn regression guard.
+
+**Trạng thái:** Open (2026-09-21)
+
+---
+
+## KI-026 — Mix `/review` không lọc `owner_id`; dựa RLS `user_id`
+
+**Mức độ:** Low  
+**File liên quan:** `src/pages/ReviewPage.tsx`, RLS `user_vocab_progress`
+
+**Mô tả:** Mix chọn mọi progress của user có `due_date <= hôm nay`, **không** join `decks` / lọc `owner_id`. An toàn phụ thuộc RLS: `user_id = auth.uid()` trên SELECT/INSERT/UPDATE/DELETE. Comment trong code: có progress nghĩa là user đã từng ôn từ đó.
+
+**Cách tái hiện:** Đọc query mix trong `startReview`; đối chiếu `schema.sql` policies.
+
+**Hướng fix:** Xác nhận RLS đủ (hiện đúng); chỉ thêm join nếu product muốn loại progress trên deck không còn quyền SELECT vocab.
+
+**Trạng thái:** Open (2026-09-21)
+
+---
+
 ## KI-025 — `title` trên nav AppLayout chỉ hiện khi hover desktop
 
 **Mức độ:** Low  

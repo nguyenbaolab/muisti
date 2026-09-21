@@ -4,6 +4,20 @@ Ghi theo thời gian, mới nhất ở trên. Mỗi entry: tên ngắn, ngày, q
 
 ---
 
+## enrollActivePool: lỗi thật là fatal (trừ unique 23505)
+
+**Ngày:** 2026-09-21
+
+**Quyết định:** Lỗi query/insert trong `enrollActivePool` (đọc deck / đếm active / progress hiện có / vocab ids / insert không phải unique) là **fatal**. `startReview` gán message «Không thêm được từ mới. Thử lại sau.» trên màn setup (`role="alert"`), `pageState = 'setup'`, **không** fetch due queue. Ngoại lệ: Postgres unique violation **code `23505`** (tab song song đã insert cùng `(user_id, vocab_item_id)`) vẫn non-fatal, `enrolledCount = 0`, session tiếp tục fetch due. Nhận diện unique bằng **code**, không bằng message. `deckError` cùng path fatal + message enroll (trước đây `startReview` đưa sang `pageState = 'error'` + `LOAD_ERROR_COPY`).
+
+**Lý do:** Nuốt lỗi khiến phiên trống/ngắn mà user không biết vì sao.
+
+**Phạm vi:** `ReviewPage.tsx` (`enrollActivePool`, `startReview`, alert trên setup).
+
+**Không làm gì:** Không đổi thuật toán enroll / SRS / mix. Không đụng KI-017 (`handleSubmit` / `submitMcqChoice`).
+
+---
+
 ## Copy giải thích nhịp học; thuật ngữ thống nhất trên UI
 
 **Ngày:** 2026-09-19
@@ -143,7 +157,7 @@ Ghi theo thời gian, mới nhất ở trên. Mỗi entry: tên ngắn, ngày, q
 - Review ngoài `AppLayout` dùng `FocusLayout`: một `<main>` `max-w-xl`, thanh trên «← Trang chủ» + `ThemeToggle`, không hairline, không wordmark. `useTheme` chỉ `setItem` khi bấm toggle — mount trên trang này không tự ghi storage.
 - Setup: hiện tên deck từ cùng query `checkOwner` (`select('owner_id, name')`), không UUID. Mix: «Tất cả từ đang đến hạn». Không hiện số từ due / số enroll (cần query mới; enroll chỉ chạy lúc Bắt đầu → dễ lệch nếu hiện trước).
 - Chặn flash setup: `ownerChecked` chỉ lớp hiển thị — deck-scoped disable «Bắt đầu ôn tập» đến khi check xong; mix coi như đã checked. Không đổi điều kiện gọi `startReview`.
-- Lỗi thô Supabase lúc tải phiên (`enroll.fatalError`, `progressResult.error`, `vocabResult.error`): `console.error` + chuỗi cố định «Không tải được dữ liệu ôn tập. Thử lại sau.» Query/thứ tự/điều kiện `startReview` không đổi.
+- Lỗi thô Supabase lúc tải phiên (`progressResult.error`, `vocabResult.error`): `console.error` + chuỗi cố định «Không tải được dữ liệu ôn tập. Thử lại sau.» (`pageState = 'error'`). Lỗi enroll fatal: xem entry 2026-09-21 «enrollActivePool: lỗi thật là fatal».
 - Empty: copy phụ mix vs scoped + link Decks / Xem deck. Error: `role="alert"` danger + link preview (nếu scoped) + Decks.
 - Done: công thức Session Summary không đổi; lưới 3 ô (Nhớ dễ / Nhớ / Quên); VocabTable khi có từ quên; hai Link «Về trang chủ» / «Xem decks». Không nút «ôn tiếp».
 - Màn `reviewing` (nội dung học) giữ nguyên — Đợt B.
@@ -315,7 +329,7 @@ Ghi theo thời gian, mới nhất ở trên. Mỗi entry: tên ngắn, ngày, q
 
 ---
 
-## Active Pool Enrollment: enroll progress khi mở ôn 1 deck, không lazy-create lúc trả lời
+## Active Pool Enrollment: enroll progress khi bấm «Bắt đầu ôn tập» trên 1 deck, không lazy-create lúc trả lời
 
 **Ngày:** 2026-09-16
 
@@ -329,7 +343,7 @@ Ghi theo thời gian, mới nhất ở trên. Mỗi entry: tên ngắn, ngày, q
 
 **Công thức:** nếu `active_count < active_pool_size` thì enroll `active_pool_size - active_count` từ ngẫu nhiên trong `vocab_items` của deck mà user **chưa** có progress. Pool tạm vượt N (nhiều từ graduated cùng “Quên” → `interval_days` reset 1): **không trục xuất**, chỉ ngừng enroll thêm cho đến khi pool tụt dưới N.
 
-**Khi chạy:** mỗi lần user vào `/review/:deckId`, **trước** fetch due queue; client-side, không cron. `/review` mix **không** enroll (không biết deck nào).
+**Khi chạy:** `enrollActivePool` chạy **trong** `startReview`, sau khi user bấm «Bắt đầu ôn tập», **chỉ khi** có `scopedDeckId` (`/review/:deckId`), **trước** fetch due queue; client-side, không cron. **Không** chạy lúc mount trang, lúc upload deck, hay trên mix `/review`.
 
 **Quên từ graduated:** `computeNextReview` đã reset `intervalDays = 1` khi Quên — không sửa `srs.ts`. Lần mở review sau, từ tự vào lại `active_count`.
 
@@ -372,15 +386,24 @@ Ghi theo thời gian, mới nhất ở trên. Mỗi entry: tên ngắn, ngày, q
 
 ## Thuật toán SRS: SM-2 rút gọn 3 mức, đánh giá tự động từ số lần sai trong session
 
-**Ngày:** 2026-09-08
+**Ngày:** 2026-09-08  
+**Cập nhật làm rõ (2026-09-21):** đây là **scheduler lấy cảm hứng SM-2 đã đơn giản hóa**, không phải SM-2 chuẩn (không quality 0–5, không nút Dễ/Khó).
 
 **Quyết định:** Thuật toán ôn tập SRS (F-05) dùng biến thể SM-2 rút gọn, 3 mức độ, suy ra tự động từ hành vi trong session — không cho user tự chấm độ khó.
 
+**Tham số thật (khớp `src/lib/srs.ts` + `ReviewPage.tsx`):**
+- Không quality 0–5, không nút grade. Grade từ `wrongCount` trong session: `0` → `easy`, `1` → `good`, `>=2` → `forgot`.
+- Ease: easy `+0.15`, good `-0.05`, forgot `-0.2`, clamp `[1.3, 2.8]`; ease ban đầu `2.5` lúc enroll.
+- Lần ôn đầu (`review_count === 0`): easy 4 ngày, good 2, forgot 1. Lần sau: easy = `max(interval_cũ + 1, round(interval × ease))`, good = `max(interval_cũ + 1, round(interval × ease × 0.6))`, clamp `[1, 180]`; forgot → interval `1`.
+- `review_count` **tăng** mỗi lần persist (kể cả forgot), không reset — bảng 4/2/1 chỉ áp dụng một lần mỗi từ.
+- `due_date` kiểu `date`, tính client bằng `todayLocalIsoDate()` (lịch địa phương); queue lọc `due_date <= hôm nay local`.
+- Hướng hỏi: luôn hiện **nghĩa** (`translation`), user trả lời **từ tiếng Phần Lan**; `decks.meaning_language` chỉ metadata, `ReviewPage` không đọc.
+
 **Cơ chế 2 tầng:**
 
-Tầng 1 (trong session, client-side, không ghi DB giữa chừng): mỗi từ trong hàng đợi ôn hôm nay có 1 "retry queue" riêng. Trả lời sai 1 từ → +1 lần hỏi lại từ đó trong session. Sai tiếp (liên tiếp) → +1 lần nữa mỗi lần sai. Session chỉ kết thúc khi mọi từ trong hàng đợi đã "trả hết nợ" (đúng ở lần hỏi cuối cùng của nó). Nếu user thoát app khi session còn dở dang (chưa trả hết nợ) → coi như CHƯA ôn, không ghi DB, `due_date` giữ nguyên.
+Tầng 1 (trong session, client-side): mỗi từ trong hàng đợi có retry trên cùng `queue` (sai → tăng `wrongCount`, đẩy lại cuối hàng). Session kết thúc khi mọi từ đã đúng ở lần hỏi cuối. **Ghi DB:** (1) `enrollActivePool` INSERT các dòng progress mới khi bắt đầu phiên deck (trước câu trả lời nào); (2) `persistCard` UPDATE đúng **một lần** khi từ đó trả đúng lần đầu trong session, dùng `wrongCount` tích lũy. Trả lời sai **không** ghi DB. Thoát giữa phiên (F5 / đóng tab): mất queue trong memory (KI-017); **giữ** các dòng đã enroll và mọi từ đã persist khi đúng; chỉ các thẻ chưa trả đúng lần cuối còn `due_date` như trước lần ôn đó.
 
-Tầng 2 (khi 1 từ trả hết nợ trong session, ghi DB đúng 1 lần): đếm `wrong_count` = tổng số lần trả lời sai từ đó trong session (trước khi đúng lần cuối). Map sang 1 trong 3 mức:
+Tầng 2 (khi 1 từ trả hết nợ trong session, ghi DB đúng 1 lần qua `persistCard`): đếm `wrong_count` = tổng số lần trả lời sai từ đó trong session (trước khi đúng lần cuối). Map sang 1 trong 3 mức:
 
 | `wrong_count` | Mức độ |
 |---|---|
@@ -394,13 +417,13 @@ Tầng 2 (khi 1 từ trả hết nợ trong session, ghi DB đúng 1 lần): đ�
 - Quên: -0.20
 
 **Công thức cập nhật `interval_days`** (sàn 1, trần 180):
-- Lần ôn đầu tiên của từ (`review_count == 0`, tức đang có `interval_days` = 0): Nhớ dễ → cố định 4 ngày | Nhớ → cố định 2 ngày | Quên → cố định 1 ngày
-- Từ lần ôn thứ 2 trở đi (`interval_days` cũ > 0):
+- Lần ôn đầu tiên của từ (`review_count == 0`): Nhớ dễ → cố định 4 ngày | Nhớ → cố định 2 ngày | Quên → cố định 1 ngày
+- Từ lần ôn thứ 2 trở đi (`review_count > 0`):
   - Nhớ dễ: `max(interval_days_cũ + 1, round(interval_days_cũ * ease_factor_mới))`
   - Nhớ: `max(interval_days_cũ + 1, round(interval_days_cũ * ease_factor_mới * 0.6))`
   - Quên: reset về 1
 
-`due_date` = hôm nay + `interval_days` mới. `review_count += 1` và `last_reviewed_at = now()` áp dụng cho cả 3 mức.
+`due_date` = hôm nay local + `interval_days` mới. `review_count += 1` và `last_reviewed_at = now()` áp dụng cho cả 3 mức.
 
 **Lý do:**
 - Đánh giá tự động từ `wrong_count` thay vì để user tự chấm ("Dễ/Khó") — dùng hành vi khách quan đã đo được thay vì cảm nhận chủ quan, đúng hướng các SRS hiện đại (FSRS) đang đi
@@ -408,11 +431,11 @@ Tầng 2 (khi 1 từ trả hết nợ trong session, ghi DB đúng 1 lần): đ�
 - Sàn `interval_days_cũ + 1` cho cả 2 nhánh Nhớ dễ/Nhớ: chống "low interval hell" — nếu chỉ nhân ease mà không có sàn, từ có ease thấp có thể bị kẹt ở cùng 1 interval nhiều lần liên tiếp dù vẫn đang nhớ được, đi ngược nguyên tắc Anki khuyến nghị (thành công không nên bị phạt bằng cách không tăng khoảng cách)
 - Bước khởi đầu cố định (4/2/1 ngày) cho lần ôn đầu tiên, tách khỏi công thức nhân dùng từ lần 2 trở đi: công thức nhân với interval gốc quá nhỏ (0 hoặc 1) không tạo đủ khác biệt có ý nghĩa giữa các mức
 - Trần 180 ngày: chặn tăng vô hạn theo cấp số nhân, đảm bảo mọi từ quay lại định kỳ dù đã rất vững
-- Đã kiểm chứng bằng test toán học exhaustive (không phải chỉ vài kịch bản chọn mẫu): thứ tự interval/ease luôn giảm dần hoặc bằng khi `wrong_count` tăng, luôn trong biên [1,180] và [1.3,2.8], không có trường hợp kẹt vĩnh viễn, quyết định deterministic
+- Công thức đã kiểm chứng bằng test toán học exhaustive (lúc chốt 2026-09-08); **không** có file test tự động trong repo hiện tại (xem KI-027)
 
 **Phạm vi:** Logic tính SRS khi kết thúc 1 từ trong session ôn tập (F-05, T1.5). Áp dụng cho toàn bộ `user_vocab_progress` từ đây về sau.
 
-**Không làm gì:** Không cho user tự chọn mức độ (không có nút "Dễ/Khó" thủ công). Không ghi DB giữa session (chỉ ghi khi từ đã trả hết nợ). Không implement cơ chế "test bất chợt từ đã thuộc lâu" (xem KI-002, để dành sau).
+**Không làm gì:** Không cho user tự chọn mức độ (không có nút "Dễ/Khó" thủ công). Không implement cơ chế "test bất chợt từ đã thuộc lâu" (xem KI-002, để dành sau).
 
 ---
 

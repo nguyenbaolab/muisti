@@ -1,7 +1,9 @@
 # REQUIREMENTS — Muisti (Finnish Learning App)
 
-**Phiên bản:** v0.2  
-**Cập nhật:** 2026-09-19
+**Phiên bản:** v0.2.1  
+**Cập nhật:** 2026-09-21
+
+**Changelog v0.2.1:** Đồng bộ docs với code — timing enroll, ghi DB giữa phiên, lỗi enroll fatal (trừ 23505), làm rõ SM-2 rút gọn, Level 1/2 roadmap, bỏ todo 377 từ ngoài phạm vi.
 
 ---
 
@@ -17,7 +19,7 @@ Khai thác nội dung SM2 sâu hơn (bài tập ngữ pháp, vận dụng) là m
 
 ## 2. Mục tiêu Muisti v2 (giai đoạn hiện tại)
 
-Ứng dụng học từ vựng **deck-based**, dùng thuật toán SRS đã kiểm chứng (SM-2 rút gọn 3 mức — xem `DECISIONS.md` và `src/lib/srs.ts`) làm lõi. Người dùng tự upload bộ từ từ bất kỳ nguồn nào (không giới hạn SM2). Roadmap nhiều cấp (Level 1–4); **giai đoạn này chỉ build Level 1**.
+Ứng dụng học từ vựng **deck-based**, dùng thuật toán SRS đã kiểm chứng (scheduler lấy cảm hứng SM-2 đã rút gọn 3 mức — xem `DECISIONS.md` và `src/lib/srs.ts`) làm lõi. Người dùng tự upload bộ từ từ bất kỳ nguồn nào (không giới hạn SM2). Roadmap nhiều cấp (Level 1–4); **giai đoạn này chỉ build Level 1**.
 
 ---
 
@@ -27,7 +29,7 @@ Khai thác nội dung SM2 sâu hơn (bài tập ngữ pháp, vận dụng) là m
 
 - **Deck** = một bộ từ vựng người dùng upload, độc lập với “unit sách”.
 - Metadata: tên deck (bắt buộc); ngôn ngữ nghĩa — Anh hoặc Việt (bắt buộc); mô tả ngắn (optional); visibility public/private (default private); **số từ học cùng lúc** `active_pool_size` (10–30, default 20) lúc tạo deck.
-- **Active Pool Enrollment:** Done (verify 2026-09-16). Enroll `user_vocab_progress` khi bấm ôn `/review/:deckId` nếu số từ `interval_days < 30` của user trên deck đó < `active_pool_size`. Mix `/review` không enroll.
+- **Active Pool Enrollment:** Done (verify 2026-09-16). Enroll `user_vocab_progress` trong `startReview` khi bấm «Bắt đầu ôn tập» trên `/review/:deckId` nếu số từ `interval_days < 30` của user trên deck đó < `active_pool_size`. Mix `/review` không enroll. Không chạy lúc mount hay lúc upload.
 - **Sửa metadata deck:** Done (2026-09-16). Owner sửa `name` / `meaning_language` / `description` / `visibility` / `active_pool_size` tại `/decks/:id/edit`. Không sửa danh sách `vocab_items` (thêm/xóa/sửa từng từ) ở slice này. Public → private không còn guard (học viên dùng bản clone độc lập). Hạ `active_pool_size` dưới active_count hiện tại: cho phép (không trục xuất từ đã enroll).
 - **Deck public người khác:** Done (verify 2026-09-16, tài khoản B). Xem-trước đọc-only tại `/decks/:id/preview` + **Clone** về deck riêng (`name` + ` (Copy)`, `visibility = private`, `active_pool_size = 20`, copy `vocab_items`, không copy progress). Clone + enroll Active Pool trên bản copy đã verify end-to-end. Không học trực tiếp trên deck gốc. Deck của chính mình (public hay private) vẫn ôn `/review/:deckId` như cũ.
 - **Tên người chia sẻ:** Done (code 2026-09-17; **cần apply migration 009**). Deck không phải của mình trên `/decks` và `/decks/:id/preview` hiện «Chia sẻ bởi {phần trước @}» (không dấu hai chấm). Deck của mình không hiện dòng này. Không hiện email đầy đủ.
@@ -52,11 +54,11 @@ Level thuộc về **từng từ** (`vocab_item`), không phải cả deck. Tron
 
 ### Level 1 (scope hiện tại) — Nhận diện + Recall qua SRS
 
-Chính là thuật toán đã chốt và implement ở T1.5 — **không thiết kế lại**, chỉ đổi nguồn dữ liệu từ unit sang deck. Chi tiết công thức: `DECISIONS.md` (entry “Thuật toán SRS: SM-2 rút gọn 3 mức…”); code: `src/lib/srs.ts` (`classifyAttempt`, `computeNextReview`).
+Chính là thuật toán đã chốt và implement ở T1.5 — **không thiết kế lại**, chỉ đổi nguồn dữ liệu từ unit sang deck. Chi tiết công thức: `DECISIONS.md` (entry “Thuật toán SRS: SM-2 rút gọn 3 mức…”); code: `src/lib/srs.ts` (`classifyAttempt`, `computeNextReview`). Màn học hiện nghĩa và hỏi từ tiếng Phần Lan (`ReviewPage` không đọc `meaning_language`).
 
-- Cơ chế 2 tầng: retry queue trong session (client-side, không ghi DB giữa chừng) + cập nhật DB đúng 1 lần khi từ “trả hết nợ” (đúng ở lần hỏi cuối).
+- Cơ chế 2 tầng: retry queue trong session (sai không ghi DB) + `persistCard` UPDATE đúng 1 lần khi từ trả đúng lần cuối trong session; trên `/review/:deckId`, `enrollActivePool` INSERT từ mới lúc bắt đầu phiên (trước khi trả lời).
 - 3 mức tự động theo `wrong_count`: Nhớ dễ (`0` → `easy`) / Nhớ (`1` → `good`) / Quên (`>=2` → `forgot`).
-- Điều kiện “sẵn sàng lên Level 2” (chỉ đánh dấu; Level 2 chưa build): 3 lần đúng liên tiếp trong SRS.
+- Điều kiện “sẵn sàng lên Level 2” (3 lần đúng liên tiếp trong SRS): **chưa triển khai / roadmap** — không có cột hay logic trong code.
 - Hai chế độ trả lời: Gõ chữ; Trắc nghiệm (MCQ). Fallback về gõ chữ khi không đủ 3 distractor (`pickMcqOptions` trả `null`).
 - **Màn học (UI järvi Đợt B 2026-09-19):** tiến độ `{đã xong} / {tổng phiên} từ` derived (`completedCards.length` và `queue.length`), không state mới. Gợi ý phím (chỉ `sm+`, `aria-hidden`): Enter để trả lời / A–D / Enter để tiếp tục — không đổi logic phím.
 - **Phím tắt lúc ôn** (`pageState === 'reviewing'`): Gõ chữ — Enter submit form (lần 1), Enter lần 2 (đã có feedback) → câu tiếp. MCQ — A/B/C/D chọn + submit ngay; Enter sau feedback → câu tiếp. Chuột (radio / Trả lời / Tiếp theo) vẫn dùng được. Không áp dụng ở setup/done/error/empty.
@@ -64,6 +66,8 @@ Chính là thuật toán đã chốt và implement ở T1.5 — **không thiết
 ### Level 2 (tương lai — không build giai đoạn này)
 
 Recall chủ động: thấy nghĩa, gõ ra từ tiếng Phần Lan.
+
+**Ghi chú (2026-09-21):** Ranh giới L1 / L2 hiện **mờ** — UI Level 1 đã hỏi theo hướng nghĩa → từ Phần Lan. Cần định nghĩa lại trước khi scope L2. `user_vocab_progress` **không** có cột level; theo dõi theo level sẽ cần đổi schema.
 
 ### Level 3 (tương lai — không build giai đoạn này)
 
@@ -87,5 +91,5 @@ Vận dụng viết tự do, cần AI chấm bài. Ollama local hiện có (`qwe
 
 ## 6. Việc tái sử dụng từ Muisti v1
 
-- Giữ: Supabase Auth, RLS pattern, Vite + React + TypeScript, Cloudflare Pages, `src/lib/srs.ts` (SM-2), ReviewPage + retry queue, cấu trúc cốt lõi bảng `user_vocab_progress`.
-- 377 từ đã soạn (Unit 1+2 SM2) re-import thành deck đầu tiên **qua luồng upload deck thật** — không viết script seed riêng; vừa có data vừa test tính năng.
+- Giữ: Supabase Auth, RLS pattern, Vite + React + TypeScript, Cloudflare Pages, `src/lib/srs.ts` (SM-2 rút gọn), ReviewPage + retry queue, cấu trúc cốt lõi bảng `user_vocab_progress`.
+- 377 từ Unit 1+2 SM2: **ngoài phạm vi project** — user tự upload nếu cần; không còn todo / seed trong repo.

@@ -4,6 +4,15 @@ Nhật ký thay đổi có ý nghĩa. Entry mới ở **đầu file** (sau tiêu
 
 ---
 
+## Giai đoạn 1 — Docs đồng bộ code (enroll / SRS / Level / KI)
+**Ngày:** 2026-09-21
+
+- DECISIONS: timing enroll trong `startReview`; ghi DB (enroll + persistCard); entry fatal enroll trừ 23505; làm rõ SM-2 rút gọn + hướng hỏi.
+- REQUIREMENTS v0.2.1: L2 readiness roadmap; ranh giới L1/L2; 377 từ ngoài phạm vi.
+- KNOWN_ISSUES: KI-026/027/028 (không đụng KI-017; bỏ qua index due — đã KI-006). CURRENT cập nhật.
+
+---
+
 ## Giai đoạn 1 — Copy giải thích nhịp học (mix vs deck)
 **Ngày:** 2026-09-19
 
