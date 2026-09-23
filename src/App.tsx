@@ -54,6 +54,7 @@ function AuthRoutes() {
           <Route path="/decks" element={<DecksPage />} />
         </Route>
         <Route path="/review" element={<ReviewPage />} />
+        <Route path="/review/:deckId/extra" element={<ReviewPage />} />
         <Route path="/review/:deckId" element={<ReviewPage />} />
         <Route path="/login" element={<Navigate to="/" replace />} />
         <Route path="*" element={<Navigate to="/" replace />} />

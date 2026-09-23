@@ -4,6 +4,14 @@ Nhật ký thay đổi có ý nghĩa. Entry mới ở **đầu file** (sau tiêu
 
 ---
 
+## Giai đoạn 1 — Ôn thêm một deck (extra practice, không ghi DB)
+**Ngày:** 2026-09-23
+
+- DeckDetail: `extraCandidatesCount` từ `progressRows` (`interval_days < 30` AND `due_date > today`); hiện Link `/review/:id/extra` + đoạn giải thích chỉ khi `dueTodayCount === 0` và còn ứng viên.
+- Route `/review/:deckId/extra` → `ReviewPage`. `extraMode` qua `useMatch`. Owner/scope như deck; không enroll; fetch tối đa 20 từ chưa đến hạn đang học; không `persistCard`. Badge + empty/done copy extra. Mix/deck không đổi.
+
+---
+
 ## Giai đoạn 1 — Docs đồng bộ code (enroll / SRS / Level / KI)
 **Ngày:** 2026-09-21
 

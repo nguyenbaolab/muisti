@@ -4,6 +4,24 @@ Ghi theo thời gian, mới nhất ở trên. Mỗi entry: tên ngắn, ngày, q
 
 ---
 
+## Extra practice («Ôn thêm»): tách khỏi SRS; route path, không query string
+
+**Ngày:** 2026-09-23
+
+**Quyết định:**
+
+- «Ôn thêm» là phiên luyện tập **tách khỏi SRS**. Không `enrollActivePool`. Không `persistCard` — không UPDATE `ease_factor` / `interval_days` / `due_date` / `review_count` / `last_reviewed_at`. Queue, `wrongCount`, màn done chỉ trong memory.
+- Chỉ hiện trên `/decks/:id` khi `dueTodayCount === 0` và còn từ đang học chưa đến hạn (`interval_days < 30` AND `due_date > today`), tính từ `progressRows` đã tải.
+- Route `/review/:deckId/extra` (path segment). `ReviewPage` lấy `extraMode` bằng `useMatch`, không `?extra=`.
+
+**Lý do:** Ghi SRS khi ôn sớm sẽ rút `interval_days` / đẩy `due_date` và có thể làm từ tốt nghiệp (`>= 30`) sớm hơn — đúng điều product owner không muốn. Path `/extra` tách rõ khỏi `/review/:deckId` (enroll + persist), bookmark/share không lẫn query, và không để `useParams`/`startReview` nhầm mode.
+
+**Phạm vi:** `DeckDetailPage` (link + copy), `App.tsx` route, `ReviewPage` nhánh `extraMode`.
+
+**Không làm gì:** Không đổi `srs.ts`. Không extra trên mix `/review`. Không UI tốt nghiệp/reset. Không bảng / cột mới.
+
+---
+
 ## enrollActivePool: lỗi thật là fatal (trừ unique 23505)
 
 **Ngày:** 2026-09-21
