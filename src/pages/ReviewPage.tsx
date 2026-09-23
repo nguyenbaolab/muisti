@@ -307,6 +307,12 @@ export function ReviewPage() {
       return
     }
 
+    if (extraMode && !scopedDeckId) {
+      setError('Không tìm thấy deck.')
+      setPageState('error')
+      return
+    }
+
     if (scopedDeckId) {
       const { data: deckOwnerData, error: deckOwnerError } = await supabase
         .from('decks')
