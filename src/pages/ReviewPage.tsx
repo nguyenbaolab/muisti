@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { Link, useMatch, useParams } from 'react-router-dom'
 import { Button, buttonPrimaryClassName, buttonSecondaryClassName } from '../components/Button'
 import { FocusLayout } from '../components/FocusLayout'
 import { Input } from '../components/Input'
@@ -25,12 +25,16 @@ type ProgressJoinRow = {
 
 const LOAD_ERROR_COPY = 'Không tải được dữ liệu ôn tập. Thử lại sau.'
 const ENROLL_ERROR_COPY = 'Không thêm được từ mới. Thử lại sau.'
+const EXTRA_MODE_LABEL = 'Ôn thêm, không tính vào lịch'
 
 const mutedTextClassName =
   'text-[var(--color-text-muted)] dark:text-[var(--color-text-muted-dark)]'
 
 const checkboxClassName =
   'mt-1 accent-[var(--color-accent)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)] dark:accent-[var(--color-accent-dark)] dark:focus-visible:outline-[var(--color-accent-dark)]'
+
+const extraBadgeClassName =
+  `inline-block rounded-base border border-[var(--color-border)] px-2 py-0.5 text-xs ${mutedTextClassName} dark:border-[var(--color-border-dark)]`
 
 function shuffle<T>(items: T[]): T[] {
   const next = [...items]
@@ -183,6 +187,7 @@ async function enrollActivePool(
 export function ReviewPage() {
   const { deckId } = useParams<{ deckId?: string }>()
   const scopedDeckId = deckId?.trim() || null
+  const extraMode = useMatch('/review/:deckId/extra') !== null
   const reviewMode: 'mix' | 'deck' = scopedDeckId ? 'deck' : 'mix'
 
   const [pageState, setPageState] = useState<PageState>('setup')
@@ -326,7 +331,7 @@ export function ReviewPage() {
 
     const today = todayLocalIsoDate()
 
-    if (scopedDeckId) {
+    if (scopedDeckId && !extraMode) {
       const enroll = await enrollActivePool(user.id, scopedDeckId, today)
       if (enroll.fatalError) {
         setError(enroll.fatalError)
@@ -338,18 +343,32 @@ export function ReviewPage() {
 
     // Mix: all own due progress rows, no extra deck/visibility join.
     // Deck: due rows whose vocab belongs to that deck (inner join).
-    let progressQuery = supabase
-      .from('user_vocab_progress')
-      .select(
-        scopedDeckId
-          ? 'id, vocab_item_id, ease_factor, interval_days, review_count, vocab_items!inner(*)'
-          : 'id, vocab_item_id, ease_factor, interval_days, review_count, vocab_items(*)',
-      )
-      .eq('user_id', user.id)
-      .lte('due_date', today)
+    // Extra: not-yet-due active words on this deck (no enroll, no persist).
+    let progressQuery
+    if (extraMode && scopedDeckId) {
+      progressQuery = supabase
+        .from('user_vocab_progress')
+        .select('id, vocab_item_id, ease_factor, interval_days, review_count, vocab_items!inner(*)')
+        .eq('user_id', user.id)
+        .eq('vocab_items.deck_id', scopedDeckId)
+        .lt('interval_days', 30)
+        .gt('due_date', today)
+        .order('due_date', { ascending: true })
+        .limit(20)
+    } else {
+      progressQuery = supabase
+        .from('user_vocab_progress')
+        .select(
+          scopedDeckId
+            ? 'id, vocab_item_id, ease_factor, interval_days, review_count, vocab_items!inner(*)'
+            : 'id, vocab_item_id, ease_factor, interval_days, review_count, vocab_items(*)',
+        )
+        .eq('user_id', user.id)
+        .lte('due_date', today)
 
-    if (scopedDeckId) {
-      progressQuery = progressQuery.eq('vocab_items.deck_id', scopedDeckId)
+      if (scopedDeckId) {
+        progressQuery = progressQuery.eq('vocab_items.deck_id', scopedDeckId)
+      }
     }
 
     let vocabQuery = supabase.from('vocab_items').select('finnish_word')
@@ -394,6 +413,8 @@ export function ReviewPage() {
   }
 
   async function persistCard(card: SessionCard): Promise<string | null> {
+    if (extraMode) return null
+
     const next = computeNextReview({
       easeFactor: card.easeFactor,
       intervalDays: card.intervalDays,
@@ -441,6 +462,11 @@ export function ReviewPage() {
         return [{ ...current, wrongCount: current.wrongCount + 1 }, ...prev.slice(1)]
       })
       setFeedback({ correct: false })
+      return
+    }
+
+    if (extraMode) {
+      setFeedback({ correct: true })
       return
     }
 
@@ -493,6 +519,11 @@ export function ReviewPage() {
         return [{ ...current, wrongCount: current.wrongCount + 1 }, ...prev.slice(1)]
       })
       setFeedback({ correct: false })
+      return
+    }
+
+    if (extraMode) {
+      setFeedback({ correct: true })
       return
     }
 
@@ -555,11 +586,14 @@ export function ReviewPage() {
     return (
       <FocusLayout>
         <h1>Ôn tập hôm nay</h1>
-        <div className={mutedTextClassName}>{scopeLine}</div>
+        {extraMode ? <div className={`mt-2 ${extraBadgeClassName}`}>{EXTRA_MODE_LABEL}</div> : null}
+        <div className={`${extraMode ? 'mt-2 ' : ''}${mutedTextClassName}`}>{scopeLine}</div>
         <p className={`mt-2 text-sm ${mutedTextClassName}`}>
-          {scopedDeckId
-            ? 'Ôn các từ đến hạn của deck này và tự thêm từ mới cho đủ số từ học cùng lúc.'
-            : 'Chỉ ôn các từ đến hạn trong mọi deck, không thêm từ mới. Muốn học từ mới, hãy vào một deck.'}
+          {extraMode
+            ? 'Luyện các từ đang học chưa đến hạn. Kết quả không ghi vào lịch ôn.'
+            : scopedDeckId
+              ? 'Ôn các từ đến hạn của deck này và tự thêm từ mới cho đủ số từ học cùng lúc.'
+              : 'Chỉ ôn các từ đến hạn trong mọi deck, không thêm từ mới. Muốn học từ mới, hãy vào một deck.'}
         </p>
 
         <fieldset className="mt-8 w-full border-0 p-0">
@@ -670,14 +704,22 @@ export function ReviewPage() {
   if (pageState === 'empty') {
     return (
       <FocusLayout>
-        <div className="font-medium text-[var(--color-text)] dark:text-[var(--color-text-dark)]">
-          Không có từ nào cần ôn hôm nay.
-        </div>
-        <div className={`mt-2 text-sm ${mutedTextClassName}`}>
-          {reviewMode === 'deck'
-            ? 'Deck này chưa có từ nào đến hạn.'
-            : 'Quay lại sau khi có từ đến hạn.'}
-        </div>
+        {extraMode ? (
+          <div className="font-medium text-[var(--color-text)] dark:text-[var(--color-text-dark)]">
+            Không còn từ nào để ôn thêm.
+          </div>
+        ) : (
+          <>
+            <div className="font-medium text-[var(--color-text)] dark:text-[var(--color-text-dark)]">
+              Không có từ nào cần ôn hôm nay.
+            </div>
+            <div className={`mt-2 text-sm ${mutedTextClassName}`}>
+              {reviewMode === 'deck'
+                ? 'Deck này chưa có từ nào đến hạn.'
+                : 'Quay lại sau khi có từ đến hạn.'}
+            </div>
+          </>
+        )}
         <div className="mt-6 flex flex-wrap gap-4">
           {scopedDeckId ? (
             <Link to={`/decks/${scopedDeckId}`} className={backLinkClassName}>
@@ -718,14 +760,20 @@ export function ReviewPage() {
           Đã ôn xong {total} từ hôm nay trong {elapsedLabel}.
         </div>
 
-        {scopedDeckId && enrolledCount > 0 ? (
+        {scopedDeckId && enrolledCount > 0 && !extraMode ? (
           <div className={`mt-2 text-sm ${mutedTextClassName}`}>
             Có {enrolledCount} từ mới được thêm vào hôm nay.
           </div>
         ) : null}
-        <p className={`mt-2 text-sm ${mutedTextClassName}`}>
-          Từ đã ôn sẽ hiện lại khi đến hạn, từ sai thường sớm hơn.
-        </p>
+        {extraMode ? (
+          <p className={`mt-2 text-sm ${mutedTextClassName}`}>
+            Phiên này chỉ để luyện tập. Lịch ôn không đổi.
+          </p>
+        ) : (
+          <p className={`mt-2 text-sm ${mutedTextClassName}`}>
+            Từ đã ôn sẽ hiện lại khi đến hạn, từ sai thường sớm hơn.
+          </p>
+        )}
 
         <div className="mt-8 grid grid-cols-3 gap-x-8 gap-y-6">
           {summaryStats.map((stat) => (
@@ -795,6 +843,7 @@ export function ReviewPage() {
     <FocusLayout>
       <div className="flex flex-col gap-6">
         <h1 className="sr-only">Ôn tập hôm nay</h1>
+        {extraMode ? <div className={extraBadgeClassName}>{EXTRA_MODE_LABEL}</div> : null}
 
         {sessionTotal > 0 ? (
           <div>

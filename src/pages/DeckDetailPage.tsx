@@ -197,6 +197,10 @@ export function DeckDetailPage() {
   const graduatedCount = progressRows.filter((p) => p.interval_days >= 30).length
   const activeCount = progressRows.filter((p) => p.interval_days < 30).length
   const dueTodayCount = progressRows.filter((p) => p.due_date <= today).length
+  const extraCandidatesCount = progressRows.filter(
+    (p) => p.interval_days < 30 && p.due_date > today,
+  ).length
+  const showExtraPractice = dueTodayCount === 0 && extraCandidatesCount > 0
   const startedLabel = new Date(deck.created_at).toLocaleDateString('vi-VN')
   const reviewedDates = new Set(
     progressRows
@@ -233,6 +237,11 @@ export function DeckDetailPage() {
             <Link to={`/review/${id}`} className={`${buttonPrimaryClassName} no-underline`}>
               Bắt đầu ôn tập
             </Link>
+            {showExtraPractice ? (
+              <Link to={`/review/${id}/extra`} className={`${buttonSecondaryClassName} no-underline`}>
+                Ôn thêm (không tính vào lịch)
+              </Link>
+            ) : null}
             <Link to={`/decks/${id}/edit`} className={`${buttonSecondaryClassName} no-underline`}>
               Sửa
             </Link>
@@ -242,6 +251,12 @@ export function DeckDetailPage() {
       <p className="mt-2 text-sm text-[var(--color-text-muted)] dark:text-[var(--color-text-muted-dark)]">
         Bắt đầu ôn tập sẽ ôn các từ đến hạn và thêm từ mới cho đủ số từ học cùng lúc của deck.
       </p>
+      {showExtraPractice ? (
+        <p className="mt-2 text-sm text-[var(--color-text-muted)] dark:text-[var(--color-text-muted-dark)]">
+          Bạn đã ôn xong bài hôm nay. "Ôn thêm" cho bạn luyện các từ đang học sắp đến hạn. Kết quả
+          chỉ để luyện tập, không thay đổi lịch ôn và không làm từ tốt nghiệp sớm hơn.
+        </p>
+      ) : null}
 
       <Tabs
         idPrefix="deck-detail"
