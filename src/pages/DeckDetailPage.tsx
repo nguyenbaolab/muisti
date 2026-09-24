@@ -5,6 +5,7 @@ import { DeckHeader } from '../components/DeckHeader'
 import { TabPanel, Tabs } from '../components/Tabs'
 import { backLinkBlockClassName } from '../components/linkClasses'
 import { VocabTable } from '../components/VocabTable'
+import { DECK_SESSION_LIMIT } from '../lib/sessionLimits'
 import { supabase } from '../lib/supabase'
 import { todayLocalIsoDate } from '../lib/srs'
 import type { Deck } from '../types/database'
@@ -249,7 +250,7 @@ export function DeckDetailPage() {
         }
       />
       <p className="mt-2 text-sm text-[var(--color-text-muted)] dark:text-[var(--color-text-muted-dark)]">
-        Bắt đầu ôn tập sẽ ôn các từ đến hạn và thêm từ mới cho đủ số từ học cùng lúc của deck.
+        Bắt đầu ôn tập sẽ ôn các từ đến hạn (tối đa {DECK_SESSION_LIMIT} từ mỗi phiên) và thêm từ mới cho đủ số từ học cùng lúc của deck.
       </p>
       {showExtraPractice ? (
         <p className="mt-2 text-sm text-[var(--color-text-muted)] dark:text-[var(--color-text-muted-dark)]">

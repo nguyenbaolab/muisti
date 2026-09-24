@@ -5,6 +5,7 @@ import { FocusLayout } from '../components/FocusLayout'
 import { Input } from '../components/Input'
 import { backLinkClassName } from '../components/linkClasses'
 import { VocabTable } from '../components/VocabTable'
+import { DECK_SESSION_LIMIT } from '../lib/sessionLimits'
 import { supabase } from '../lib/supabase'
 import { computeNextReview, todayLocalIsoDate } from '../lib/srs'
 import type { ReviewQueueItem, VocabItem } from '../types/database'
@@ -205,6 +206,7 @@ export function ReviewPage() {
   const [completedCards, setCompletedCards] = useState<SessionCard[]>([])
   const [sessionStartTime, setSessionStartTime] = useState<number | null>(null)
   const [enrolledCount, setEnrolledCount] = useState(0)
+  const [remainingDue, setRemainingDue] = useState<number | null>(null)
   const [deckName, setDeckName] = useState<string | null>(null)
   const [ownerChecked, setOwnerChecked] = useState(() => !scopedDeckId)
   const typedInputRef = useRef<HTMLInputElement | null>(null)
@@ -296,6 +298,7 @@ export function ReviewPage() {
     setSessionStartTime(Date.now())
     setCompletedCards([])
     setEnrolledCount(0)
+    setRemainingDue(null)
     setError(null)
 
     const {
@@ -373,7 +376,11 @@ export function ReviewPage() {
         .lte('due_date', today)
 
       if (scopedDeckId) {
-        progressQuery = progressQuery.eq('vocab_items.deck_id', scopedDeckId)
+        progressQuery = progressQuery
+          .eq('vocab_items.deck_id', scopedDeckId)
+          .order('due_date', { ascending: true })
+          .order('id', { ascending: true })
+          .limit(DECK_SESSION_LIMIT)
       }
     }
 
@@ -487,6 +494,36 @@ export function ReviewPage() {
     setFeedback({ correct: true })
   }
 
+  async function loadRemainingDue() {
+    if (!scopedDeckId || extraMode) {
+      setRemainingDue(null)
+      return
+    }
+
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
+    if (!user) {
+      setRemainingDue(null)
+      return
+    }
+
+    const { count, error: remainingError } = await supabase
+      .from('user_vocab_progress')
+      .select('id, vocab_items!inner(deck_id)', { count: 'exact', head: true })
+      .eq('user_id', user.id)
+      .eq('vocab_items.deck_id', scopedDeckId)
+      .lte('due_date', todayLocalIsoDate())
+
+    if (remainingError) {
+      console.error(remainingError)
+      setRemainingDue(null)
+      return
+    }
+
+    setRemainingDue(typeof count === 'number' ? count : null)
+  }
+
   function handleNext() {
     if (!feedback || saving) return
 
@@ -500,6 +537,9 @@ export function ReviewPage() {
       setQueue(remaining)
       if (remaining.length === 0) {
         setPageState('done')
+        if (scopedDeckId && !extraMode) {
+          void loadRemainingDue()
+        }
         return
       }
       presentCard(remaining, enabledModes, finnishPool)
@@ -598,7 +638,7 @@ export function ReviewPage() {
           {extraMode
             ? 'Luyện các từ đang học chưa đến hạn. Kết quả không ghi vào lịch ôn.'
             : scopedDeckId
-              ? 'Ôn các từ đến hạn của deck này và tự thêm từ mới cho đủ số từ học cùng lúc.'
+              ? `Ôn các từ đến hạn của deck này (tối đa ${DECK_SESSION_LIMIT} từ mỗi phiên) và tự thêm từ mới cho đủ số từ học cùng lúc.`
               : 'Chỉ ôn các từ đến hạn trong mọi deck, không thêm từ mới. Muốn học từ mới, hãy vào một deck.'}
         </p>
 
@@ -763,8 +803,15 @@ export function ReviewPage() {
       <FocusLayout>
         <h1>Hoàn thành!</h1>
         <div className="font-medium text-[var(--color-text)] dark:text-[var(--color-text-dark)]">
-          Đã ôn xong {total} từ hôm nay trong {elapsedLabel}.
+          {remainingDue !== null && remainingDue > 0
+            ? `Đã ôn xong ${total} từ trong ${elapsedLabel}.`
+            : `Đã ôn xong ${total} từ hôm nay trong ${elapsedLabel}.`}
         </div>
+        {remainingDue !== null && remainingDue > 0 ? (
+          <div className={`mt-2 text-sm ${mutedTextClassName}`}>
+            Còn {remainingDue} từ đến hạn hôm nay.
+          </div>
+        ) : null}
 
         {scopedDeckId && enrolledCount > 0 && !extraMode ? (
           <div className={`mt-2 text-sm ${mutedTextClassName}`}>
@@ -816,7 +863,19 @@ export function ReviewPage() {
         ) : null}
 
         <div className="mt-10 flex flex-wrap gap-3">
-          <Link to="/" className={buttonPrimaryClassName}>
+          {remainingDue !== null && remainingDue > 0 ? (
+            <Button type="button" variant="primary" onClick={() => void startReview()}>
+              Ôn tiếp
+            </Button>
+          ) : null}
+          <Link
+            to="/"
+            className={
+              remainingDue !== null && remainingDue > 0
+                ? buttonSecondaryClassName
+                : buttonPrimaryClassName
+            }
+          >
             Về trang chủ
           </Link>
           <Link to="/decks" className={buttonSecondaryClassName}>

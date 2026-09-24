@@ -4,6 +4,27 @@ Ghi theo thời gian, mới nhất ở trên. Mỗi entry: tên ngắn, ngày, q
 
 ---
 
+## Cap 20 từ due mỗi phiên ôn deck; leftover giữ due_date
+
+**Ngày:** 2026-09-24
+
+**Quyết định:**
+
+- Trên `/review/:deckId` (không extra), hàng đợi due cắt **mỗi phiên** tối đa `DECK_SESSION_LIMIT` (20) — **không** phải giới hạn theo ngày, không đếm “hôm nay đã ôn bao nhiêu”. Mix `/review` không cap. Extra giữ `.limit(20)` inline riêng (ứng viên chưa đến hạn), không dùng hằng này.
+- Cắt trên DB: `.order('due_date', { ascending: true }).order('id', { ascending: true }).limit(20)`. Quá hạn trước; `id` là tie-break ổn định khi nhiều hàng cùng `due_date`. Session vẫn shuffle sau khi cắt (như mix/extra).
+- Leftover **giữ** `due_date` — không UPDATE / dời lịch / chia đều sang ngày sau. Phiên sau lấy tiếp theo cùng thứ tự. Không ghi thêm ngoài `enrollActivePool` + `persistCard` như cũ.
+- Không reschedule leftover: dời `due_date` của phần dư là **ghi vào dữ liệu SRS**, làm lệch lịch thật (từ quá hạn bị đẩy sang mai). Giữ nguyên due thì phiên sau tự lấy, Home vẫn hiện «{n} từ đến hạn» / chưa tick cho đến khi hết leftover — **đúng**, không phải bug.
+- Từ mới enroll hôm nay (`due_date = hôm nay`, sau các hàng quá hạn) nằm cuối slice → có thể tràn sang phiên sau. `enrollActivePool` không đổi.
+- Done deck khi còn due: count read-only `count: 'exact', head: true`; «Còn N từ đến hạn hôm nay.» + «Ôn tiếp» gọi lại `startReview`. Lỗi count → `remainingDue = null`, done không bị chặn.
+
+**Lý do:** Phiên 80–100 từ (upload deck lớn / pool đầy due) quá tải (KI-007). Cap theo phiên, không theo ngày, khớp “ôm tiếp ngay leftover” thay vì giả vờ xong hôm nay.
+
+**Phạm vi:** `src/lib/sessionLimits.ts`; `ReviewPage` nhánh deck due + done; copy setup + một câu `DeckDetailPage`.
+
+**Không làm gì:** Không đụng `srs.ts`, `persistCard`, `enrollActivePool`, mix/extra query, Home, Decks. Không schema / RPC / reschedule leftover.
+
+---
+
 ## Home todo: tick từ due_date + last_reviewed_at; không bảng mới
 
 **Ngày:** 2026-09-24
