@@ -4,6 +4,15 @@ Nhật ký thay đổi có ý nghĩa. Entry mới ở **đầu file** (sau tiêu
 
 ---
 
+## Giai đoạn 1 — Home: danh sách việc hôm nay theo deck
+**Ngày:** 2026-09-24
+
+- Home: bỏ hero due + nút Ôn tập + dòng mix; khối Việc hôm nay (hàng due / xong hôm nay) + lưới 6 số giữ nguyên; empty no-decks không đổi.
+- Due / reviewed-today paged (`order id` + range 1000); hôm nay local (`todayLocalIsoDate` + `localMidnightIso`); gợi ý khi tổng due ≤ 10.
+- DecksPage: `?tab=public` chỉ set tab ban đầu. Docs: CONTEXT, REQUIREMENTS, DECISIONS, KI-028/029/030.
+
+---
+
 ## Giai đoạn 1 — Ôn thêm một deck (extra practice, không ghi DB)
 **Ngày:** 2026-09-23
 

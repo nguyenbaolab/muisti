@@ -30,7 +30,10 @@ export function DecksPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [deletingId, setDeletingId] = useState<string | null>(null)
-  const [activeTab, setActiveTab] = useState<DeckTab>('mine')
+  const [activeTab, setActiveTab] = useState<DeckTab>(() => {
+    const tab = new URLSearchParams(location.search).get('tab')
+    return tab === 'public' ? 'public' : 'mine'
+  })
 
   useEffect(() => {
     let cancelled = false

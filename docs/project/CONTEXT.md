@@ -46,8 +46,8 @@ src/
     useTheme.ts         # override | system; chỉ ghi localStorage khi toggle (KI-012 Closed)
   pages/
     LoginPage.tsx       # järvi; signInWithPassword; lỗi Việt hóa; ngoài AppLayout
-    HomePage.tsx        # `/` — Tổng kết Tổng; hero due + Ôn tập + dòng mix vs deck; empty tạo deck
-    DecksPage.tsx       # /decks järvi; dòng nhịp học; Tabs Cá nhân/Public; Public có dòng clone; hàng hairline; own → /:id; khác → /preview
+    HomePage.tsx        # `/` — Việc hôm nay (todo deck sở hữu) + lưới 6 số; empty tạo deck; không nút Ôn tập
+    DecksPage.tsx       # /decks järvi; dòng nhịp học; Tabs Cá nhân/Public; `?tab=public` chỉ set tab ban đầu; Public có dòng clone; hàng hairline; own → /:id; khác → /preview
     CreateDeckPage.tsx  # /decks/new järvi; DeckForm + FileField + Xem trước; Lưu deck
     EditDeckPage.tsx    # /decks/:id/edit järvi; DeckForm; owner; Lưu/Hủy
     DeckPreviewPage.tsx # /decks/:id/preview järvi; đọc-only + Clone; dòng clone không copy tiến độ nếu !owned
@@ -81,8 +81,8 @@ supabase/
 ## §3 Navigation skeleton
 
 - `/login` — `LoginPage` järvi khi chưa có session; đã login thì redirect `/`
-- `/` — `HomePage` trong `AppLayout` khi có session (Tổng kết Tổng); chưa login thì redirect `/login`
-- `/decks` — `DecksPage` trong `AppLayout` khi có session (tab Cá nhân / Public, default Cá nhân); guest → `/login`
+- `/` — `HomePage` trong `AppLayout` khi có session (Việc hôm nay + lưới 6 số); chưa login thì redirect `/login`
+- `/decks` — `DecksPage` trong `AppLayout` khi có session (tab Cá nhân / Public; `?tab=public` mở Public lần đầu, mọi giá trị khác / không có param mở Cá nhân; tab local, không sync URL); guest → `/login`
 - `/decks/new` — `CreateDeckPage` khi có session; guest → `/login`
 - `/decks/:id/edit` — `EditDeckPage` khi có session; guest → `/login`; chỉ owner thấy form
 - `/decks/:id/preview` — `DeckPreviewPage` khi có session; guest → `/login`; public hoặc own; Clone nếu không phải owner
@@ -124,9 +124,12 @@ Hướng đã chốt (2026-09-14, cột pool 2026-09-16, profiles 2026-09-17):
 
 - `src/lib/supabase.ts`: `export const supabase` — Supabase client dùng chung toàn app; khởi tạo từ `VITE_SUPABASE_URL` + `VITE_SUPABASE_ANON_KEY`
 - Parse deck file: `parseDeckFile(content)` — `src/lib/deckParser.ts` (cắt dòng trống cuối; cap 500 sau cắt; dòng trống giữa file vẫn lỗi)
-- List decks: `decks.select('*, vocab_items(count)')` — RLS lọc own + public — `DecksPage`; filter client `activeTab` `'mine' | 'public'`; click own → `/decks/:id`, click không phải mình → `/decks/:id/preview`. UI järvi: `Tabs` (`idPrefix="decks"`, aria-label «Loại deck») + `TabPanel`; hàng đầu `h1` + `<Link>` «Tạo deck mới» + dòng nhịp học; tab Public dòng clone (không lúc loading); hàng deck hairline; nhãn từ `src/lib/deckLabels.ts` (DecksPage tự thêm «Nghĩa: » khi render). Sửa `<Link>` `/edit`; Xóa `window.confirm` cũ. Lỗi `profiles` → `console.error`.
+- List decks: `decks.select('*, vocab_items(count)')` — RLS lọc own + public — `DecksPage`; filter client `activeTab` `'mine' | 'public'`; initial `activeTab` từ `?tab=public` (Public) hoặc khác/không có (Cá nhân), không ghi lại URL; click own → `/decks/:id`, click không phải mình → `/decks/:id/preview`. UI järvi: `Tabs` (`idPrefix="decks"`, aria-label «Loại deck») + `TabPanel`; hàng đầu `h1` + `<Link>` «Tạo deck mới» + dòng nhịp học; tab Public dòng clone (không lúc loading); hàng deck hairline; nhãn từ `src/lib/deckLabels.ts` (DecksPage tự thêm «Nghĩa: » khi render). Sửa `<Link>` `/edit`; Xóa `window.confirm` cũ. Lỗi `profiles` → `console.error`.
 - Owner email (tên chia sẻ): query 2 — `profiles.select('id, email').in('id', ownerIds)` trên `DecksPage`; `profiles.select('email').eq('id', owner_id)` trên `DeckPreviewPage` nếu `!owned`. Không embed từ `decks`. `sharerNameFromEmail` trong `deckLabels.ts`. Preview lỗi profiles → `console.error`, fallback «Ẩn danh».
-- Account summary: `decks.select('id, vocab_items(count)').eq('owner_id', user.id)` + `user_vocab_progress.select('interval_days, due_date').eq('user_id')` — `HomePage` `/`; `todayLocalIsoDate()`; không join vocab cho progress. Hero due + nút Ôn tập + dòng «Ôn những từ đến hạn của mọi deck…»
+- Account summary: `decks.select('id, name, created_at, vocab_items(count)').eq('owner_id', user.id).order('created_at')` + `user_vocab_progress.select('interval_days, due_date').eq('user_id')` — `HomePage` `/`; `todayLocalIsoDate()`; không join vocab cho progress summary (unpaged — KI-030). Lưới 6 số dưới khối Việc hôm nay; không hero due / không nút Ôn tập
+- Home todo due: `user_vocab_progress.select('id, vocab_item_id, vocab_items!inner(deck_id)').eq('user_id').lte('due_date', todayLocalIsoDate())` — paged `.order('id').range(from, from+999)` đến trang < 1000 hàng; group `deck_id` client, bỏ deck không sở hữu
+- Home todo reviewed-today: cùng select + `.gte('last_reviewed_at', localMidnightIso)` với `localMidnightIso = new Date(y, m, d, 0, 0, 0, 0).toISOString()` (nửa đêm local → ISO); paged như due
+- Home suggestion (chỉ khi tổng `dueCount` ≤ `LOW_WORK_THRESHOLD` 10): lần lượt deck sở hữu `created_at` tăng, `vocab_items` count > 0, `user_vocab_progress.select('id, vocab_items!inner(deck_id)').eq('user_id').eq('vocab_items.deck_id', deckId).limit(1)` — match đầu (0 hàng = chưa bắt đầu) → `/decks/:id`; không thì `/decks?tab=public`
 - Deck detail (owner): `decks.select('*')` rồi `vocab_items.select(...).eq('deck_id').order('created_at')` + `user_vocab_progress` join `vocab_items!inner` — `DeckDetailPage`; UI `DeckHeader` + dòng Bắt đầu ôn tập + `Tabs` («Nội dung deck») + chú giải trạng thái / lưới Tổng kết + dòng Đã học/quá hạn; actions Link ôn + Link extra (khi `dueTodayCount === 0` và `extraCandidatesCount > 0`) + Link Sửa `/edit`. Non-owner: `forbidden`, không bảng. Ngày «hôm nay» = `todayLocalIsoDate()`
 - Create deck: `decks.insert({ owner_id, name, meaning_language, description, visibility, active_pool_size }).select('id').single()` rồi `vocab_items.insert([...])` — `CreateDeckPage` (`DeckForm` + `FileField` + Xem trước; rollback nếu vocab lỗi; lỗi insert UI cố định + `console.error`). `canSave` không đổi (mọi lỗi parse kể cả dòng trống khóa Lưu).
 - Update deck metadata: `decks.update({ name, meaning_language, description, visibility, active_pool_size }).eq('id')` — `EditDeckPage` (`DeckForm`; không còn guard public→private; lỗi lưu UI cố định + `console.error`)

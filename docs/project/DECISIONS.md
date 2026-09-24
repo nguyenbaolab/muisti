@@ -4,6 +4,29 @@ Ghi theo thời gian, mới nhất ở trên. Mỗi entry: tên ngắn, ngày, q
 
 ---
 
+## Home todo: tick từ due_date + last_reviewed_at; không bảng mới
+
+**Ngày:** 2026-09-24
+
+**Quyết định:**
+
+- Tick «Xong hôm nay» **suy ra** từ dữ liệu sẵn có: `dueCount === 0` (progress deck đó `due_date <= hôm nay` local) **và** có ≥ 1 hàng `last_reviewed_at >= localMidnightIso`. Không bảng task, không cột tick, không localStorage, không RPC, không ghi lúc xem Home.
+- `localMidnightIso = new Date(y, m, d, 0, 0, 0, 0).toISOString()` từ ngày máy; lọc server `.gte('last_reviewed_at', localMidnightIso)`. Không so prefix ngày UTC. `due_date` dùng `todayLocalIsoDate()`.
+- Bỏ hero số due + nút Ôn tập + dòng mix trên Home. Mix vẫn vào từ nav `/review`.
+- Gợi ý chỉ khi tổng `dueCount` các deck sở hữu `<= LOW_WORK_THRESHOLD` (10). Ưu tiên deck chưa bắt đầu (0 progress + có từ); không thì `/decks?tab=public`.
+- `?tab=public` trên `/decks` chỉ set `activeTab` **lần đầu** (`'public'` / `'mine'`). Đổi tab không ghi URL. Clone `location.state` không đổi.
+- Query due / reviewed-today **phải phân trang** (PostgREST cắt im ở 1000). Helper local `.order('id').range(from, from+999)` đến trang < 1000 hàng. Account summary `interval_days, due_date` giữ unpaged (KI-030).
+
+**Gap đã biết:** «Bắt đầu ôn tập» có thể enroll từ mới `due_date = hôm nay` khi pool còn chỗ → deck vừa tick có thể hiện lại chưa xong (KI-029, liên quan KI-028). Extra practice không ghi `last_reviewed_at` nên không tự tick.
+
+**Lý do:** Home hướng việc theo deck, không phải số tổng. Tái sử dụng progress hiện có, đọc-only, không schema mới.
+
+**Phạm vi:** `HomePage.tsx` (todo + gợi ý + paging); `DecksPage.tsx` (initial `tab` only).
+
+**Không làm gì:** Không đụng `srs.ts`, `ReviewPage`, `DeckDetailPage`. Không insert/update/upsert/delete. Không component file mới.
+
+---
+
 ## Extra practice («Ôn thêm»): tách khỏi SRS; route path, không query string
 
 **Ngày:** 2026-09-23
