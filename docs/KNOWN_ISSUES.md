@@ -13,18 +13,49 @@ Lỗi / sai lệch đã biết. Đánh số từ **KI-001**. Entry mới ở đ�
 
 ---
 
-## KI-028 — Số «Đến hạn hôm nay» trên Home/Detail có thể nhỏ hơn phiên ôn deck
+## KI-030 — Account summary trên Home không phân trang, cắt im ở 1000 dòng progress
+
+**Mức độ:** Low  
+**File liên quan:** `src/pages/HomePage.tsx`
+
+**Mô tả:** Query lưới 6 số `user_vocab_progress.select('interval_days, due_date').eq('user_id')` **không** `.range`. PostgREST trả tối đa 1000 hàng/request và cắt im. Đã học / chưa học / đã thuộc / đang học (và `dueTodayCount` nội bộ) có thể thiếu khi user có > 1000 dòng progress. Query due / reviewed-today của khối Việc hôm nay đã paged.
+
+**Cách tái hiện:** Tài khoản > 1000 `user_vocab_progress`; so lưới Home với đếm thật trên DB.
+
+**Hướng fix:** Paged cùng helper todo, hoặc RPC/count trên server.
+
+**Trạng thái:** Open (2026-09-24)
+
+---
+
+## KI-029 — Tick «Xong hôm nay» trên Home có thể bị mở lại sau Bắt đầu ôn tập
+
+**Mức độ:** Low  
+**File liên quan:** `src/pages/HomePage.tsx`, `src/pages/ReviewPage.tsx`  
+**Liên quan:** KI-028
+
+**Mô tả:** Tick suy ra `dueCount === 0` + có `last_reviewed_at` hôm nay (local). «Bắt đầu ôn tập» trên `/review/:deckId` gọi `enrollActivePool` khi pool còn chỗ — từ mới `due_date = hôm nay`. Quay Home: `dueCount > 0`, hàng chuyển «Chưa xong». Home không ghi tick; không undo tay được vì indicator không tương tác.
+
+**Cách tái hiện:** Deck vừa ôn hết due hôm nay (tick), còn từ chưa enroll và slot pool; bấm «Bắt đầu ôn tập»; về `/`.
+
+**Hướng fix:** Coi enroll hôm nay là việc mới (giữ hành vi); hoặc không enroll từ `due_date = hôm nay` nếu chỉ muốn giữ tick; hoặc persist tick riêng (ngoài scope hiện tại).
+
+**Trạng thái:** Open (2026-09-24)
+
+---
+
+## KI-028 — Số due trên Detail / hàng Home có thể nhỏ hơn phiên ôn deck
 
 **Mức độ:** Low  
 **File liên quan:** `src/pages/HomePage.tsx`, `src/pages/DeckDetailPage.tsx`, `src/pages/ReviewPage.tsx`
 
-**Mô tả:** Home và Detail đếm `due_date <= hôm nay` trên progress hiện có, **không** enroll. «Bắt đầu ôn tập» trên `/review/:deckId` gọi `enrollActivePool` trước khi fetch due — từ mới được `due_date = hôm nay` và vào cùng phiên. Session deck có thể **dài hơn** số «Đến hạn hôm nay» vừa thấy trên Home/Detail. Mix `/review` không enroll nên gần khớp hơn với hero Home.
+**Mô tả:** Home **không còn** hero số «Đến hạn hôm nay». Detail vẫn đếm `due_date <= hôm nay` trên progress hiện có, **không** enroll. Hàng Home «{n} từ đến hạn» cùng công thức. «Bắt đầu ôn tập» trên `/review/:deckId` gọi `enrollActivePool` trước khi fetch due — từ mới được `due_date = hôm nay` và vào cùng phiên. Session deck có thể **dài hơn** số vừa thấy trên Detail / hàng Home. Mix `/review` không enroll nên gần khớp hơn với tổng due. Tick Home có thể mất sau enroll — KI-029.
 
-**Cách tái hiện:** Deck còn slot pool và từ chưa enroll; so sánh số trên Detail với độ dài phiên sau «Bắt đầu ôn tập».
+**Cách tái hiện:** Deck còn slot pool và từ chưa enroll; so sánh số trên Detail (hoặc subtitle Home) với độ dài phiên sau «Bắt đầu ôn tập».
 
 **Hướng fix:** Copy UI đã gợi ý; nếu cần số khớp thì hiện số sẽ thêm trên setup (tránh lệch lúc Bắt đầu — KI-017) hoặc ghi chú rõ trên Detail.
 
-**Trạng thái:** Open (2026-09-21)
+**Trạng thái:** Open (2026-09-21; cập nhật 2026-09-24 — Home hết hero)
 
 ---
 
