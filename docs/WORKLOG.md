@@ -4,6 +4,15 @@ Nhật ký thay đổi có ý nghĩa. Entry mới ở **đầu file** (sau tiêu
 
 ---
 
+## Giai đoạn 1 — Cap 20 từ due mỗi phiên ôn deck
+**Ngày:** 2026-09-24
+
+- `DECK_SESSION_LIMIT` trong `src/lib/sessionLimits.ts`. Deck due: `order due_date, id` + `limit 20`; leftover giữ `due_date`; mix/extra không đổi (extra vẫn `.limit(20)` inline).
+- Done deck: count remaining due (`count: exact`, `head`); «Còn N…» + «Ôn tiếp» (`startReview`) khi N > 0. Copy setup + một câu DeckDetail từ hằng.
+- Docs: CONTEXT, REQUIREMENTS v0.2.4, DECISIONS, KI-007 Partial, KI-028.
+
+---
+
 ## Giai đoạn 1 — Home: danh sách việc hôm nay theo deck
 **Ngày:** 2026-09-24
 

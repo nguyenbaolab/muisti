@@ -41,6 +41,7 @@ src/
   lib/
     supabase.ts         # Supabase client (createClient, requireEnv guard)
     srs.ts              # classifyAttempt + computeNextReview (SM-2 rút gọn)
+    sessionLimits.ts    # DECK_SESSION_LIMIT (20) — cap due mỗi phiên ôn deck; extra giữ .limit(20) inline
     deckParser.ts       # parseDeckFile — split `;`, trim, cắt dòng trống cuối, max 500 sau cắt
     deckLabels.ts       # languageLabel / visibilityLabel / sharerNameFromEmail
     useTheme.ts         # override | system; chỉ ghi localStorage khi toggle (KI-012 Closed)
@@ -52,7 +53,7 @@ src/
     EditDeckPage.tsx    # /decks/:id/edit järvi; DeckForm; owner; Lưu/Hủy
     DeckPreviewPage.tsx # /decks/:id/preview järvi; đọc-only + Clone; dòng clone không copy tiến độ nếu !owned
     DeckDetailPage.tsx  # /decks/:id järvi; owner: dòng Bắt đầu ôn tập; Tabs Từ vựng (chú giải trạng thái)/Tổng kết (Đã học/quá hạn); ôn + Sửa; VocabTable
-    ReviewPage.tsx      # ôn SRS + extraMode `/review/:deckId/extra` (không ghi DB); ngoài AppLayout; FocusLayout; setup mô tả mix vs deck vs extra + phím sm+; empty/error/done Đợt A; reviewing Đợt B; done + dòng đến hạn lại (extra: không nhắc lịch)
+    ReviewPage.tsx      # ôn SRS + extraMode `/review/:deckId/extra` (không ghi DB); ngoài AppLayout; FocusLayout; setup mô tả mix vs deck vs extra + phím sm+; empty/error/done Đợt A; reviewing Đợt B; deck due cap DECK_SESSION_LIMIT; done + Ôn tiếp khi còn due (extra: không nhắc lịch)
   types/
     database.ts         # Deck, VocabItem, UserVocabProgress, ReviewQueueItem, Profile
 public/                 # Vite copy nguyên vào dist/
@@ -137,12 +138,13 @@ Hướng đã chốt (2026-09-14, cột pool 2026-09-16, profiles 2026-09-17):
 - Clone deck: insert deck mới (`name` + ` (Copy)`, `visibility: 'private'`, `active_pool_size: 20`) rồi bulk insert vocab; rollback delete deck nếu vocab lỗi; không copy progress — `DeckPreviewPage`. Verified 2026-09-16 (tài khoản B, deck public của A): Clone + enroll Active Pool trên bản copy.
 - Delete deck: `decks.delete().eq('id')` — CASCADE vocab + progress — `DecksPage`
 - Active pool enroll (chỉ `/review/:deckId` **và** owner, **không** extra): `enrollActivePool` trả `{ fatalError, enrolledCount }`; `startReview` lưu `enrolledCount`. Mix `/review` và extra `/review/:deckId/extra` không enroll.
-- Session Summary: `completedCards` tích khi trả hết nợ; màn `done` đếm wrongCount 0/1/≥2, thời gian từ `sessionStartTime`, bảng từ quên; dòng từ mới chỉ khi `scopedDeckId && enrolledCount > 0 && !extraMode`. Extra: không dòng lịch ôn / từ mới.
+- Session Summary: `completedCards` tích khi trả hết nợ; màn `done` đếm wrongCount 0/1/≥2, thời gian từ `sessionStartTime`, bảng từ quên; dòng từ mới chỉ khi `scopedDeckId && enrolledCount > 0 && !extraMode`. Extra: không dòng lịch ôn / từ mới. Deck (không extra): lúc `pageState = 'done'` gọi count remaining due (không chặn màn done); `remainingDue > 0` → bỏ «hôm nay» trên dòng tổng, thêm «Còn N từ đến hạn hôm nay.» + Button «Ôn tiếp» (`startReview`); hai Link về secondary. Mix / extra / `remainingDue` 0 hoặc null: done như cũ.
 - Review keyboard (`pageState === 'reviewing'` only): document `keydown` — Enter + `feedback` → `handleNext`; MCQ A–D → `submitMcqChoice(chosen)` (không đọc `selectedOption` vì stale). `handleSubmit` chuột/form không đổi.
 - Theme: `useTheme` — override từ `localStorage['muisti-theme']` (`light`|`dark` only) hoặc theo OS sống (`matchMedia` change). Chỉ `setItem` trong `toggleTheme`. Script FOUC `index.html` cùng quy tắc. `ThemeToggle` trong `AppLayout` và `FocusLayout` (Review). Mount hook không ghi storage. Login không mount hook (class lúc load). KI-012 Closed.
 - Review UI Đợt A: một `<main>` qua `FocusLayout`; setup hiện tên deck (cùng query `checkOwner` `owner_id, name`) + dòng mix vs deck (không số due); `ownerChecked` chỉ lớp hiển thị; gợi ý phím setup `hidden sm:block`; loading/empty/error/done järvi; done thêm dòng đến hạn lại; `startReview` lỗi fetch → copy cố định + `console.error`.
 - Review UI Đợt B (màn `reviewing`): h1 sr-only; tiến độ derived `completedCards.length` / (`completedCards.length + queue.length`); khối Nghĩa lớn; Typing qua `Input` (`ref` → `<input>` thật, `!text-base`); MCQ tự dựng (không `RadioGroup`), fieldset disabled, A–D theo `mcqOptions.map` index; persist error chỉ hiện khi `!feedback`; feedback `role="status"` `aria-live="polite"`; gợi ý phím `hidden sm:block` `aria-hidden`. `persistCard` lỗi → copy cố định + `console.error`.
 - SRS queue mix: `user_vocab_progress.select('..., vocab_items(*)').eq('user_id').lte('due_date', todayLocalIsoDate())` — không join `decks` — `ReviewPage` `/review`
-- SRS queue 1 deck: cùng query + `vocab_items!inner(*)` + `.eq('vocab_items.deck_id', deckId)` — `ReviewPage` `/review/:deckId`
+- SRS queue 1 deck: cùng query + `vocab_items!inner(*)` + `.eq('vocab_items.deck_id', deckId)` + `.order('due_date' asc).order('id' asc).limit(DECK_SESSION_LIMIT)` (`src/lib/sessionLimits.ts`, 20) — `ReviewPage` `/review/:deckId`. Cắt trên DB (quá hạn trước; `id` hòa); leftover giữ `due_date`; session vẫn shuffle như mix/extra. Mix không cap.
+- Remaining due (done, deck, không extra): `user_vocab_progress.select('id, vocab_items!inner(deck_id)', { count: 'exact', head: true }).eq('user_id').eq('vocab_items.deck_id').lte('due_date', todayLocalIsoDate())` — lỗi → `remainingDue = null`, vẫn hiện done. Reset `null` lúc đầu `startReview`.
 - Extra queue 1 deck: cùng select `!inner` + `interval_days < 30` + `due_date > today`, `order due_date asc`, `limit 20` — `ReviewPage` `/review/:deckId/extra`. Không shuffle trước khi cắt 20 (cắt trên DB); session vẫn shuffle hàng đợi như mix/deck.
 - SRS update: khi từ trả hết nợ (đúng lần cuối), `computeNextReview` rồi `update` ease/interval/due_date/review_count/last_reviewed_at. Sai chỉ đẩy lại cuối queue, không ghi DB. Extra mode **không** gọi `persistCard` (và `persistCard` return sớm nếu `extraMode`). — `src/lib/srs.ts` + `ReviewPage`

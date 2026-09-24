@@ -49,13 +49,13 @@ Lỗi / sai lệch đã biết. Đánh số từ **KI-001**. Entry mới ở đ�
 **Mức độ:** Low  
 **File liên quan:** `src/pages/HomePage.tsx`, `src/pages/DeckDetailPage.tsx`, `src/pages/ReviewPage.tsx`
 
-**Mô tả:** Home **không còn** hero số «Đến hạn hôm nay». Detail vẫn đếm `due_date <= hôm nay` trên progress hiện có, **không** enroll. Hàng Home «{n} từ đến hạn» cùng công thức. «Bắt đầu ôn tập» trên `/review/:deckId` gọi `enrollActivePool` trước khi fetch due — từ mới được `due_date = hôm nay` và vào cùng phiên. Session deck có thể **dài hơn** số vừa thấy trên Detail / hàng Home. Mix `/review` không enroll nên gần khớp hơn với tổng due. Tick Home có thể mất sau enroll — KI-029.
+**Mô tả:** Home **không còn** hero số «Đến hạn hôm nay». Detail vẫn đếm `due_date <= hôm nay` trên progress hiện có, **không** enroll. Hàng Home «{n} từ đến hạn» cùng công thức. «Bắt đầu ôn tập» trên `/review/:deckId` gọi `enrollActivePool` trước khi fetch due — từ mới được `due_date = hôm nay`. Phiên deck **capped 20** (`DECK_SESSION_LIMIT`): nếu due+enroll ≤ 20, session vẫn có thể **dài hơn** số vừa thấy trên Detail / hàng Home; nếu n > 20, session **ngắn hơn** số Home (leftover giữ `due_date`, Home vẫn hiện n). Mix `/review` không enroll và không cap. Tick Home có thể mất sau enroll — KI-029; leftover cũng giữ tick «Chưa xong» (đúng).
 
-**Cách tái hiện:** Deck còn slot pool và từ chưa enroll; so sánh số trên Detail (hoặc subtitle Home) với độ dài phiên sau «Bắt đầu ôn tập».
+**Cách tái hiện:** Deck còn slot pool và từ chưa enroll, due+enroll ≤ 20: so Detail/Home với độ dài phiên. Hoặc due > 20: phiên 20, Home vẫn «{n} từ đến hạn».
 
-**Hướng fix:** Copy UI đã gợi ý; nếu cần số khớp thì hiện số sẽ thêm trên setup (tránh lệch lúc Bắt đầu — KI-017) hoặc ghi chú rõ trên Detail.
+**Hướng fix:** Copy UI đã gợi ý cap 20 + «Ôn tiếp» khi leftover. Không cần số khớp Home với độ dài một phiên.
 
-**Trạng thái:** Open (2026-09-21; cập nhật 2026-09-24 — Home hết hero)
+**Trạng thái:** Open (2026-09-21; cập nhật 2026-09-24 — Home hết hero + cap phiên deck)
 
 ---
 
@@ -462,20 +462,22 @@ Lỗi / sai lệch đã biết. Đánh số từ **KI-001**. Entry mới ở đ�
 
 ## KI-007 — Giới hạn số từ MỚI đưa vào 1 session ôn tập (batch limit)
 
-**Mức độ:** Medium — có thể ảnh hưởng trải nghiệm thật sớm (ngay khi user đưa nhiều từ mới vào ôn cùng lúc, vd upload một deck lớn)  
-**File liên quan:** `src/pages/ReviewPage.tsx` (fetch hàng đợi due)
+**Mức độ:** Medium — mix `/review` vẫn không cap; deck đã cap  
+**File liên quan:** `src/pages/ReviewPage.tsx` (fetch hàng đợi due), `src/lib/sessionLimits.ts`
 
-**Vấn đề (chủ dự án, 2026-09-08; cập nhật 2026-09-14):** Hàng đợi SRS lấy **tất cả** từ có `due_date <= hôm nay`, không giới hạn số lượng. Nếu user thêm 80–100 từ mới trong 1 lần (vd upload một deck), `due_date` mặc định là hôm nay cho tất cả — nghĩa là ngay session ôn đầu tiên đã phải xử lý 80–100 từ cùng lúc. Với retry queue (từ sai phải hỏi lại), tổng số lượt hỏi trong 1 session có thể vượt 150–200+ lượt — quá tải, dễ gây chán nản, bỏ dở giữa chừng.
+**Vấn đề (chủ dự án, 2026-09-08; cập nhật 2026-09-14 / 2026-09-24):** Hàng đợi SRS từng lấy **tất cả** từ có `due_date <= hôm nay`, không giới hạn số lượng. Upload deck lớn → session đầu 80–100 từ; retry queue có thể > 150–200 lượt.
 
-**Nghiên cứu tham khảo (2026-09-08):** Anki có khái niệm "new cards per day" — giới hạn số thẻ **mới** (chưa từng ôn) được đưa vào hàng đợi mỗi ngày, tách biệt với số lượt "review" (thẻ cũ quay lại theo lịch). Khuyến nghị phổ biến: 10–20 thẻ mới/ngày là mức bền vững; vượt quá dễ dẫn tới "review overload" tích luỹ (mỗi thẻ mới thêm vào sẽ quay lại nhiều lần trong tương lai, cộng dồn theo cấp số nhân nếu học quá nhanh). Nguồn: Anki official docs (docs.ankiweb.net/deck-options.html), cộng đồng khuyến nghị 10–20/ngày (nhiều bài viết độc lập).
+**Đã làm (2026-09-24, deck only):** `/review/:deckId` cắt `DECK_SESSION_LIMIT` (20) mỗi **phiên** (không phải mỗi ngày), mọi từ due (`review_count` 0 hay > 0 đều tính — Task 3). Leftover giữ `due_date`. Done hiện «Còn N…» + «Ôn tiếp». Mix `/review` **vẫn uncapped**. Extra `.limit(20)` inline không liên quan KI này.
 
-**Hướng xử lý dự kiến (chưa chốt, cần bàn kỹ trước khi implement):**
-1. Giới hạn số từ `review_count = 0` (chưa từng ôn lần nào) được đưa vào 1 session — vd tối đa N từ mới/ngày (N cụ thể cần bàn, tham khảo 10–20 theo Anki). Muisti hiện **là** deck-based: user tự upload deck (public/private), không còn giáo trình unit cố định — bối cảnh gần Anki hơn hướng sách cũ.
-2. Từ mới **vượt** quá giới hạn N thì xử lý sao — vẫn hiện `due_date` = hôm nay trong DB (để sau này tự nhiên due) nhưng **không** đưa vào session hôm nay? Hay dời `due_date` của phần dư sang ngày mai/các ngày sau (dàn đều ra)?
-3. Từ `review_count > 0` (đã ôn ít nhất 1 lần, đang quay lại theo lịch SRS bình thường) — có tính vào giới hạn N không, hay chỉ áp dụng riêng cho từ hoàn toàn mới?
-4. Cần UI thông báo rõ cho user khi có từ due nhưng bị hoãn do giới hạn batch (vd "Còn 45 từ mới sẽ xuất hiện trong các ngày tới")
+**Nghiên cứu tham khảo (2026-09-08):** Anki "new cards per day" (10–20 thẻ mới/ngày, tách review). Nguồn: docs.ankiweb.net/deck-options.html.
 
-**Trạng thái:** Open — vấn đề thật, dễ gặp ngay khi upload deck lớn (mọi từ mới due hôm nay). Ưu tiên bàn kỹ + chốt DECISIONS trước khi implement; ảnh hưởng trực tiếp ReviewPage / SRS.
+**Hướng xử lý còn lại:**
+1. Mix `/review` — vẫn lấy hết due mọi deck; chưa cap.
+2. Đã chọn: leftover **giữ** `due_date` (không dời sang ngày sau).
+3. **Task 3 — đã chốt:** `review_count > 0` **tính vào** cap 20 (cả set due, không chỉ từ mới).
+4. UI leftover trên done deck: «Còn N từ đến hạn hôm nay.» — mix chưa có.
+
+**Trạng thái:** Partial (2026-09-24) — deck capped; mix còn mở.
 
 ---
 
