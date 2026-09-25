@@ -4,6 +4,25 @@ Ghi theo thời gian, mới nhất ở trên. Mỗi entry: tên ngắn, ngày, q
 
 ---
 
+## Mix `/review`: cap 30 từ/phiên; không cân bằng deck; không chọn deck
+
+**Ngày:** 2026-09-25
+
+**Quyết định:**
+
+- Mix lấy tối đa `MIX_SESSION_LIMIT` (30) due mỗi phiên — **cao hơn** deck (20) vì gộp nhiều deck; cùng cơ chế `.order('due_date' asc).order('id' asc).limit(...)`, leftover giữ `due_date`, done «Ôn tiếp» qua `loadRemainingDue` (count mọi progress due của user, không lọc `deck_id`).
+- **Không** cân bằng số từ giữa các deck trong mix — lấy due sớm nhất trước (nhất quán deck), không round-robin / quota theo deck.
+- **Không** UI chọn deck trong mix — giữ scope tối thiểu: gộp tất cả due của user như thiết kế ban đầu.
+- Extra vẫn early-return `remainingDue = null`; deck count vẫn lọc theo `vocab_items.deck_id`.
+
+**Lý do:** Mix uncapped (KI-007 Partial) dễ phiên quá dài khi nhiều deck cùng due. 30 > 20 phản ánh gộp nguồn; không thêm ưu tiên deck để tránh phức tạp và lệch SRS lịch.
+
+**Phạm vi:** `src/lib/sessionLimits.ts` (`MIX_SESSION_LIMIT`); `ReviewPage` nhánh mix due + `loadRemainingDue` + setup copy. Docs REQUIREMENTS / CONTEXT / KI-007 Closed.
+
+**Không làm gì:** Không đổi `DECK_SESSION_LIMIT` / nhánh deck / extra /. Không reschedule leftover. Không chọn deck trong mix.
+
+---
+
 ## Tốt nghiệp deck + reset: xóa hẳn progress; window.confirm; toàn bộ deck
 
 **Ngày:** 2026-09-25

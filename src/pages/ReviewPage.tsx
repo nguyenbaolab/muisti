@@ -5,7 +5,7 @@ import { FocusLayout } from '../components/FocusLayout'
 import { Input } from '../components/Input'
 import { backLinkClassName } from '../components/linkClasses'
 import { VocabTable } from '../components/VocabTable'
-import { DECK_SESSION_LIMIT } from '../lib/sessionLimits'
+import { DECK_SESSION_LIMIT, MIX_SESSION_LIMIT } from '../lib/sessionLimits'
 import { supabase } from '../lib/supabase'
 import { computeNextReview, todayLocalIsoDate } from '../lib/srs'
 import type { ReviewQueueItem, VocabItem } from '../types/database'
@@ -381,6 +381,11 @@ export function ReviewPage() {
           .order('due_date', { ascending: true })
           .order('id', { ascending: true })
           .limit(DECK_SESSION_LIMIT)
+      } else {
+        progressQuery = progressQuery
+          .order('due_date', { ascending: true })
+          .order('id', { ascending: true })
+          .limit(MIX_SESSION_LIMIT)
       }
     }
 
@@ -495,7 +500,7 @@ export function ReviewPage() {
   }
 
   async function loadRemainingDue() {
-    if (!scopedDeckId || extraMode) {
+    if (extraMode) {
       setRemainingDue(null)
       return
     }
@@ -508,12 +513,21 @@ export function ReviewPage() {
       return
     }
 
-    const { count, error: remainingError } = await supabase
-      .from('user_vocab_progress')
-      .select('id, vocab_items!inner(deck_id)', { count: 'exact', head: true })
-      .eq('user_id', user.id)
-      .eq('vocab_items.deck_id', scopedDeckId)
-      .lte('due_date', todayLocalIsoDate())
+    const today = todayLocalIsoDate()
+    const remainingQuery = scopedDeckId
+      ? supabase
+          .from('user_vocab_progress')
+          .select('id, vocab_items!inner(deck_id)', { count: 'exact', head: true })
+          .eq('user_id', user.id)
+          .eq('vocab_items.deck_id', scopedDeckId)
+          .lte('due_date', today)
+      : supabase
+          .from('user_vocab_progress')
+          .select('id', { count: 'exact', head: true })
+          .eq('user_id', user.id)
+          .lte('due_date', today)
+
+    const { count, error: remainingError } = await remainingQuery
 
     if (remainingError) {
       console.error(remainingError)
@@ -644,7 +658,7 @@ export function ReviewPage() {
             ? 'Luyện các từ đang học chưa đến hạn. Kết quả không ghi vào lịch ôn.'
             : scopedDeckId
               ? `Ôn các từ đến hạn của deck này (tối đa ${DECK_SESSION_LIMIT} từ mỗi phiên) và tự thêm từ mới cho đủ số từ học cùng lúc.`
-              : 'Chỉ ôn các từ đến hạn trong mọi deck, không thêm từ mới. Muốn học từ mới, hãy vào một deck.'}
+              : `Chỉ ôn các từ đến hạn trong mọi deck (tối đa ${MIX_SESSION_LIMIT} từ mỗi phiên), không thêm từ mới. Muốn học từ mới, hãy vào một deck.`}
         </p>
 
         <fieldset className="mt-8 w-full border-0 p-0">

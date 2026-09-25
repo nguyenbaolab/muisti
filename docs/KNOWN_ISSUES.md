@@ -49,13 +49,13 @@ Lỗi / sai lệch đã biết. Đánh số từ **KI-001**. Entry mới ở đ�
 **Mức độ:** Low  
 **File liên quan:** `src/pages/HomePage.tsx`, `src/pages/DeckDetailPage.tsx`, `src/pages/ReviewPage.tsx`
 
-**Mô tả:** Home **không còn** hero số «Đến hạn hôm nay». Detail vẫn đếm `due_date <= hôm nay` trên progress hiện có, **không** enroll. Hàng Home «{n} từ đến hạn» cùng công thức. «Bắt đầu ôn tập» trên `/review/:deckId` gọi `enrollActivePool` trước khi fetch due — từ mới được `due_date = hôm nay`. Phiên deck **capped 20** (`DECK_SESSION_LIMIT`): nếu due+enroll ≤ 20, session vẫn có thể **dài hơn** số vừa thấy trên Detail / hàng Home; nếu n > 20, session **ngắn hơn** số Home (leftover giữ `due_date`, Home vẫn hiện n). Mix `/review` không enroll và không cap. Tick Home có thể mất sau enroll — KI-029; leftover cũng giữ tick «Chưa xong» (đúng).
+**Mô tả:** Home **không còn** hero số «Đến hạn hôm nay». Detail vẫn đếm `due_date <= hôm nay` trên progress hiện có, **không** enroll. Hàng Home «{n} từ đến hạn» cùng công thức. «Bắt đầu ôn tập» trên `/review/:deckId` gọi `enrollActivePool` trước khi fetch due — từ mới được `due_date = hôm nay`. Phiên deck **capped 20** (`DECK_SESSION_LIMIT`); mix **capped 30** (`MIX_SESSION_LIMIT`): nếu due+enroll ≤ cap, session deck vẫn có thể **dài hơn** số vừa thấy trên Detail / hàng Home; nếu n > cap, session **ngắn hơn** số Home (leftover giữ `due_date`, Home vẫn hiện n). Mix không enroll. Tick Home có thể mất sau enroll — KI-029; leftover cũng giữ tick «Chưa xong» (đúng).
 
-**Cách tái hiện:** Deck còn slot pool và từ chưa enroll, due+enroll ≤ 20: so Detail/Home với độ dài phiên. Hoặc due > 20: phiên 20, Home vẫn «{n} từ đến hạn».
+**Cách tái hiện:** Deck còn slot pool và từ chưa enroll, due+enroll ≤ 20: so Detail/Home với độ dài phiên. Hoặc due > 20: phiên 20, Home vẫn «{n} từ đến hạn». Mix due > 30: phiên 30, done «Ôn tiếp».
 
-**Hướng fix:** Copy UI đã gợi ý cap 20 + «Ôn tiếp» khi leftover. Không cần số khớp Home với độ dài một phiên.
+**Hướng fix:** Copy UI đã gợi ý cap + «Ôn tiếp» khi leftover. Không cần số khớp Home với độ dài một phiên.
 
-**Trạng thái:** Open (2026-09-21; cập nhật 2026-09-24 — Home hết hero + cap phiên deck)
+**Trạng thái:** Open (2026-09-21; cập nhật 2026-09-24 — Home hết hero + cap phiên deck; 2026-09-25 — mix cũng cap)
 
 ---
 
@@ -462,22 +462,14 @@ Lỗi / sai lệch đã biết. Đánh số từ **KI-001**. Entry mới ở đ�
 
 ## KI-007 — Giới hạn số từ MỚI đưa vào 1 session ôn tập (batch limit)
 
-**Mức độ:** Medium — mix `/review` vẫn không cap; deck đã cap  
+**Mức độ:** Medium — đã xử lý (deck + mix)
 **File liên quan:** `src/pages/ReviewPage.tsx` (fetch hàng đợi due), `src/lib/sessionLimits.ts`
 
-**Vấn đề (chủ dự án, 2026-09-08; cập nhật 2026-09-14 / 2026-09-24):** Hàng đợi SRS từng lấy **tất cả** từ có `due_date <= hôm nay`, không giới hạn số lượng. Upload deck lớn → session đầu 80–100 từ; retry queue có thể > 150–200 lượt.
+**Vấn đề (chủ dự án, 2026-09-08; cập nhật 2026-09-14 / 2026-09-24 / 2026-09-25):** Hàng đợi SRS từng lấy **tất cả** từ có `due_date <= hôm nay`, không giới hạn số lượng. Upload deck lớn → session đầu 80–100 từ; retry queue có thể > 150–200 lượt.
 
-**Đã làm (2026-09-24, deck only):** `/review/:deckId` cắt `DECK_SESSION_LIMIT` (20) mỗi **phiên** (không phải mỗi ngày), mọi từ due (`review_count` 0 hay > 0 đều tính — Task 3). Leftover giữ `due_date`. Done hiện «Còn N…» + «Ôn tiếp». Mix `/review` **vẫn uncapped**. Extra `.limit(20)` inline không liên quan KI này.
+**Đã làm:** `/review/:deckId` cắt `DECK_SESSION_LIMIT` (20) mỗi phiên (2026-09-24). Mix `/review` cắt `MIX_SESSION_LIMIT` (30) cùng order `due_date` + `id` (2026-09-25). Leftover giữ `due_date`. Done deck/mix: «Còn N…» + «Ôn tiếp». Extra `.limit(20)` inline không liên quan KI này.
 
-**Nghiên cứu tham khảo (2026-09-08):** Anki "new cards per day" (10–20 thẻ mới/ngày, tách review). Nguồn: docs.ankiweb.net/deck-options.html.
-
-**Hướng xử lý còn lại:**
-1. Mix `/review` — vẫn lấy hết due mọi deck; chưa cap.
-2. Đã chọn: leftover **giữ** `due_date` (không dời sang ngày sau).
-3. **Task 3 — đã chốt:** `review_count > 0` **tính vào** cap 20 (cả set due, không chỉ từ mới).
-4. UI leftover trên done deck: «Còn N từ đến hạn hôm nay.» — mix chưa có.
-
-**Trạng thái:** Partial (2026-09-24) — deck capped; mix còn mở.
+**Trạng thái:** Closed (2026-09-25) — deck + mix đều capped theo phiên.
 
 ---
 

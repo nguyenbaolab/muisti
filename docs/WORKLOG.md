@@ -4,6 +4,14 @@ Nhật ký thay đổi có ý nghĩa. Entry mới ở **đầu file** (sau tiêu
 
 ---
 
+## Giai đoạn 1 — Cap 30 từ due mỗi phiên mix `/review`
+**Ngày:** 2026-09-25
+
+- `MIX_SESSION_LIMIT = 30` trong `sessionLimits.ts`. Mix due: `order due_date, id` + `limit 30`; leftover giữ `due_date`. `loadRemainingDue` chạy cho mix (count mọi due, không lọc deck) + deck; extra vẫn null ngay. Setup copy mix có «tối đa 30…».
+- Docs: CONTEXT, REQUIREMENTS v0.2.6, DECISIONS, KI-007 Closed, KI-028 cập nhật.
+
+---
+
 ## Giai đoạn 1 — Tốt nghiệp deck + Học lại từ đầu
 **Ngày:** 2026-09-25
 
