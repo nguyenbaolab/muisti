@@ -4,6 +4,25 @@ Ghi theo thời gian, mới nhất ở trên. Mỗi entry: tên ngắn, ngày, q
 
 ---
 
+## Tốt nghiệp deck + reset: xóa hẳn progress; window.confirm; toàn bộ deck
+
+**Ngày:** 2026-09-25
+
+**Quyết định:**
+
+- **Tốt nghiệp deck** = mọi từ trong deck đã enroll **và** mọi từ đều `interval_days >= 30` (`totalWords > 0 && notEnrolledCount === 0 && graduatedCount === totalWords`). Không đủ nếu chỉ các từ đã enroll đều thuộc mà còn từ chưa học.
+- `isGraduated` và `showExtraPractice` tự loại trừ: tốt nghiệp ⇒ không còn `interval_days < 30` ⇒ `extraCandidatesCount === 0`. Không thêm guard `&& !showExtraPractice`.
+- **Reset «Học lại từ đầu»:** DELETE toàn bộ dòng `user_vocab_progress` của user cho các `vocab_item_id` của deck (ids từ `words` đã load — DELETE PostgREST không filter qua `vocab_items!inner` như SELECT). Không UPDATE về default; không đụng `vocab_items` / `decks.active_pool_size`. Sau DELETE refetch progress cùng query mount (`fetchDeckProgress`).
+- Xác nhận bằng `window.confirm` (cùng pattern xóa deck trên `DecksPage`). Không dựng Modal mới.
+
+**Lý do:** Xóa hẳn đơn giản hơn reset cột (không giữ `review_count` lịch sử — owner chấp nhận mất). Confirm browser giữ nhất quán, chưa có Dialog trong repo. Định nghĩa “toàn bộ deck” tránh tuyên bố tốt nghiệp khi còn từ chưa học.
+
+**Phạm vi:** `DeckDetailPage.tsx` (`isGraduated`, Button reset, `handleResetDeck`, `actionError` / `resetting`). Docs REQUIREMENTS / CONTEXT.
+
+**Không làm gì:** Không DDL / migration. Không sửa `ReviewPage` / `srs.ts` / RLS (policy DELETE own đã có). Không Modal component mới.
+
+---
+
 ## Cap 20 từ due mỗi phiên ôn deck; leftover giữ due_date
 
 **Ngày:** 2026-09-24

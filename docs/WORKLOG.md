@@ -4,6 +4,14 @@ Nhật ký thay đổi có ý nghĩa. Entry mới ở **đầu file** (sau tiêu
 
 ---
 
+## Giai đoạn 1 — Tốt nghiệp deck + Học lại từ đầu
+**Ngày:** 2026-09-25
+
+- `isGraduated` trên Detail; copy chúc mừng + Button «Học lại từ đầu» (sau Sửa). Reset: `window.confirm` → DELETE progress theo `vocab_item_id` từ `words` → `fetchDeckProgress` refetch; `actionError` / `resetting`.
+- Docs: CONTEXT, REQUIREMENTS v0.2.5, DECISIONS (xóa hẳn vs reset cột; confirm; định nghĩa toàn bộ deck).
+
+---
+
 ## Giai đoạn 1 — Chặn nháy màn done (await remainingDue trước khi done)
 **Ngày:** 2026-09-25
 

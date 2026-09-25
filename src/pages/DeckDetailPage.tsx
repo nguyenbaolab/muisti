@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
-import { buttonPrimaryClassName, buttonSecondaryClassName } from '../components/Button'
+import { Button, buttonPrimaryClassName, buttonSecondaryClassName } from '../components/Button'
 import { DeckHeader } from '../components/DeckHeader'
 import { TabPanel, Tabs } from '../components/Tabs'
 import { backLinkBlockClassName } from '../components/linkClasses'
@@ -44,15 +44,33 @@ function localIsoDateFromTimestamp(iso: string): string {
   return `${d.getFullYear()}-${month}-${day}`
 }
 
+function wordsWithProgress(vocabItems: VocabRow[], progress: ProgressRow[]): WordRow[] {
+  const intervalByVocabId = new Map(progress.map((row) => [row.vocab_item_id, row.interval_days]))
+  return vocabItems.map((item) => ({
+    ...item,
+    status: wordStatus(intervalByVocabId.get(item.id)),
+  }))
+}
+
+function fetchDeckProgress(userId: string, deckId: string) {
+  return supabase
+    .from('user_vocab_progress')
+    .select('vocab_item_id, interval_days, due_date, last_reviewed_at, vocab_items!inner(deck_id)')
+    .eq('user_id', userId)
+    .eq('vocab_items.deck_id', deckId)
+}
+
 export function DeckDetailPage() {
   const { id } = useParams<{ id: string }>()
 
   const [status, setStatus] = useState<PageStatus>('loading')
   const [loadError, setLoadError] = useState<string | null>(null)
+  const [actionError, setActionError] = useState<string | null>(null)
   const [deck, setDeck] = useState<Deck | null>(null)
   const [words, setWords] = useState<WordRow[]>([])
   const [progressRows, setProgressRows] = useState<ProgressRow[]>([])
   const [activeTab, setActiveTab] = useState<ActiveTab>('words')
+  const [resetting, setResetting] = useState(false)
 
   useEffect(() => {
     let cancelled = false
@@ -96,11 +114,7 @@ export function DeckDetailPage() {
           .select('id, finnish_word, translation')
           .eq('deck_id', id)
           .order('created_at', { ascending: true }),
-        supabase
-          .from('user_vocab_progress')
-          .select('vocab_item_id, interval_days, due_date, last_reviewed_at, vocab_items!inner(deck_id)')
-          .eq('user_id', user.id)
-          .eq('vocab_items.deck_id', id),
+        fetchDeckProgress(user.id, id),
       ])
 
       if (cancelled) return
@@ -113,16 +127,11 @@ export function DeckDetailPage() {
 
       const vocabItems = (vocabResult.data ?? []) as VocabRow[]
       const progress = (progressResult.data ?? []) as ProgressRow[]
-      const intervalByVocabId = new Map(progress.map((row) => [row.vocab_item_id, row.interval_days]))
 
       setDeck(loadedDeck)
       setProgressRows(progress)
-      setWords(
-        vocabItems.map((item) => ({
-          ...item,
-          status: wordStatus(intervalByVocabId.get(item.id)),
-        })),
-      )
+      setWords(wordsWithProgress(vocabItems, progress))
+      setActionError(null)
       setStatus('ready')
     }
 
@@ -131,6 +140,62 @@ export function DeckDetailPage() {
       cancelled = true
     }
   }, [id])
+
+  async function handleResetDeck() {
+    if (!id || resetting) return
+
+    const ok = window.confirm(
+      'Học lại từ đầu sẽ xóa toàn bộ tiến độ ôn tập của deck này (bao gồm số lần đã ôn). Từ vựng trong deck vẫn giữ nguyên. Không thể hoàn tác. Tiếp tục?',
+    )
+    if (!ok) return
+
+    setResetting(true)
+    setActionError(null)
+
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
+    if (!user) {
+      setActionError('Không có phiên đăng nhập.')
+      setResetting(false)
+      return
+    }
+
+    // DELETE cannot filter via vocab_items!inner join like SELECT — use ids from loaded words.
+    const vocabIds = words.map((w) => w.id)
+    const { error: deleteError } = await supabase
+      .from('user_vocab_progress')
+      .delete()
+      .eq('user_id', user.id)
+      .in('vocab_item_id', vocabIds)
+
+    if (deleteError) {
+      setActionError(deleteError.message || 'Không xóa được tiến độ. Thử lại sau.')
+      setResetting(false)
+      return
+    }
+
+    const progressResult = await fetchDeckProgress(user.id, id)
+    if (progressResult.error) {
+      setActionError(progressResult.error.message || 'Đã xóa tiến độ nhưng không tải lại được dữ liệu.')
+      setResetting(false)
+      return
+    }
+
+    const progress = (progressResult.data ?? []) as ProgressRow[]
+    setProgressRows(progress)
+    setWords((prev) =>
+      wordsWithProgress(
+        prev.map(({ id: wordId, finnish_word, translation }) => ({
+          id: wordId,
+          finnish_word,
+          translation,
+        })),
+        progress,
+      ),
+    )
+    setResetting(false)
+  }
 
   if (status === 'loading') {
     return (
@@ -202,6 +267,7 @@ export function DeckDetailPage() {
     (p) => p.interval_days < 30 && p.due_date > today,
   ).length
   const showExtraPractice = dueTodayCount === 0 && extraCandidatesCount > 0
+  const isGraduated = totalWords > 0 && notEnrolledCount === 0 && graduatedCount === totalWords
   const startedLabel = new Date(deck.created_at).toLocaleDateString('vi-VN')
   const reviewedDates = new Set(
     progressRows
@@ -246,6 +312,17 @@ export function DeckDetailPage() {
             <Link to={`/decks/${id}/edit`} className={`${buttonSecondaryClassName} no-underline`}>
               Sửa
             </Link>
+            {isGraduated ? (
+              <Button
+                type="button"
+                variant="secondary"
+                loading={resetting}
+                disabled={resetting}
+                onClick={() => void handleResetDeck()}
+              >
+                {resetting ? 'Đang xóa tiến độ…' : 'Học lại từ đầu'}
+              </Button>
+            ) : null}
           </>
         }
       />
@@ -256,6 +333,16 @@ export function DeckDetailPage() {
         <p className="mt-2 text-sm text-[var(--color-text-muted)] dark:text-[var(--color-text-muted-dark)]">
           Bạn đã ôn xong bài hôm nay. "Ôn thêm" cho bạn luyện các từ đang học sắp đến hạn. Kết quả
           chỉ để luyện tập, không thay đổi lịch ôn và không làm từ tốt nghiệp sớm hơn.
+        </p>
+      ) : null}
+      {isGraduated ? (
+        <p className="mt-2 text-sm text-[var(--color-text-muted)] dark:text-[var(--color-text-muted-dark)]">
+          Chúc mừng! Bạn đã tốt nghiệp toàn bộ deck này. Mọi từ đều đã thuộc lâu dài.
+        </p>
+      ) : null}
+      {actionError ? (
+        <p role="alert" className="mt-2 text-sm text-[var(--color-danger)] dark:text-[var(--color-danger-dark)]">
+          {actionError}
         </p>
       ) : null}
 
