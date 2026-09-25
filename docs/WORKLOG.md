@@ -4,6 +4,14 @@ Nhật ký thay đổi có ý nghĩa. Entry mới ở **đầu file** (sau tiêu
 
 ---
 
+## Giai đoạn 1 — Chặn nháy màn done (await remainingDue trước khi done)
+**Ngày:** 2026-09-25
+
+- `handleNext` → `async`; hết queue: `await loadRemainingDue()` (try/catch → null) rồi mới `setPageState('done')`. Gọi mọi mode (mix/extra set null nhanh). JSX done / `loadRemainingDue` nội bộ không đổi.
+- Keyboard Enter: `void handleNext()`. Docs: CONTEXT (Session Summary + Remaining due).
+
+---
+
 ## Giai đoạn 1 — Cap 20 từ due mỗi phiên ôn deck
 **Ngày:** 2026-09-24
 

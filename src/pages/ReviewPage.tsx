@@ -524,7 +524,7 @@ export function ReviewPage() {
     setRemainingDue(typeof count === 'number' ? count : null)
   }
 
-  function handleNext() {
+  async function handleNext() {
     if (!feedback || saving) return
 
     if (feedback.correct) {
@@ -536,10 +536,15 @@ export function ReviewPage() {
       const remaining = queue.slice(1)
       setQueue(remaining)
       if (remaining.length === 0) {
-        setPageState('done')
-        if (scopedDeckId && !extraMode) {
-          void loadRemainingDue()
+        // Await so done screen never paints with remainingDue still null (deck flash).
+        // loadRemainingDue handles mix/extra by setting null quickly; guards errors as null.
+        try {
+          await loadRemainingDue()
+        } catch (err) {
+          console.error(err)
+          setRemainingDue(null)
         }
+        setPageState('done')
         return
       }
       presentCard(remaining, enabledModes, finnishPool)
@@ -591,7 +596,7 @@ export function ReviewPage() {
       if (feedback) {
         if (event.key === 'Enter') {
           event.preventDefault()
-          handleNext()
+          void handleNext()
         }
         return
       }
