@@ -4,6 +4,14 @@ Nhật ký thay đổi có ý nghĩa. Entry mới ở **đầu file** (sau tiêu
 
 ---
 
+## Giai đoạn 1 — Task 5 bước 1/4: schema Level 2 exercises
+**Ngày:** 2026-09-26
+
+- Migration `20260926_010_exercise_generation.sql` + `schema.sql` v0.3.0: `profiles.is_admin` / `daily_exercise_quota`; `exercise_quota_usage`; `generated_exercises`; `public.is_admin()` SECURITY DEFINER (tránh recursion RLS).
+- Types: Profile mở rộng; `GeneratedExercise` / `ExerciseQuotaUsage` (`content: unknown`). Docs: CONTEXT, REQUIREMENTS v0.3.0, DECISIONS. Chưa UI / Function / apply DB.
+
+---
+
 ## Giai đoạn 1 — Cap 30 từ due mỗi phiên mix `/review`
 **Ngày:** 2026-09-25
 

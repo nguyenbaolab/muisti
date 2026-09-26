@@ -1,6 +1,8 @@
 export interface Profile {
   id: string
   email: string
+  is_admin: boolean
+  daily_exercise_quota: number
 }
 
 export interface Deck {
@@ -41,4 +43,23 @@ export interface ReviewQueueItem {
   easeFactor: number
   intervalDays: number
   reviewCount: number
+}
+
+export type ExerciseType = 'fill_blank' | 'mcq'
+
+/** Stored as jsonb; exact keys TBD until Function/UI (Task 5 later steps). */
+export interface GeneratedExercise {
+  id: string
+  vocab_item_id: string
+  exercise_type: ExerciseType
+  content: unknown
+  times_shown: number
+  cooldown_until: string | null
+  created_at: string
+}
+
+export interface ExerciseQuotaUsage {
+  user_id: string
+  usage_date: string
+  generations_used: number
 }

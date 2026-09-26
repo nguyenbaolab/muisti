@@ -11,7 +11,7 @@ Tài liệu kỹ thuật cho Cursor khi đọc/ghi code. Business: `REQUIREMENTS
 - **Data / Auth:** Supabase (Postgres + Auth), client gọi `supabase-js`, bảo vệ bằng RLS
 - **Auth model:** admin invite (`inviteUserByEmail`); không form đăng ký công khai
 - **Deploy:** Cloudflare Workers Static Assets qua Git integration (nhánh `main`, Worker `name` = `muisti`). SPA: `wrangler.jsonc` `assets.not_found_handling = "single-page-application"`, `directory` = `./dist`. Không `public/_redirects` (rule `/* /index.html 200` lỗi 100324 trên Workers). `public/_headers` (bảo mật + cache immutable `/assets/*`). `.node-version` = 22. Không thêm wrangler vào `package.json`. Env **Build** variables: `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY` (không đặt `SUPABASE_SERVICE_ROLE_KEY`)
-- **AI content:** app v0.1 không gọi LLM lúc runtime; nội dung deck do user upload
+- **AI content:** app v0.1 không gọi LLM lúc runtime; nội dung deck do user upload. Task 5 (Level 2): schema generation đã có trên repo; Function Claude / UI **chưa**.
 - **Phân công:** Claude thiết kế + prompt; Cursor thực thi code/data; chủ dự án test và quyết định cuối
 
 ---
@@ -55,7 +55,7 @@ src/
     DeckDetailPage.tsx  # /decks/:id järvi; owner: ôn + Ôn thêm + Sửa + «Học lại từ đầu» khi isGraduated; Tabs Từ vựng/Tổng kết; VocabTable
     ReviewPage.tsx      # ôn SRS + extraMode `/review/:deckId/extra` (không ghi DB); ngoài AppLayout; FocusLayout; setup mô tả mix vs deck vs extra + phím sm+; empty/error/done Đợt A; reviewing Đợt B; deck/mix due cap; done + Ôn tiếp khi còn due (extra: không nhắc lịch)
   types/
-    database.ts         # Deck, VocabItem, UserVocabProgress, ReviewQueueItem, Profile
+    database.ts         # Deck, VocabItem, UserVocabProgress, ReviewQueueItem, Profile (+is_admin/quota), GeneratedExercise, ExerciseQuotaUsage
 public/                 # Vite copy nguyên vào dist/
   _headers              # nosniff / referrer / DENY / Permissions-Policy; /assets/* immutable
   favicon.svg
@@ -74,6 +74,9 @@ supabase/
     20260914_007_deck_based_schema.sql   # wipe units/exercises → decks
     20260916_008_deck_active_pool_size.sql  # decks.active_pool_size 10–30 default 20
     20260916_009_profiles.sql               # profiles + trigger auth.users — CHƯA APPLY (owner SQL Editor)
+    20260926_010_exercise_generation.sql    # Task 5 bước 1: is_admin/quota + exercise tables — CHƯA APPLY
+
+schema.sql v0.3.0 (2026-09-26): profiles (+ is_admin, daily_exercise_quota), decks, vocab_items, user_vocab_progress, exercise_quota_usage, generated_exercises; `public.is_admin()` SECURITY DEFINER.
 .env.example            # VITE_* (nhúng bundle / đặt Build variables trên Worker); SUPABASE_SERVICE_ROLE_KEY local-only, không đặt trên Cloudflare
 ```
 
@@ -106,7 +109,9 @@ Hướng đã chốt (2026-09-14, cột pool 2026-09-16, profiles 2026-09-17):
 - `decks`: SELECT nếu `visibility = 'public'` hoặc `owner_id = auth.uid()`; INSERT/UPDATE/DELETE chỉ owner. Cột `active_pool_size` integer 10–30, default 20.
 - `vocab_items`: SELECT theo quyền SELECT của deck cha; INSERT/UPDATE/DELETE chỉ owner deck (client upload được)
 - `user_vocab_progress`: RLS own-rows `user_id = auth.uid()` — không đổi cấu trúc cột
-- `profiles`: `id` = `auth.users.id`, `email`; SELECT mọi authenticated (`USING (true)`); trigger `on_auth_user_created` INSERT khi có user mới. **009 chưa apply trên DB cho đến khi owner chạy SQL Editor.**
+- `profiles`: `id` = `auth.users.id`, `email`, `is_admin` (default false), `daily_exercise_quota` (default 10); SELECT mọi authenticated (`USING (true)`); UPDATE chỉ admin qua `public.is_admin()` (SECURITY DEFINER — tránh recursion RLS). Trigger `on_auth_user_created` INSERT khi có user mới. **009 / 010 chưa apply trên DB cho đến khi owner chạy SQL Editor.**
+- `exercise_quota_usage`: PK `(user_id, usage_date)`; đếm lần sinh bài trong ngày; RLS own-rows SELECT/INSERT/UPDATE. Mục đích: enforce quota client/Function.
+- `generated_exercises`: bài Level 2 gắn `vocab_item_id`; `exercise_type` `fill_blank`|`mcq`; `content` jsonb; `times_shown` / `cooldown_until`. SELECT nếu deck visible; INSERT/UPDATE chỉ owner deck.
 
 ---
 

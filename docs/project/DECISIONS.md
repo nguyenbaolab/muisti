@@ -4,6 +4,26 @@ Ghi theo thời gian, mới nhất ở trên. Mỗi entry: tên ngắn, ngày, q
 
 ---
 
+## Task 5 schema: quota theo user; is_admin trên profiles; content jsonb; owner-only write exercises
+
+**Ngày:** 2026-09-26
+
+**Quyết định:**
+
+- **Quota sinh bài:** cột `profiles.daily_exercise_quota` (default 10) + bảng `exercise_quota_usage` `(user_id, usage_date)` — mỗi user một hạn mức riêng (admin chỉnh được), không hằng số toàn cục trong code.
+- **Admin:** `profiles.is_admin` (default false). Policy UPDATE profiles chỉ cho admin (sửa bất kỳ hàng). Check quyền qua `public.is_admin()` **SECURITY DEFINER** — không `EXISTS (SELECT … FROM profiles WHERE id = auth.uid())` trong policy trên chính `profiles` (Postgres báo infinite recursion).
+- **`generated_exercises.content`:** `jsonb` — một cột linh hoạt cho `fill_blank` và `mcq` (shape khác nhau); không tách cột rời theo type.
+- **RLS write exercises:** INSERT/UPDATE chỉ khi user là **owner** của deck chứa `vocab_item_id`. SELECT theo visibility deck (public hoặc owner) — giống pattern vocab. Người xem deck public **không** được sinh/sửa bài tập.
+- Types: `GeneratedExercise.content: unknown` cho đến khi chốt shape Function/UI. Đề xuất (chờ PO): `fill_blank` → `{ prompt, answer }`; `mcq` → `{ prompt, options: string[], correct }`.
+
+**Lý do:** Quota per-user cho phép admin nới hạn cho tester; jsonb tránh schema cứng khi Claude đổi format nhẹ; owner-only write tránh viewer public đốt quota / ghi rác vào deck người khác.
+
+**Phạm vi:** migration `20260926_010_exercise_generation.sql`; `schema.sql` v0.3.0; `src/types/database.ts`. Docs REQUIREMENTS / CONTEXT.
+
+**Không làm gì:** Không UI, không Cloudflare Function, không Claude API, không đụng decks/vocab/progress cột cũ.
+
+---
+
 ## Mix `/review`: cap 30 từ/phiên; không cân bằng deck; không chọn deck
 
 **Ngày:** 2026-09-25

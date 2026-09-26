@@ -1,7 +1,9 @@
 # REQUIREMENTS — Muisti (Finnish Learning App)
 
-**Phiên bản:** v0.2.6  
-**Cập nhật:** 2026-09-25
+**Phiên bản:** v0.3.0  
+**Cập nhật:** 2026-09-26
+
+**Changelog v0.3.0:** Task 5 bước 1/4 — schema Level 2 exercises (`generated_exercises`, `exercise_quota_usage`, `profiles.is_admin` / `daily_exercise_quota`). Chưa Function / UI admin / UI luyện tập.
 
 **Changelog v0.2.6:** Mix `/review` tối đa 30 từ due mỗi phiên (`MIX_SESSION_LIMIT`); leftover giữ `due_date`; done mix có «Ôn tiếp» khi còn due (cùng UI deck).
 
@@ -75,11 +77,13 @@ Chính là thuật toán đã chốt và implement ở T1.5 — **không thiết
 - **Màn học (UI järvi Đợt B 2026-09-19):** tiến độ `{đã xong} / {tổng phiên} từ` derived (`completedCards.length` và `queue.length`), không state mới. Gợi ý phím (chỉ `sm+`, `aria-hidden`): Enter để trả lời / A–D / Enter để tiếp tục — không đổi logic phím.
 - **Phím tắt lúc ôn** (`pageState === 'reviewing'`): Gõ chữ — Enter submit form (lần 1), Enter lần 2 (đã có feedback) → câu tiếp. MCQ — A/B/C/D chọn + submit ngay; Enter sau feedback → câu tiếp. Chuột (radio / Trả lời / Tiếp theo) vẫn dùng được. Không áp dụng ở setup/done/error/empty.
 
-### Level 2 (tương lai — không build giai đoạn này)
+### Level 2 (đang mở — Task 5)
 
-Recall chủ động: thấy nghĩa, gõ ra từ tiếng Phần Lan.
+Recall chủ động + bài tập sinh AI (`fill_blank`, `mcq`) gắn `vocab_item`.
 
-**Ghi chú (2026-09-21):** Ranh giới L1 / L2 hiện **mờ** — UI Level 1 đã hỏi theo hướng nghĩa → từ Phần Lan. Cần định nghĩa lại trước khi scope L2. `user_vocab_progress` **không** có cột level; theo dõi theo level sẽ cần đổi schema.
+**Ghi chú (2026-09-21):** Ranh giới L1 / L2 vẫn **mờ** trên UI ôn SRS. `user_vocab_progress` **không** có cột level.
+
+**Task 5 bước 1/4 (schema only, 2026-09-26):** Done trên repo — migration `20260926_010_exercise_generation.sql` + `schema.sql` v0.3.0. Thêm `profiles.is_admin`, `profiles.daily_exercise_quota`; bảng `exercise_quota_usage` (quota sinh bài theo ngày); bảng `generated_exercises` (`fill_blank` | `mcq`, `content` jsonb, `times_shown`, `cooldown_until`). Types trong `src/types/database.ts`. **Chưa làm:** Cloudflare Function gọi Claude API; UI admin (quota / is_admin); UI luyện tập Level 2. Owner cần apply migration trên Supabase.
 
 ### Level 3 (tương lai — không build giai đoạn này)
 
@@ -95,7 +99,7 @@ Vận dụng viết tự do, cần AI chấm bài. Ollama local hiện có (`qwe
 
 - Bỏ hẳn khái niệm “unit sách” / `book_code` / kappale làm trung tâm
 - Bỏ hẳn bảng `exercises` và toàn bộ F-06 (chấm mcq/fill_blank theo cấu trúc sách)
-- Không build Level 2 / 3 / 4 (roadmap, không phải việc đang làm)
+- Không build Level 3 / 4 (roadmap). Level 2: chỉ schema Task 5 bước 1 trên repo; Function / UI vẫn chưa.
 - Không dùng AI / Ollama ở bất kỳ đâu trong Level 1 (parse deck và chấm Level 1 đều thuần code)
 - Không mô phỏng format đề thi YKI (không audio, không đọc/viết theo chuẩn thi chính thức) — hướng đã cân nhắc và loại bỏ
 
