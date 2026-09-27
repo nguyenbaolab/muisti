@@ -1,25 +1,22 @@
 -- Muisti schema — full DDL (source of truth for fresh project setup)
--- Version: 0.3.0
--- Updated: 2026-09-26
+-- Version: 0.4.0
+-- Updated: 2026-09-28
 -- Apply entire file on a fresh Supabase project.
 -- For incremental updates on existing DB, use supabase/migrations/.
 
--- bảng profiles (email đồng bộ từ auth.users; admin + quota Task 5)
+-- bảng profiles (email đồng bộ từ auth.users; admin + quota Task 5; super admin 011)
 CREATE TABLE profiles (
   id uuid PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
   email text NOT NULL,
   is_admin boolean NOT NULL DEFAULT false,
+  is_super_admin boolean NOT NULL DEFAULT false,
   daily_exercise_quota int NOT NULL DEFAULT 10 CHECK (daily_exercise_quota >= 0)
 );
 
 ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "profiles: select all authenticated"
-  ON profiles FOR SELECT
-  TO authenticated
-  USING (true);
-
 -- Avoid infinite recursion: policy on profiles must not SELECT profiles under RLS.
+-- SECURITY DEFINER reads is_admin / is_super_admin bypassing RLS.
 CREATE OR REPLACE FUNCTION public.is_admin()
 RETURNS boolean
 LANGUAGE sql
@@ -36,11 +33,42 @@ $$;
 REVOKE ALL ON FUNCTION public.is_admin() FROM PUBLIC;
 GRANT EXECUTE ON FUNCTION public.is_admin() TO authenticated;
 
-CREATE POLICY "profiles: admin update any row"
+CREATE OR REPLACE FUNCTION public.is_super_admin()
+RETURNS boolean
+LANGUAGE sql
+STABLE
+SECURITY DEFINER
+SET search_path = public
+AS $$
+  SELECT COALESCE(
+    (SELECT is_super_admin FROM public.profiles WHERE id = auth.uid()),
+    false
+  );
+$$;
+
+REVOKE ALL ON FUNCTION public.is_super_admin() FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION public.is_super_admin() TO authenticated;
+
+-- SELECT: own row, any admin (list), or owner of a public deck (sharer name on Decks/Preview).
+-- Policy evaluates at query time — decks may be defined later in this file.
+CREATE POLICY "profiles: select own, admin, or public deck owner"
+  ON profiles FOR SELECT
+  TO authenticated
+  USING (
+    id = auth.uid()
+    OR public.is_admin()
+    OR EXISTS (
+      SELECT 1 FROM public.decks
+      WHERE decks.owner_id = profiles.id
+        AND decks.visibility = 'public'
+    )
+  );
+
+CREATE POLICY "profiles: super admin update any row"
   ON profiles FOR UPDATE
   TO authenticated
-  USING (public.is_admin())
-  WITH CHECK (public.is_admin());
+  USING (public.is_super_admin())
+  WITH CHECK (public.is_super_admin());
 
 CREATE FUNCTION public.handle_new_user()
 RETURNS trigger AS $$
@@ -58,6 +86,10 @@ CREATE TRIGGER on_auth_user_created
 INSERT INTO public.profiles (id, email)
 SELECT id, email FROM auth.users
 ON CONFLICT (id) DO NOTHING;
+
+-- SAU KHI APPLY (project mới): chủ dự án tự set tài khoản của mình bằng SQL tay (chạy riêng):
+-- UPDATE profiles SET is_super_admin = true, is_admin = true WHERE email = '<email-cua-ban>';
+-- Chốt: 1 super admin duy nhất. is_admin = true để lọt policy SELECT/admin-list.
 
 -- bảng decks
 CREATE TABLE decks (
@@ -278,3 +310,5 @@ CREATE POLICY "generated_exercises: update if deck owner"
         AND decks.owner_id = auth.uid()
     )
   );
+
+CREATE INDEX ON generated_exercises (vocab_item_id, exercise_type, times_shown);
