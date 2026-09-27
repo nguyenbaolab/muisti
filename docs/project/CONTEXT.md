@@ -53,12 +53,13 @@ src/
     HomePage.tsx        # `/` — Việc hôm nay (todo deck sở hữu) + lưới 6 số; empty tạo deck; không nút Ôn tập
     AdminPage.tsx       # `/admin` — list profiles; quota + is_admin chỉ super admin sửa; admin thường read-only; khóa is_admin dòng mình
     PracticePage.tsx    # `/practice/:deckId` Level 2; FocusLayout; owner; interval>=3 ưu tiên times_shown thấp; sai tối đa 1 lần lặp API; không ghi SRS
-    DecksPage.tsx       # /decks järvi; dòng nhịp học; Tabs Cá nhân/Public; `?tab=public` chỉ set tab ban đầu; Public có dòng clone; hàng hairline; own → /:id; khác → /preview
+    DecksPage.tsx       # /decks järvi; dòng nhịp học; link «Luyện file tự do» → `/practice-file`; Tabs Cá nhân/Public; `?tab=public` chỉ set tab ban đầu; Public có dòng clone; hàng hairline; own → /:id; khác → /preview
     CreateDeckPage.tsx  # /decks/new järvi; DeckForm + FileField + Xem trước; Lưu deck
     EditDeckPage.tsx    # /decks/:id/edit järvi; DeckForm; owner; Lưu/Hủy
     DeckPreviewPage.tsx # /decks/:id/preview järvi; đọc-only + Clone; dòng clone không copy tiến độ nếu !owned
     DeckDetailPage.tsx  # /decks/:id järvi; owner: ôn + Luyện tập + Ôn thêm + Sửa + «Học lại từ đầu» khi isGraduated; Tabs Từ vựng/Tổng kết; VocabTable
     ReviewPage.tsx      # ôn SRS + extraMode; FocusLayout; queue debt/reinsert qua lib/session; wrongCount đóng băng sau persist 1 lần; done + Ôn tiếp khi còn due
+    FilePracticePage.tsx # `/practice-file` — luyện file tạm; FocusLayout; parseDeckFile + session.ts; không Supabase/SRS
   types/
     database.ts         # Deck, VocabItem, UserVocabProgress, ReviewQueueItem, Profile (+is_admin/quota), GeneratedExercise (content typed), ExerciseQuotaUsage, FillBlankContent/McqContent
 public/                 # Vite copy nguyên vào dist/
@@ -104,7 +105,8 @@ schema.sql v0.3.0 (2026-09-26): profiles (+ is_admin, daily_exercise_quota), dec
 - `/review/:deckId` — `ReviewPage` chỉ owner: check `owner_id` rồi enroll Active Pool rồi ôn due; **ngoài** `AppLayout`, cùng `FocusLayout`; non-owner bị chặn (nhắn sang preview)
 - `/review/:deckId/extra` — cùng `ReviewPage`, `extraMode` (`useMatch`); owner check + scope deck như `/review/:deckId`; **không** enroll; fetch từ đang học chưa đến hạn; **không** ghi progress; ngoài `AppLayout`, cùng `FocusLayout`
 - `/practice/:deckId` — `PracticePage` Level 2; **ngoài** `AppLayout`, `FocusLayout`; chỉ owner; lọc `interval_days >= 3`, ưu tiên tổng `times_shown` thấp, cap `PRACTICE_SESSION_LIMIT` (20); gọi Worker; **không** ghi SRS
-- Layout session: `AppLayout` bọc `/`, `/decks`, `/decks/new`, `/decks/:id`, `/decks/:id/edit`, `/decks/:id/preview`, `/admin` (qua `AdminRoute`). Header: Muisti → `/`, Decks, Ôn tập → `/review`, link **Admin** → `/admin` chỉ khi `profiles.is_admin` (fetch 1 lần lúc mount AppLayout), `ThemeToggle`, Đăng xuất. Không hiện email. `/review`, `/review/:deckId`, `/review/:deckId/extra`, `/practice/:deckId` đứng ngoài layout.
+- `/practice-file` — `FilePracticePage`; **ngoài** `AppLayout`, `FocusLayout`; upload file + session `lib/session` + `parseDeckFile`; **không** Supabase/SRS; vào từ Decks
+- Layout session: `AppLayout` bọc `/`, `/decks`, `/decks/new`, `/decks/:id`, `/decks/:id/edit`, `/decks/:id/preview`, `/admin` (qua `AdminRoute`). Header: Muisti → `/`, Decks, Ôn tập → `/review`, link **Admin** → `/admin` chỉ khi `profiles.is_admin` (fetch 1 lần lúc mount AppLayout), `ThemeToggle`, Đăng xuất. Không hiện email. `/review`, `/review/:deckId`, `/review/:deckId/extra`, `/practice/:deckId`, `/practice-file` đứng ngoài layout.
 - Session: `getSession` + `onAuthStateChange` trong `App.tsx`; lần đầu hiện `Loading...`
 - Chi tiết UI nghiệp vụ ở `REQUIREMENTS.md`.
 

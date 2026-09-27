@@ -150,6 +150,18 @@ export function DecksPage() {
         Mỗi ngày vào một hoặc vài deck để học từ mới và ôn bài, sau đó vào Ôn tập để ôn thêm một lượt.
       </p>
 
+      <div className="mt-4 border-t border-[var(--color-border)] pt-4 dark:border-[var(--color-border-dark)]">
+        <Link
+          to="/practice-file"
+          className="text-sm font-medium text-[var(--color-accent)] no-underline hover:underline dark:text-[var(--color-accent-dark)]"
+        >
+          Luyện file tự do
+        </Link>
+        <p className="mt-1 text-sm text-[var(--color-text-muted)] dark:text-[var(--color-text-muted-dark)]">
+          Upload file từ vựng để luyện nhanh, không lưu vào deck.
+        </p>
+      </div>
+
       <Tabs
         idPrefix="decks"
         ariaLabel="Loại deck"

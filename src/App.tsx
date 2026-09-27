@@ -14,6 +14,7 @@ import { DeckDetailPage } from './pages/DeckDetailPage'
 import { LoginPage } from './pages/LoginPage'
 import { ReviewPage } from './pages/ReviewPage'
 import { PracticePage } from './pages/PracticePage'
+import { FilePracticePage } from './pages/FilePracticePage'
 
 function AuthRoutes() {
   const [session, setSession] = useState<Session | null>(null)
@@ -63,6 +64,7 @@ function AuthRoutes() {
         <Route path="/review/:deckId/extra" element={<ReviewPage />} />
         <Route path="/review/:deckId" element={<ReviewPage />} />
         <Route path="/practice/:deckId" element={<PracticePage />} />
+        <Route path="/practice-file" element={<FilePracticePage />} />
         <Route path="/login" element={<Navigate to="/" replace />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

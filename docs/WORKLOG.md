@@ -4,6 +4,13 @@ Nhật ký thay đổi có ý nghĩa. Entry mới ở **đầu file** (sau tiêu
 
 ---
 
+## Giai đoạn 1 — F-07: luyện file tự do `/practice-file`
+**Ngày:** 2026-09-28
+
+- `FilePracticePage`: upload (`FileField` + `parseDeckFile`), setup (số từ + type/MCQ), reviewing dùng `applyWrong`/`advanceSession` từ `lib/session` (không Supabase). Done: đúng lần đầu / từng sai / danh sách sai. Route ngoài AppLayout; link trên Decks. `tsc --noEmit` pass. ReviewPage không sửa.
+
+---
+
 ## Giai đoạn 1 — Refactor: `lib/session.ts` (debt + reinsert thuần)
 **Ngày:** 2026-09-28
 
