@@ -4,6 +4,15 @@ Nhật ký thay đổi có ý nghĩa. Entry mới ở **đầu file** (sau tiêu
 
 ---
 
+## Giai đoạn 1 — Task 5 bước 2/4: Worker + endpoint generate-exercise
+**Ngày:** 2026-09-26
+
+- `worker/index.ts` + `wrangler.jsonc` `main` / `ASSETS` / `run_worker_first: ["/api/*"]`. `POST /api/generate-exercise`: verify JWT → secrets → pool hoặc Claude (quota Hướng B). `tsconfig.worker.json` + `@cloudflare/workers-types`.
+- `.env.example` / RUNBOOK: Build `VITE_*` vs runtime `SUPABASE_URL`/`SUPABASE_ANON_KEY` + secrets `SERVICE_ROLE`/`ANTHROPIC`. Docs: CONTEXT, REQUIREMENTS v0.3.1, DECISIONS, KI-031/032.
+- **CHƯA UI** gọi API; owner set secret + test curl trước bước 3–4.
+
+---
+
 ## Giai đoạn 1 — Task 5 bước 1/4: schema Level 2 exercises
 **Ngày:** 2026-09-26
 

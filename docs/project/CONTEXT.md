@@ -10,8 +10,8 @@ Tài liệu kỹ thuật cho Cursor khi đọc/ghi code. Business: `REQUIREMENTS
 - **CSS:** Tailwind CSS v4 (`@tailwindcss/vite` + `@import "tailwindcss"` trong `index.css`). Token järvi trong `@theme`; dark mode class `.dark` trên `<html>` (`@custom-variant`). Không còn alias CSS cũ (`--text` / `--border`…). Trang session dùng token + `Button` / `Input` / `Select` / `Textarea` / `RadioGroup` / `FileField` / `DeckForm` / `Tabs` / `DeckHeader` / `VocabTable` / `FocusLayout`. Review Đợt A + Đợt B đã järvi
 - **Data / Auth:** Supabase (Postgres + Auth), client gọi `supabase-js`, bảo vệ bằng RLS
 - **Auth model:** admin invite (`inviteUserByEmail`); không form đăng ký công khai
-- **Deploy:** Cloudflare Workers Static Assets qua Git integration (nhánh `main`, Worker `name` = `muisti`). SPA: `wrangler.jsonc` `assets.not_found_handling = "single-page-application"`, `directory` = `./dist`. Không `public/_redirects` (rule `/* /index.html 200` lỗi 100324 trên Workers). `public/_headers` (bảo mật + cache immutable `/assets/*`). `.node-version` = 22. Không thêm wrangler vào `package.json`. Env **Build** variables: `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY` (không đặt `SUPABASE_SERVICE_ROLE_KEY`)
-- **AI content:** app v0.1 không gọi LLM lúc runtime; nội dung deck do user upload. Task 5 (Level 2): schema generation đã có trên repo; Function Claude / UI **chưa**.
+- **Deploy:** Cloudflare Workers Static Assets qua Git integration (nhánh `main`, Worker `name` = `muisti`). SPA: `wrangler.jsonc` `assets.directory` = `./dist`, `binding` = `ASSETS`, `not_found_handling` = `single-page-application`, `run_worker_first` = `["/api/*"]`, `main` = `worker/index.ts`. Không `public/_redirects`. `public/_headers`. `.node-version` = 22. Wrangler không trong `package.json` scripts (Cloudflare chạy lúc deploy). Env **Build** (Vite): `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`. Env **Worker runtime**: `SUPABASE_URL`, `SUPABASE_ANON_KEY`, secrets `SUPABASE_SERVICE_ROLE_KEY` + `ANTHROPIC_API_KEY` (wrangler secret put — không Build vars).
+- **AI content:** Task 5 bước 2 — Worker `POST /api/generate-exercise` gọi Claude; SPA chưa gọi endpoint. Schema bước 1 đã có.
 - **Phân công:** Claude thiết kế + prompt; Cursor thực thi code/data; chủ dự án test và quyết định cuối
 
 ---
@@ -60,7 +60,10 @@ public/                 # Vite copy nguyên vào dist/
   _headers              # nosniff / referrer / DENY / Permissions-Policy; /assets/* immutable
   favicon.svg
   icons.svg
-wrangler.jsonc          # Worker muisti; assets.directory ./dist; SPA not_found_handling
+wrangler.jsonc          # main worker/index.ts; assets ./dist + binding ASSETS; run_worker_first /api/*
+worker/
+  index.ts              # POST /api/generate-exercise (Claude + pool + quota)
+tsconfig.worker.json    # include worker/; types @cloudflare/workers-types
 .node-version           # 22 — Cloudflare Builds đọc file này
 supabase/
   schema.sql              # full DDL — dùng setup project mới
@@ -77,7 +80,7 @@ supabase/
     20260926_010_exercise_generation.sql    # Task 5 bước 1: is_admin/quota + exercise tables — CHƯA APPLY
 
 schema.sql v0.3.0 (2026-09-26): profiles (+ is_admin, daily_exercise_quota), decks, vocab_items, user_vocab_progress, exercise_quota_usage, generated_exercises; `public.is_admin()` SECURITY DEFINER.
-.env.example            # VITE_* (nhúng bundle / đặt Build variables trên Worker); SUPABASE_SERVICE_ROLE_KEY local-only, không đặt trên Cloudflare
+.env.example            # VITE_* Build; SUPABASE_URL/ANON_KEY + SERVICE_ROLE + ANTHROPIC Worker runtime
 ```
 
 ---
@@ -129,6 +132,7 @@ Hướng đã chốt (2026-09-14, cột pool 2026-09-16, profiles 2026-09-17):
 ## §6 Store/API index
 
 - `src/lib/supabase.ts`: `export const supabase` — Supabase client dùng chung toàn app; khởi tạo từ `VITE_SUPABASE_URL` + `VITE_SUPABASE_ANON_KEY`
+- Worker API: `POST /api/generate-exercise` — `worker/index.ts`. Bearer access token → verify `/auth/v1/user` → secrets → validate body → pool (`times_shown`, cooldown ≥5 → +10 ngày) hoặc Claude (quota Hướng B) → `{ exercise: { id, exercise_type, content } }`. Lỗi JSON: `unauthorized` | `server_misconfigured` | `invalid_request` | `quota_exceeded` | `vocab_item_not_found` | `generation_failed` | `generation_unavailable` | `internal_error` | `not_found`. Cùng origin với SPA → không CORS đặc biệt.
 - Parse deck file: `parseDeckFile(content)` — `src/lib/deckParser.ts` (cắt dòng trống cuối; cap 500 sau cắt; dòng trống giữa file vẫn lỗi)
 - List decks: `decks.select('*, vocab_items(count)')` — RLS lọc own + public — `DecksPage`; filter client `activeTab` `'mine' | 'public'`; initial `activeTab` từ `?tab=public` (Public) hoặc khác/không có (Cá nhân), không ghi lại URL; click own → `/decks/:id`, click không phải mình → `/decks/:id/preview`. UI järvi: `Tabs` (`idPrefix="decks"`, aria-label «Loại deck») + `TabPanel`; hàng đầu `h1` + `<Link>` «Tạo deck mới» + dòng nhịp học; tab Public dòng clone (không lúc loading); hàng deck hairline; nhãn từ `src/lib/deckLabels.ts` (DecksPage tự thêm «Nghĩa: » khi render). Sửa `<Link>` `/edit`; Xóa `window.confirm` cũ. Lỗi `profiles` → `console.error`.
 - Owner email (tên chia sẻ): query 2 — `profiles.select('id, email').in('id', ownerIds)` trên `DecksPage`; `profiles.select('email').eq('id', owner_id)` trên `DeckPreviewPage` nếu `!owned`. Không embed từ `decks`. `sharerNameFromEmail` trong `deckLabels.ts`. Preview lỗi profiles → `console.error`, fallback «Ẩn danh».

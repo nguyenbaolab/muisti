@@ -13,6 +13,32 @@ Lỗi / sai lệch đã biết. Đánh số từ **KI-001**. Entry mới ở đ�
 
 ---
 
+## KI-032 — Worker `/api/generate-exercise` chưa rate-limit tần suất gọi
+
+**Mức độ:** Low  
+**File liên quan:** `worker/index.ts`
+
+**Mô tả:** Mỗi request (kể cả chỉ lấy lại bài từ pool, không sinh Claude) vẫn tốn verify JWT + query Supabase. Chưa giới hạn số lần gọi Worker/phút/user. Spam client có thể tăng tải Auth/PostgREST dù không đốt quota sinh.
+
+**Hướng fix:** Rate limit (CF / Durable Object / KV) hoặc cache ngắn pool hit; ưu tiên sau khi UI luyện tập có traffic thật.
+
+**Trạng thái:** Open (2026-09-26)
+
+---
+
+## KI-031 — Race quota multi-tab khi sinh bài (Hướng B)
+
+**Mức độ:** Low  
+**File liên quan:** `worker/index.ts`, `exercise_quota_usage`
+
+**Mô tả:** Quota tăng **sau** Claude + INSERT thành công (Hướng B). Hai tab cùng vượt gần hạn có thể cùng qua check `used < limit` rồi cùng sinh → vượt `daily_exercise_quota` nhỏ. Chấp nhận tạm; Hướng A (reserve rồi refund nếu fail) deferred.
+
+**Hướng fix:** Atomic reserve (`UPDATE … WHERE generations_used < quota RETURNING`) hoặc RPC; refund nếu generation fail.
+
+**Trạng thái:** Open (2026-09-26) — deferred Hướng A
+
+---
+
 ## KI-030 — Account summary trên Home không phân trang, cắt im ở 1000 dòng progress
 
 **Mức độ:** Low  

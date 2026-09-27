@@ -22,7 +22,7 @@ npm ci
 cp .env.example .env
 ```
 
-Điền `.env` (không commit). Hai biến `VITE_*` bắt buộc để app chạy. `SUPABASE_SERVICE_ROLE_KEY` chỉ cho script server local — không cần để `npm run dev` / `npm run build`.
+Điền `.env` (không commit). Hai biến `VITE_*` bắt buộc để SPA chạy local. Biến Worker (`SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `ANTHROPIC_API_KEY`) chỉ cần khi chạy/deploy Worker — xem §3 secrets.
 
 **Chạy local (đã scaffold Vite + React + TypeScript):**
 
@@ -63,12 +63,32 @@ Project là **Cloudflare Workers với Static Assets**, không phải Pages cổ
    - Build command: `npm run build`
    - Deploy command: `npx wrangler deploy` (mặc định luồng Workers)
    - Root directory: để trống
-3. Biến môi trường — **Build** variables (Settings → **Build** → Variables and secrets), đặt **trước** build đầu tiên (Vite nhúng lúc build). Cũng đặt cho preview/production builds nếu tách môi trường:
+3. Biến môi trường — tách **Build** (Vite) và **Worker runtime**:
+
+   **Build variables** (Dashboard → Settings → **Build** → Variables and secrets), đặt **trước** build đầu (Vite nhúng lúc `npm run build`):
    - `VITE_SUPABASE_URL`
    - `VITE_SUPABASE_ANON_KEY`
-   - **Không** đặt `SUPABASE_SERVICE_ROLE_KEY`
-   - Chỉ đặt Runtime variables thì app trắng trang (`Missing environment variable`) vì bundle không chứa URL/anon key.
+   - **Không** đặt `SUPABASE_SERVICE_ROLE_KEY` / `ANTHROPIC_API_KEY` / bất kỳ secret nào vào Build vars (lộ vào log/bundle).
+
+   **Worker runtime** (SPA + API cùng origin nhờ `main` + `ASSETS`):
+   - Secrets — set **trước** deploy có Worker API, nếu không `/api/generate-exercise` trả `server_misconfigured`:
+     ```bash
+     npx wrangler secret put SUPABASE_SERVICE_ROLE_KEY
+     npx wrangler secret put ANTHROPIC_API_KEY
+     npx wrangler secret put SUPABASE_ANON_KEY
+     ```
+   - Plain var (Dashboard → Worker → Settings → Variables **runtime**, hoặc `wrangler secret`/`vars` — **không** Build):
+     - `SUPABASE_URL` = URL project Supabase (cùng giá trị với `VITE_SUPABASE_URL`, nhưng **không** dùng tên `VITE_` — Worker runtime không đọc `VITE_*`).
+
 4. Cloudflare đọc `.node-version` (Node 22). Có thể thêm `NODE_VERSION=22` nếu cần — không bắt buộc.
+
+5. Test tay API sau deploy (thay domain + token + vocab uuid):
+   ```bash
+   curl -X POST https://muisti.<subdomain>.workers.dev/api/generate-exercise \
+     -H "Authorization: Bearer <supabase_access_token>" \
+     -H "Content-Type: application/json" \
+     -d "{\"vocab_item_id\":\"<uuid>\",\"exercise_type\":\"mcq\"}"
+   ```
 
 ### Supabase Dashboard (phòng ngừa)
 

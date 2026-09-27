@@ -4,6 +4,28 @@ Ghi theo thời gian, mới nhất ở trên. Mỗi entry: tên ngắn, ngày, q
 
 ---
 
+## Task 5 bước 2: Worker entry trên Static Assets; secrets sau verify; quota Hướng B
+
+**Ngày:** 2026-09-26
+
+**Quyết định:**
+
+- Giữ **Workers Static Assets** + thêm `main: worker/index.ts` (không chuyển Cloudflare Pages / `functions/`). `assets.binding = "ASSETS"`, `run_worker_first: ["/api/*"]` để `/api/*` vào Worker trước; request khác → `env.ASSETS.fetch`.
+- Endpoint: `POST /api/generate-exercise`. Verify JWT qua `GET /auth/v1/user` (anon key) **trước**; rồi mới kiểm tra secret thiếu → `503 server_misconfigured` (không lộ thiếu cấu hình cho request chưa xác thực).
+- Worker runtime env (không `VITE_`): `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `ANTHROPIC_API_KEY`. `VITE_*` chỉ Build variables cho SPA.
+- Service role sau verify: đọc/ghi pool + quota + insert (bỏ RLS có chủ đích). Sinh mới chỉ khi vocab thuộc deck **owner** (`vocab_items` + `decks.owner_id`).
+- Claude non-200: `429` hoặc `400`/`403` giống billing → `generation_unavailable`; khác → `generation_failed`. Mọi đường fail **không** tăng `generations_used`, **không** insert exercise.
+- Quota **Hướng B**: gọi Claude trước, `+1` chỉ sau INSERT thành công. Race multi-tab chấp nhận tạm; Hướng A (reserve/refund) để sau.
+- Bảo mật log: không log giá trị secret; không đưa raw Claude body/`error.message` Anthropic ra JSON frontend.
+
+**Lý do:** Cùng origin SPA+API; Pages Functions không khớp stack hiện tại. Secret sau auth giảm dò cấu hình. Hướng B đơn giản hơn refund.
+
+**Phạm vi:** `worker/index.ts`, `wrangler.jsonc`, `tsconfig.worker.json`, `.env.example`, RUNBOOK secrets, docs Task 5.
+
+**Không làm gì:** Không UI; không đổi schema; không implement Hướng A / rate-limit Worker.
+
+---
+
 ## Task 5 schema: quota theo user; is_admin trên profiles; content jsonb; owner-only write exercises
 
 **Ngày:** 2026-09-26

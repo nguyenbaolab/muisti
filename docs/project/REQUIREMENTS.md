@@ -1,7 +1,9 @@
 # REQUIREMENTS — Muisti (Finnish Learning App)
 
-**Phiên bản:** v0.3.0  
+**Phiên bản:** v0.3.1  
 **Cập nhật:** 2026-09-26
+
+**Changelog v0.3.1:** Task 5 bước 2/4 — Cloudflare Worker `POST /api/generate-exercise` (Claude + pool + quota). Chưa UI admin / UI luyện tập.
 
 **Changelog v0.3.0:** Task 5 bước 1/4 — schema Level 2 exercises (`generated_exercises`, `exercise_quota_usage`, `profiles.is_admin` / `daily_exercise_quota`). Chưa Function / UI admin / UI luyện tập.
 
@@ -83,7 +85,9 @@ Recall chủ động + bài tập sinh AI (`fill_blank`, `mcq`) gắn `vocab_ite
 
 **Ghi chú (2026-09-21):** Ranh giới L1 / L2 vẫn **mờ** trên UI ôn SRS. `user_vocab_progress` **không** có cột level.
 
-**Task 5 bước 1/4 (schema only, 2026-09-26):** Done trên repo — migration `20260926_010_exercise_generation.sql` + `schema.sql` v0.3.0. Thêm `profiles.is_admin`, `profiles.daily_exercise_quota`; bảng `exercise_quota_usage` (quota sinh bài theo ngày); bảng `generated_exercises` (`fill_blank` | `mcq`, `content` jsonb, `times_shown`, `cooldown_until`). Types trong `src/types/database.ts`. **Chưa làm:** Cloudflare Function gọi Claude API; UI admin (quota / is_admin); UI luyện tập Level 2. Owner cần apply migration trên Supabase.
+**Task 5 bước 1/4 (schema only, 2026-09-26):** Done trên repo — migration `20260926_010_exercise_generation.sql` + `schema.sql` v0.3.0. Thêm `profiles.is_admin`, `profiles.daily_exercise_quota`; bảng `exercise_quota_usage` (quota sinh bài theo ngày); bảng `generated_exercises` (`fill_blank` | `mcq`, `content` jsonb, `times_shown`, `cooldown_until`). Types trong `src/types/database.ts`. Owner cần apply migration trên Supabase.
+
+**Task 5 bước 2/4 (Worker API, 2026-09-26):** Done trên repo — `worker/index.ts` + `wrangler.jsonc` `main` + `ASSETS` / `run_worker_first: ["/api/*"]`. `POST /api/generate-exercise` (Bearer Supabase access token): verify user → check secrets → validate → lấy bài từ pool (tăng `times_shown`, cooldown sau 5 lần) hoặc sinh Claude (quota Hướng B) → `{ exercise: { id, exercise_type, content } }`. Mã lỗi: `unauthorized`, `server_misconfigured`, `invalid_request`, `quota_exceeded`, `vocab_item_not_found`, `generation_failed`, `generation_unavailable`, `internal_error`, `not_found`. **Chưa làm:** UI admin (bước 3); UI luyện tập Level 2 (bước 4). Owner set secrets (`wrangler secret put`) rồi test curl trước khi UI.
 
 ### Level 3 (tương lai — không build giai đoạn này)
 
