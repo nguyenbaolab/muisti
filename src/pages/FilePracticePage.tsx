@@ -93,6 +93,11 @@ export function FilePracticePage() {
   const [completedCards, setCompletedCards] = useState<SessionCard[]>([])
   const [sessionStartTime, setSessionStartTime] = useState<number | null>(null)
   const [initialSessionSize, setInitialSessionSize] = useState(0)
+  const [attemptCount, setAttemptCount] = useState(0)
+  const [correctAttempts, setCorrectAttempts] = useState(0)
+  const [wrongAttempts, setWrongAttempts] = useState(0)
+  const [plannedAttempts, setPlannedAttempts] = useState(0)
+  const [elapsedSec, setElapsedSec] = useState(0)
 
   const typedInputRef = useRef<HTMLInputElement | null>(null)
 
@@ -176,6 +181,11 @@ export function FilePracticePage() {
     setCompletedCards([])
     setSessionStartTime(Date.now())
     setInitialSessionSize(cards.length)
+    setAttemptCount(0)
+    setCorrectAttempts(0)
+    setWrongAttempts(0)
+    setElapsedSec(0)
+    setPlannedAttempts(cards.length)
     setFinnishPool(pool)
     setQueue(cards)
     presentCard(cards, enabledModes, pool)
@@ -198,6 +208,11 @@ export function FilePracticePage() {
 
     const correct = checkAnswer(card)
     if (!correct) {
+      const nextTotalWrong = card.totalWrong + 1
+      const debtAdd = nextTotalWrong === 1 ? 3 : nextTotalWrong === 2 ? 2 : 1
+      setPlannedAttempts((p) => p + debtAdd)
+      setAttemptCount((n) => n + 1)
+      setWrongAttempts((n) => n + 1)
       setQueue((prev) => {
         const current = prev[0]
         if (!current) return prev
@@ -207,6 +222,8 @@ export function FilePracticePage() {
       return
     }
 
+    setAttemptCount((n) => n + 1)
+    setCorrectAttempts((n) => n + 1)
     setFeedback({ correct: true })
   }
 
@@ -216,6 +233,11 @@ export function FilePracticePage() {
 
     const correct = chosen === card.finnishWord
     if (!correct) {
+      const nextTotalWrong = card.totalWrong + 1
+      const debtAdd = nextTotalWrong === 1 ? 3 : nextTotalWrong === 2 ? 2 : 1
+      setPlannedAttempts((p) => p + debtAdd)
+      setAttemptCount((n) => n + 1)
+      setWrongAttempts((n) => n + 1)
       setQueue((prev) => {
         const current = prev[0]
         if (!current) return prev
@@ -225,6 +247,8 @@ export function FilePracticePage() {
       return
     }
 
+    setAttemptCount((n) => n + 1)
+    setCorrectAttempts((n) => n + 1)
     setFeedback({ correct: true })
   }
 
@@ -259,6 +283,11 @@ export function FilePracticePage() {
     setFeedback(null)
     setTypedAnswer('')
     setSelectedOption(null)
+    setAttemptCount(0)
+    setCorrectAttempts(0)
+    setWrongAttempts(0)
+    setPlannedAttempts(0)
+    setElapsedSec(0)
   }
 
   function backToSetup() {
@@ -298,6 +327,16 @@ export function FilePracticePage() {
     document.addEventListener('keydown', onKeyDown)
     return () => document.removeEventListener('keydown', onKeyDown)
   }, [pageState, feedback, askMode, mcqOptions, queue, completedCards, initialSessionSize, finnishPool, enabledModes])
+
+  useEffect(() => {
+    if (pageState !== 'reviewing') return
+    const id = setInterval(() => {
+      if (sessionStartTime !== null) {
+        setElapsedSec(Math.floor((Date.now() - sessionStartTime) / 1000))
+      }
+    }, 1000)
+    return () => clearInterval(id)
+  }, [pageState, sessionStartTime])
 
   useEffect(() => {
     if (pageState === 'reviewing' && askMode === 'type' && !feedback) {
@@ -544,6 +583,9 @@ export function FilePracticePage() {
   const canSubmit =
     !feedback && (askMode === 'type' ? typedAnswer.trim() !== '' : selectedOption !== null)
   const completedCount = completedCards.length
+  const hudMinutes = Math.floor(elapsedSec / 60)
+  const hudSeconds = String(elapsedSec % 60).padStart(2, '0')
+  const hudTime = `${hudMinutes}:${hudSeconds}`
 
   return (
     <FocusLayout>
@@ -554,6 +596,14 @@ export function FilePracticePage() {
           <div>
             <div className={`text-xs ${mutedTextClassName}`}>
               {completedCount} / {initialSessionSize} từ
+            </div>
+            <div className={`mt-1 flex flex-wrap gap-x-3 gap-y-1 text-xs ${mutedTextClassName}`}>
+              <span>
+                Câu {attemptCount + 1} / {plannedAttempts}
+              </span>
+              <span>Đúng {correctAttempts}</span>
+              <span>Sai {wrongAttempts}</span>
+              <span>{hudTime}</span>
             </div>
             <div
               role="progressbar"
