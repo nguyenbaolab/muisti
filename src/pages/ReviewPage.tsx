@@ -213,6 +213,11 @@ export function ReviewPage() {
   const [deckName, setDeckName] = useState<string | null>(null)
   const [ownerChecked, setOwnerChecked] = useState(() => !scopedDeckId)
   const [initialSessionSize, setInitialSessionSize] = useState(0)
+  const [attemptCount, setAttemptCount] = useState(0)
+  const [correctAttempts, setCorrectAttempts] = useState(0)
+  const [wrongAttempts, setWrongAttempts] = useState(0)
+  const [plannedAttempts, setPlannedAttempts] = useState(0)
+  const [elapsedSec, setElapsedSec] = useState(0)
   const typedInputRef = useRef<HTMLInputElement | null>(null)
 
   useEffect(() => {
@@ -304,6 +309,10 @@ export function ReviewPage() {
     setEnrolledCount(0)
     setRemainingDue(null)
     setError(null)
+    setAttemptCount(0)
+    setCorrectAttempts(0)
+    setWrongAttempts(0)
+    setElapsedSec(0)
 
     const {
       data: { user },
@@ -435,6 +444,7 @@ export function ReviewPage() {
     )
     const shuffled = shuffle(items)
     setInitialSessionSize(shuffled.length)
+    setPlannedAttempts(shuffled.length)
     setFinnishPool(pool)
     setQueue(shuffled)
     presentCard(shuffled, enabledModes, pool)
@@ -485,6 +495,11 @@ export function ReviewPage() {
 
     const correct = checkAnswer(card)
     if (!correct) {
+      const nextTotalWrong = card.totalWrong + 1
+      const debtAdd = nextTotalWrong === 1 ? 3 : nextTotalWrong === 2 ? 2 : 1
+      setPlannedAttempts((p) => p + debtAdd)
+      setAttemptCount((n) => n + 1)
+      setWrongAttempts((n) => n + 1)
       setQueue((prev) => {
         const current = prev[0]
         if (!current) return prev
@@ -495,6 +510,8 @@ export function ReviewPage() {
     }
 
     if (extraMode) {
+      setAttemptCount((n) => n + 1)
+      setCorrectAttempts((n) => n + 1)
       setFeedback({ correct: true })
       return
     }
@@ -513,6 +530,8 @@ export function ReviewPage() {
         return [{ ...current, persisted: true }, ...prev.slice(1)]
       })
     }
+    setAttemptCount((n) => n + 1)
+    setCorrectAttempts((n) => n + 1)
     setFeedback({ correct: true })
   }
 
@@ -585,6 +604,11 @@ export function ReviewPage() {
 
     const correct = chosen === card.finnishWord
     if (!correct) {
+      const nextTotalWrong = card.totalWrong + 1
+      const debtAdd = nextTotalWrong === 1 ? 3 : nextTotalWrong === 2 ? 2 : 1
+      setPlannedAttempts((p) => p + debtAdd)
+      setAttemptCount((n) => n + 1)
+      setWrongAttempts((n) => n + 1)
       setQueue((prev) => {
         const current = prev[0]
         if (!current) return prev
@@ -595,6 +619,8 @@ export function ReviewPage() {
     }
 
     if (extraMode) {
+      setAttemptCount((n) => n + 1)
+      setCorrectAttempts((n) => n + 1)
       setFeedback({ correct: true })
       return
     }
@@ -613,6 +639,8 @@ export function ReviewPage() {
         return [{ ...current, persisted: true }, ...prev.slice(1)]
       })
     }
+    setAttemptCount((n) => n + 1)
+    setCorrectAttempts((n) => n + 1)
     setFeedback({ correct: true })
   }
 
@@ -649,6 +677,16 @@ export function ReviewPage() {
       typedInputRef.current?.focus()
     }
   }, [pageState, askMode, feedback, queue])
+
+  useEffect(() => {
+    if (pageState !== 'reviewing') return
+    const id = setInterval(() => {
+      if (sessionStartTime !== null) {
+        setElapsedSec(Math.floor((Date.now() - sessionStartTime) / 1000))
+      }
+    }, 1000)
+    return () => clearInterval(id)
+  }, [pageState, sessionStartTime])
 
   const card = queue[0]
   const startDisabled = enabledModes.length === 0 || (Boolean(scopedDeckId) && !ownerChecked)
@@ -935,6 +973,9 @@ export function ReviewPage() {
 
   const completedCount = completedCards.length
   const sessionTotal = completedCards.length + queue.length
+  const hudMinutes = Math.floor(elapsedSec / 60)
+  const hudSeconds = String(elapsedSec % 60).padStart(2, '0')
+  const hudTime = `${hudMinutes}:${hudSeconds}`
 
   return (
     <FocusLayout>
@@ -946,6 +987,14 @@ export function ReviewPage() {
           <div>
             <div className={`text-xs ${mutedTextClassName}`}>
               {completedCount} / {sessionTotal} từ
+            </div>
+            <div className={`mt-1 flex flex-wrap gap-x-3 gap-y-1 text-xs ${mutedTextClassName}`}>
+              <span>
+                Câu {attemptCount + 1} / {plannedAttempts}
+              </span>
+              <span>Đúng {correctAttempts}</span>
+              <span>Sai {wrongAttempts}</span>
+              <span>{hudTime}</span>
             </div>
             <div
               role="progressbar"
