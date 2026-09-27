@@ -13,18 +13,50 @@ Lỗi / sai lệch đã biết. Đánh số từ **KI-001**. Entry mới ở đ�
 
 ---
 
+## KI-036 — Worker insertExercise fail sau khi Claude đã sinh xong → tốn 1 lần gọi Claude, không lưu câu
+
+**Mức độ:** Low  
+**File liên quan:** `worker/index.ts` (`insertExercise`), `worker/generateExercise.ts`
+
+**Mô tả:** Trong luồng sinh Level 2 (Hướng B: quota tăng SAU khi sinh + INSERT thành công), nếu Claude sinh câu thành công nhưng bước `insertExercise` vào `generated_exercises` fail (vd RLS INSERT từ chối, lỗi mạng DB), thì đã tốn 1 lần gọi Claude (mất tiền) nhưng không lưu được câu và không bump quota. Hiếm: owner-check đã pass ở `loadOwnedVocab` trước đó nên RLS INSERT gần như chắc pass.
+
+**Cách tái hiện:** Khó tái hiện tự nhiên vì owner-check đã lọc trước INSERT. Về lý thuyết: làm INSERT fail (vd thu hồi quyền owner giữa chừng, hoặc lỗi DB tạm thời) sau khi generate thành công.
+
+**Hướng fix:** Ghi nhận, không vá. Chi phí 1 lần gọi Claude lãng phí khi INSERT fail được chấp nhận vì tần suất cực thấp. Đúng Hướng B (không bump quota khi chưa lưu thành công).
+
+**Trạng thái:** Open (2026-09-28)
+
+---
+
+## KI-035 — Pool generated_exercises phình vô hạn theo thời gian cho mỗi (từ, loại)
+
+**Mức độ:** Low  
+**File liên quan:** `worker/generateExercise.ts` (`findPoolExercise`), `src/pages/PracticePage.tsx` (`loadPracticeWords`)  
+**Liên quan:** KI-034
+
+**Mô tả:** Mỗi câu trong pool khi chạm `times_shown` 5 → set `cooldown_until` 10 ngày → Worker sinh câu MỚI bù cho (từ, loại) đó. Không có trần số câu mỗi (từ, loại), nên pool tăng đơn điệu theo thời gian. Đã cân nhắc và CHẤP NHẬN không đặt trần: content nhỏ, Postgres nuốt hàng triệu hàng dễ; pool nhiều câu sẵn thì Worker gọi Claude ÍT hơn (giảm tiền, không tăng), vì tỉ lệ trúng câu cũ trong pool cao hơn.
+
+**Cách tái hiện:** Luyện một (từ, loại) lặp lại nhiều ngày qua các chu kỳ cooldown; đếm số hàng `generated_exercises` cho `vocab_item_id` đó tăng dần.
+
+**Hướng fix:** Không xóa câu. Nếu cần về sau: đổi PracticePage đọc pool sang RPC sum group by trên DB (gộp `times_shown` theo `vocab_item_id` phía server thay vì kéo hàng về client) — giải quyết luôn KI-034. Không đặt trần pool.
+
+**Trạng thái:** Open (2026-09-28) — chấp nhận, không cấp bách
+
+---
+
 ## KI-034 — Ưu tiên times_shown Level 2 có thể lệch nếu >1000 hàng generated_exercises cho tập từ eligible
 
 **Mức độ:** Low  
-**File liên quan:** `src/pages/PracticePage.tsx` (`loadPracticeWords`)
+**File liên quan:** `src/pages/PracticePage.tsx` (`loadPracticeWords`)  
+**Liên quan:** KI-035
 
-**Mô tả:** Tổng `times_shown` tính client từ `generated_exercises.select('vocab_item_id, times_shown').in(vocab_ids)`. PostgREST cắt im ~1000 hàng/request. Deck lớn + nhiều bài sinh → tổng thiếu → thứ tự ưu tiên có thể sai (vẫn lấy đủ từ `interval_days >= 3`, chỉ lệch sort).
+**Mô tả:** Tổng `times_shown` tính client từ `generated_exercises.select('vocab_item_id, times_shown').in(vocab_ids)`. PostgREST cắt im ~1000 hàng/request. Deck lớn + nhiều bài sinh → tổng thiếu → thứ tự ưu tiên có thể sai (vẫn lấy đủ từ `interval_days >= 3`, chỉ lệch sort). Lưu ý: ngưỡng ~1000 hàng của PostgREST đếm số CÂU (`generated_exercises` rows) không đếm số TỪ — một deck 200 từ, mỗi từ 5 câu, đã chạm ~1000 câu nên lệch đến sớm hơn tưởng. Chỉ lệch sort ưu tiên, không hỏng chức năng; tự hết khi chuyển RPC sum group by (xem KI-035).
 
 **Cách tái hiện:** Nhiều hơn ~1000 hàng `generated_exercises` thuộc các `vocab_item_id` eligible của một deck.
 
 **Hướng fix:** Aggregate RPC/`sum` group by trên DB, hoặc page `.range` đến hết rồi cộng.
 
-**Trạng thái:** Open (2026-09-27)
+**Trạng thái:** Open (2026-09-27; cập nhật 2026-09-28 — ghi chú ngưỡng đếm câu; liên quan KI-035)
 
 ---
 
@@ -39,7 +71,7 @@ Lỗi / sai lệch đã biết. Đánh số từ **KI-001**. Entry mới ở đ�
 
 **Hướng fix:** Chặn uncheck hàng `id === auth.uid()`, hoặc confirm; tùy chọn không cho hạ admin cuối cùng.
 
-**Trạng thái:** Open (2026-09-27)
+**Trạng thái:** Resolved (2026-09-28) — xử qua mô hình super admin (migration 011 + Admin UI): chỉ super admin đổi is_admin; admin thường read-only; checkbox is_admin trên dòng chính super admin bị khóa (chống tự hạ quyền); RLS UPDATE profiles chặn ở tầng DB.
 
 ---
 
