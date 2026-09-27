@@ -2,7 +2,9 @@ import { useEffect, useState } from 'react'
 import type { Session } from '@supabase/supabase-js'
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { supabase } from './lib/supabase'
+import { AdminRoute } from './components/AdminRoute'
 import { AppLayout } from './components/AppLayout'
+import { AdminPage } from './pages/AdminPage'
 import { HomePage } from './pages/HomePage'
 import { DecksPage } from './pages/DecksPage'
 import { CreateDeckPage } from './pages/CreateDeckPage'
@@ -52,6 +54,9 @@ function AuthRoutes() {
           <Route path="/decks/:id/preview" element={<DeckPreviewPage />} />
           <Route path="/decks/:id" element={<DeckDetailPage />} />
           <Route path="/decks" element={<DecksPage />} />
+          <Route element={<AdminRoute />}>
+            <Route path="/admin" element={<AdminPage />} />
+          </Route>
         </Route>
         <Route path="/review" element={<ReviewPage />} />
         <Route path="/review/:deckId/extra" element={<ReviewPage />} />

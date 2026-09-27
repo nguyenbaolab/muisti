@@ -1,7 +1,9 @@
 # REQUIREMENTS — Muisti (Finnish Learning App)
 
-**Phiên bản:** v0.3.1  
-**Cập nhật:** 2026-09-26
+**Phiên bản:** v0.3.2  
+**Cập nhật:** 2026-09-27
+
+**Changelog v0.3.2:** Task 5 bước 3/4 — UI admin `/admin` (quota + is_admin). Chưa UI luyện tập Level 2.
 
 **Changelog v0.3.1:** Task 5 bước 2/4 — Cloudflare Worker `POST /api/generate-exercise` (Claude + pool + quota). Chưa UI admin / UI luyện tập.
 
@@ -87,7 +89,9 @@ Recall chủ động + bài tập sinh AI (`fill_blank`, `mcq`) gắn `vocab_ite
 
 **Task 5 bước 1/4 (schema only, 2026-09-26):** Done trên repo — migration `20260926_010_exercise_generation.sql` + `schema.sql` v0.3.0. Thêm `profiles.is_admin`, `profiles.daily_exercise_quota`; bảng `exercise_quota_usage` (quota sinh bài theo ngày); bảng `generated_exercises` (`fill_blank` | `mcq`, `content` jsonb, `times_shown`, `cooldown_until`). Types trong `src/types/database.ts`. Owner cần apply migration trên Supabase.
 
-**Task 5 bước 2/4 (Worker API, 2026-09-26):** Done trên repo — `worker/index.ts` + `wrangler.jsonc` `main` + `ASSETS` / `run_worker_first: ["/api/*"]`. `POST /api/generate-exercise` (Bearer Supabase access token): verify user → check secrets → validate → lấy bài từ pool (tăng `times_shown`, cooldown sau 5 lần) hoặc sinh Claude (quota Hướng B) → `{ exercise: { id, exercise_type, content } }`. Mã lỗi: `unauthorized`, `server_misconfigured`, `invalid_request`, `quota_exceeded`, `vocab_item_not_found`, `generation_failed`, `generation_unavailable`, `internal_error`, `not_found`. **Chưa làm:** UI admin (bước 3); UI luyện tập Level 2 (bước 4). Owner set secrets (`wrangler secret put`) rồi test curl trước khi UI.
+**Task 5 bước 2/4 (Worker API, 2026-09-26):** Done trên repo — `worker/index.ts` + `wrangler.jsonc` `main` + `ASSETS` / `run_worker_first: ["/api/*"]`. `POST /api/generate-exercise` (Bearer Supabase access token): verify user → check secrets → validate → lấy bài từ pool (tăng `times_shown`, cooldown sau 5 lần) hoặc sinh Claude (quota Hướng B) → `{ exercise: { id, exercise_type, content } }`. Mã lỗi: `unauthorized`, `server_misconfigured`, `invalid_request`, `quota_exceeded`, `vocab_item_not_found`, `generation_failed`, `generation_unavailable`, `internal_error`, `not_found`. Owner set secrets (`wrangler secret put`) rồi test curl trước khi UI luyện tập.
+
+**Task 5 bước 3/4 (UI admin, 2026-09-27):** Done trên repo — `AdminRoute` + `AdminPage` tại `/admin` (trong `AppLayout`). Admin thấy link «Admin» trên nav. Bảng mọi `profiles`: email, `daily_exercise_quota` (sửa inline, lưu khi blur, validate ≥ 0), `is_admin` (checkbox inline). Tìm kiếm email client-side. Non-admin gõ URL → redirect `/`. RLS UPDATE profiles vẫn chỉ `public.is_admin()`. **Chưa làm:** UI luyện tập Level 2 (bước 4).
 
 ### Level 3 (tương lai — không build giai đoạn này)
 
@@ -103,7 +107,7 @@ Vận dụng viết tự do, cần AI chấm bài. Ollama local hiện có (`qwe
 
 - Bỏ hẳn khái niệm “unit sách” / `book_code` / kappale làm trung tâm
 - Bỏ hẳn bảng `exercises` và toàn bộ F-06 (chấm mcq/fill_blank theo cấu trúc sách)
-- Không build Level 3 / 4 (roadmap). Level 2: chỉ schema Task 5 bước 1 trên repo; Function / UI vẫn chưa.
+- Không build Level 3 / 4 (roadmap). Level 2: schema + Worker API + UI admin trên repo; UI luyện tập vẫn chưa.
 - Không dùng AI / Ollama ở bất kỳ đâu trong Level 1 (parse deck và chấm Level 1 đều thuần code)
 - Không mô phỏng format đề thi YKI (không audio, không đọc/viết theo chuẩn thi chính thức) — hướng đã cân nhắc và loại bỏ
 

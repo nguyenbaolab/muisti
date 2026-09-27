@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react'
 import { Link, NavLink, Outlet } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { Button } from './Button'
@@ -10,6 +11,42 @@ function navClass({ isActive }: { isActive: boolean }): string {
 }
 
 export function AppLayout() {
+  const [showAdminLink, setShowAdminLink] = useState(false)
+
+  useEffect(() => {
+    let cancelled = false
+
+    async function loadAdminFlag() {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser()
+      if (!user) {
+        if (!cancelled) setShowAdminLink(false)
+        return
+      }
+
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('is_admin')
+        .eq('id', user.id)
+        .maybeSingle()
+
+      if (cancelled) return
+
+      if (error || !data?.is_admin) {
+        setShowAdminLink(false)
+        return
+      }
+
+      setShowAdminLink(true)
+    }
+
+    void loadAdminFlag()
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
   return (
     <div className="min-h-svh">
       <header className="border-b border-[var(--color-border)] dark:border-[var(--color-border-dark)]">
@@ -28,6 +65,11 @@ export function AppLayout() {
               <NavLink to="/review" className={navClass} title="Ôn các từ đến hạn trong mọi deck">
                 Ôn tập
               </NavLink>
+              {showAdminLink ? (
+                <NavLink to="/admin" className={navClass} title="Quản lý quota và quyền admin">
+                  Admin
+                </NavLink>
+              ) : null}
             </nav>
           </div>
           <div className="flex items-center gap-2">

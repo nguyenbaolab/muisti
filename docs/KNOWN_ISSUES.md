@@ -13,6 +13,21 @@ Lỗi / sai lệch đã biết. Đánh số từ **KI-001**. Entry mới ở đ�
 
 ---
 
+## KI-033 — Admin có thể tự tắt `is_admin` của chính mình
+
+**Mức độ:** Low  
+**File liên quan:** `src/pages/AdminPage.tsx`
+
+**Mô tả:** Checkbox `is_admin` trên `/admin` cho phép bỏ tick hàng của chính admin đang đăng nhập. Sau khi UPDATE thành công, user mất quyền admin (nav ẩn, `/admin` redirect `/`). Không có confirm; khôi phục chỉ qua SQL / service role.
+
+**Cách tái hiện:** Admin mở `/admin`, bỏ tick Admin trên email của mình, blur/đợi lưu xong, reload.
+
+**Hướng fix:** Chặn uncheck hàng `id === auth.uid()`, hoặc confirm; tùy chọn không cho hạ admin cuối cùng.
+
+**Trạng thái:** Open (2026-09-27)
+
+---
+
 ## KI-032 — Worker `/api/generate-exercise` chưa rate-limit tần suất gọi
 
 **Mức độ:** Low  

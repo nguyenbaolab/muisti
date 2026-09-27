@@ -4,6 +4,25 @@ Ghi theo thời gian, mới nhất ở trên. Mỗi entry: tên ngắn, ngày, q
 
 ---
 
+## Task 5 bước 3: AdminRoute nested + AppLayout link; sửa quota/admin inline
+
+**Ngày:** 2026-09-27
+
+**Quyết định:**
+
+- **Gate:** `AdminRoute` nested dưới `AppLayout` trong nhánh session (`getUser` → `profiles.is_admin` → `Outlet` hoặc `Navigate` `/`). Không thêm AuthContext.
+- **Nav:** link «Admin» chỉ hiện khi AppLayout mount xác nhận `is_admin` (một query); ẩn khi loading / non-admin.
+- **UI:** một trang `/admin` — list toàn bộ `profiles` (email + quota + is_admin); filter email client; quota lưu khi blur (số nguyên ≥ 0); checkbox `is_admin` lưu ngay; lỗi update hiện theo dòng, giữ giá trị vừa nhập / revert checkbox nếu fail.
+- Bảo vệ thật vẫn ở RLS (`public.is_admin()` UPDATE); UI gate chỉ UX.
+
+**Lý do:** Khớp pattern hiện tại (session gate ở App + getUser per page); nested `AdminRoute` + `Outlet` giống cách mở rộng role mà không đổi AuthRoutes.
+
+**Phạm vi:** `AdminRoute.tsx`, `AdminPage.tsx`, `App.tsx`, `AppLayout.tsx`, docs Task 5 bước 3.
+
+**Không làm gì:** Không AuthContext; không UI luyện tập Level 2; không đổi schema / Worker.
+
+---
+
 ## Task 5 bước 2: Worker entry trên Static Assets; secrets sau verify; quota Hướng B
 
 **Ngày:** 2026-09-26

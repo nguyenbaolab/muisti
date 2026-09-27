@@ -11,7 +11,7 @@ Tài liệu kỹ thuật cho Cursor khi đọc/ghi code. Business: `REQUIREMENTS
 - **Data / Auth:** Supabase (Postgres + Auth), client gọi `supabase-js`, bảo vệ bằng RLS
 - **Auth model:** admin invite (`inviteUserByEmail`); không form đăng ký công khai
 - **Deploy:** Cloudflare Workers Static Assets qua Git integration (nhánh `main`, Worker `name` = `muisti`). SPA: `wrangler.jsonc` `assets.directory` = `./dist`, `binding` = `ASSETS`, `not_found_handling` = `single-page-application`, `run_worker_first` = `["/api/*"]`, `main` = `worker/index.ts`. Không `public/_redirects`. `public/_headers`. `.node-version` = 22. Wrangler không trong `package.json` scripts (Cloudflare chạy lúc deploy). Env **Build** (Vite): `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`. Env **Worker runtime**: `SUPABASE_URL`, `SUPABASE_ANON_KEY`, secrets `SUPABASE_SERVICE_ROLE_KEY` + `ANTHROPIC_API_KEY` (wrangler secret put — không Build vars).
-- **AI content:** Task 5 bước 2 — Worker `POST /api/generate-exercise` gọi Claude; SPA chưa gọi endpoint. Schema bước 1 đã có.
+- **AI content:** Task 5 bước 3 — UI admin `/admin` chỉnh `daily_exercise_quota` / `is_admin`. Worker `POST /api/generate-exercise` đã có; SPA luyện tập Level 2 chưa gọi endpoint. Schema bước 1 đã có.
 - **Phân công:** Claude thiết kế + prompt; Cursor thực thi code/data; chủ dự án test và quyết định cuối
 
 ---
@@ -24,7 +24,8 @@ src/
   App.tsx               # BrowserRouter + session gate (onAuthStateChange); nested AppLayout
   index.css             # Tailwind + token järvi; không alias cũ; #root không chrome Vite
   components/
-    AppLayout.tsx       # header (wordmark + Decks/Ôn tập + title hover + ThemeToggle + Đăng xuất) + Outlet
+    AppLayout.tsx       # header (wordmark + Decks/Ôn tập + Admin nếu is_admin + ThemeToggle + Đăng xuất) + Outlet
+    AdminRoute.tsx      # gate nested: getUser → profiles.is_admin; loading / Navigate `/` / Outlet
     Button.tsx          # variant primary/secondary/danger; prop loading; export class primary/secondary
     Input.tsx           # forwardRef; optional label/error; w-full
     Select.tsx          # forwardRef; label/error; option children; mũi tên native
@@ -48,6 +49,7 @@ src/
   pages/
     LoginPage.tsx       # järvi; signInWithPassword; lỗi Việt hóa; ngoài AppLayout
     HomePage.tsx        # `/` — Việc hôm nay (todo deck sở hữu) + lưới 6 số; empty tạo deck; không nút Ôn tập
+    AdminPage.tsx       # `/admin` — danh sách profiles; sửa daily_exercise_quota (blur) + is_admin (checkbox); filter email client
     DecksPage.tsx       # /decks järvi; dòng nhịp học; Tabs Cá nhân/Public; `?tab=public` chỉ set tab ban đầu; Public có dòng clone; hàng hairline; own → /:id; khác → /preview
     CreateDeckPage.tsx  # /decks/new järvi; DeckForm + FileField + Xem trước; Lưu deck
     EditDeckPage.tsx    # /decks/:id/edit järvi; DeckForm; owner; Lưu/Hủy
@@ -94,10 +96,11 @@ schema.sql v0.3.0 (2026-09-26): profiles (+ is_admin, daily_exercise_quota), dec
 - `/decks/:id/edit` — `EditDeckPage` khi có session; guest → `/login`; chỉ owner thấy form
 - `/decks/:id/preview` — `DeckPreviewPage` khi có session; guest → `/login`; public hoặc own; Clone nếu không phải owner
 - `/decks/:id` — `DeckDetailPage` khi có session; guest → `/login`; chỉ owner (non-owner: thông báo + link preview, không redirect)
+- `/admin` — `AdminPage` trong `AppLayout` + `AdminRoute` (profiles.is_admin); non-admin / lỗi → `/`; guest → `/login`
 - `/review` — `ReviewPage` mix; **ngoài** `AppLayout`; tự khung `FocusLayout` (← Trang chủ + ThemeToggle, `max-w-xl`); guest → `/login`
 - `/review/:deckId` — `ReviewPage` chỉ owner: check `owner_id` rồi enroll Active Pool rồi ôn due; **ngoài** `AppLayout`, cùng `FocusLayout`; non-owner bị chặn (nhắn sang preview)
 - `/review/:deckId/extra` — cùng `ReviewPage`, `extraMode` (`useMatch`); owner check + scope deck như `/review/:deckId`; **không** enroll; fetch từ đang học chưa đến hạn; **không** ghi progress; ngoài `AppLayout`, cùng `FocusLayout`
-- Layout session: `AppLayout` bọc `/`, `/decks`, `/decks/new`, `/decks/:id`, `/decks/:id/edit`, `/decks/:id/preview`. Header: Muisti → `/`, Decks (`title` xem/học deck), Ôn tập → `/review` (`title` ôn due mọi deck), `ThemeToggle`, Đăng xuất (`signOut`). Không hiện email. `/review`, `/review/:deckId`, `/review/:deckId/extra` đứng ngoài layout.
+- Layout session: `AppLayout` bọc `/`, `/decks`, `/decks/new`, `/decks/:id`, `/decks/:id/edit`, `/decks/:id/preview`, `/admin` (qua `AdminRoute`). Header: Muisti → `/`, Decks, Ôn tập → `/review`, link **Admin** → `/admin` chỉ khi `profiles.is_admin` (fetch 1 lần lúc mount AppLayout), `ThemeToggle`, Đăng xuất. Không hiện email. `/review`, `/review/:deckId`, `/review/:deckId/extra` đứng ngoài layout.
 - Session: `getSession` + `onAuthStateChange` trong `App.tsx`; lần đầu hiện `Loading...`
 - Chi tiết UI nghiệp vụ ở `REQUIREMENTS.md`.
 
@@ -136,6 +139,7 @@ Hướng đã chốt (2026-09-14, cột pool 2026-09-16, profiles 2026-09-17):
 - Parse deck file: `parseDeckFile(content)` — `src/lib/deckParser.ts` (cắt dòng trống cuối; cap 500 sau cắt; dòng trống giữa file vẫn lỗi)
 - List decks: `decks.select('*, vocab_items(count)')` — RLS lọc own + public — `DecksPage`; filter client `activeTab` `'mine' | 'public'`; initial `activeTab` từ `?tab=public` (Public) hoặc khác/không có (Cá nhân), không ghi lại URL; click own → `/decks/:id`, click không phải mình → `/decks/:id/preview`. UI järvi: `Tabs` (`idPrefix="decks"`, aria-label «Loại deck») + `TabPanel`; hàng đầu `h1` + `<Link>` «Tạo deck mới» + dòng nhịp học; tab Public dòng clone (không lúc loading); hàng deck hairline; nhãn từ `src/lib/deckLabels.ts` (DecksPage tự thêm «Nghĩa: » khi render). Sửa `<Link>` `/edit`; Xóa `window.confirm` cũ. Lỗi `profiles` → `console.error`.
 - Owner email (tên chia sẻ): query 2 — `profiles.select('id, email').in('id', ownerIds)` trên `DecksPage`; `profiles.select('email').eq('id', owner_id)` trên `DeckPreviewPage` nếu `!owned`. Không embed từ `decks`. `sharerNameFromEmail` trong `deckLabels.ts`. Preview lỗi profiles → `console.error`, fallback «Ẩn danh».
+- Admin users: `profiles.select('id, email, is_admin, daily_exercise_quota').order('email')` — `AdminPage`; filter email client; UPDATE `.eq('id')` từng cột (`daily_exercise_quota` khi blur input số ≥ 0; `is_admin` khi checkbox). Lỗi dòng giữ draft/quota vừa nhập; checkbox revert nếu fail. `AdminRoute` + link nav: `profiles.select('is_admin').eq('id', user.id).maybeSingle()`.
 - Account summary: `decks.select('id, name, created_at, vocab_items(count)').eq('owner_id', user.id).order('created_at')` + `user_vocab_progress.select('interval_days, due_date').eq('user_id')` — `HomePage` `/`; `todayLocalIsoDate()`; không join vocab cho progress summary (unpaged — KI-030). Lưới 6 số dưới khối Việc hôm nay; không hero due / không nút Ôn tập
 - Home todo due: `user_vocab_progress.select('id, vocab_item_id, vocab_items!inner(deck_id)').eq('user_id').lte('due_date', todayLocalIsoDate())` — paged `.order('id').range(from, from+999)` đến trang < 1000 hàng; group `deck_id` client, bỏ deck không sở hữu
 - Home todo reviewed-today: cùng select + `.gte('last_reviewed_at', localMidnightIso)` với `localMidnightIso = new Date(y, m, d, 0, 0, 0, 0).toISOString()` (nửa đêm local → ISO); paged như due

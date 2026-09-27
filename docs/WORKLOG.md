@@ -4,6 +4,14 @@ Nhật ký thay đổi có ý nghĩa. Entry mới ở **đầu file** (sau tiêu
 
 ---
 
+## Giai đoạn 1 — Task 5 bước 3/4: UI admin quota + is_admin
+**Ngày:** 2026-09-27
+
+- `AdminRoute` + `AdminPage` `/admin` (trong `AppLayout`): list profiles, filter email, sửa `daily_exercise_quota` (blur, ≥ 0) và `is_admin` (checkbox). Link «Admin» trên nav chỉ khi `is_admin`.
+- Docs: CONTEXT, REQUIREMENTS v0.3.2, DECISIONS, KI-033. `tsc --noEmit` + `tsc -b` pass. Chưa UI luyện tập Level 2 (bước 4).
+
+---
+
 ## Giai đoạn 1 — Task 5 bước 2/4: Worker + endpoint generate-exercise
 **Ngày:** 2026-09-26
 
