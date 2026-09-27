@@ -218,6 +218,7 @@ export function ReviewPage() {
   const [wrongAttempts, setWrongAttempts] = useState(0)
   const [plannedAttempts, setPlannedAttempts] = useState(0)
   const [elapsedSec, setElapsedSec] = useState(0)
+  const [questionNumber, setQuestionNumber] = useState(0)
   const typedInputRef = useRef<HTMLInputElement | null>(null)
 
   useEffect(() => {
@@ -279,6 +280,7 @@ export function ReviewPage() {
   function presentCard(nextQueue: SessionCard[], modes: AskMode[], pool: string[]) {
     const card = nextQueue[0]
     if (!card) return
+    setQuestionNumber((n) => n + 1)
     let mode = pickMode(modes)
     let options: string[] = []
     if (mode === 'mcq') {
@@ -313,6 +315,7 @@ export function ReviewPage() {
     setCorrectAttempts(0)
     setWrongAttempts(0)
     setElapsedSec(0)
+    setQuestionNumber(0)
 
     const {
       data: { user },
@@ -990,7 +993,7 @@ export function ReviewPage() {
             </div>
             <div className={`mt-1 flex flex-wrap gap-x-3 gap-y-1 text-xs ${mutedTextClassName}`}>
               <span>
-                Câu {attemptCount + 1} / {plannedAttempts}
+                Câu {questionNumber} / {plannedAttempts}
               </span>
               <span>Đúng {correctAttempts}</span>
               <span>Sai {wrongAttempts}</span>
