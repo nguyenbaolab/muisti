@@ -213,7 +213,6 @@ export function ReviewPage() {
   const [deckName, setDeckName] = useState<string | null>(null)
   const [ownerChecked, setOwnerChecked] = useState(() => !scopedDeckId)
   const [initialSessionSize, setInitialSessionSize] = useState(0)
-  const [attemptCount, setAttemptCount] = useState(0)
   const [correctAttempts, setCorrectAttempts] = useState(0)
   const [wrongAttempts, setWrongAttempts] = useState(0)
   const [plannedAttempts, setPlannedAttempts] = useState(0)
@@ -311,7 +310,6 @@ export function ReviewPage() {
     setEnrolledCount(0)
     setRemainingDue(null)
     setError(null)
-    setAttemptCount(0)
     setCorrectAttempts(0)
     setWrongAttempts(0)
     setElapsedSec(0)
@@ -501,7 +499,6 @@ export function ReviewPage() {
       const nextTotalWrong = card.totalWrong + 1
       const debtAdd = nextTotalWrong === 1 ? 3 : nextTotalWrong === 2 ? 2 : 1
       setPlannedAttempts((p) => p + debtAdd)
-      setAttemptCount((n) => n + 1)
       setWrongAttempts((n) => n + 1)
       setQueue((prev) => {
         const current = prev[0]
@@ -513,7 +510,6 @@ export function ReviewPage() {
     }
 
     if (extraMode) {
-      setAttemptCount((n) => n + 1)
       setCorrectAttempts((n) => n + 1)
       setFeedback({ correct: true })
       return
@@ -533,7 +529,6 @@ export function ReviewPage() {
         return [{ ...current, persisted: true }, ...prev.slice(1)]
       })
     }
-    setAttemptCount((n) => n + 1)
     setCorrectAttempts((n) => n + 1)
     setFeedback({ correct: true })
   }
@@ -610,7 +605,6 @@ export function ReviewPage() {
       const nextTotalWrong = card.totalWrong + 1
       const debtAdd = nextTotalWrong === 1 ? 3 : nextTotalWrong === 2 ? 2 : 1
       setPlannedAttempts((p) => p + debtAdd)
-      setAttemptCount((n) => n + 1)
       setWrongAttempts((n) => n + 1)
       setQueue((prev) => {
         const current = prev[0]
@@ -622,7 +616,6 @@ export function ReviewPage() {
     }
 
     if (extraMode) {
-      setAttemptCount((n) => n + 1)
       setCorrectAttempts((n) => n + 1)
       setFeedback({ correct: true })
       return
@@ -642,7 +635,6 @@ export function ReviewPage() {
         return [{ ...current, persisted: true }, ...prev.slice(1)]
       })
     }
-    setAttemptCount((n) => n + 1)
     setCorrectAttempts((n) => n + 1)
     setFeedback({ correct: true })
   }

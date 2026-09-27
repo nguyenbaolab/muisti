@@ -93,7 +93,6 @@ export function FilePracticePage() {
   const [completedCards, setCompletedCards] = useState<SessionCard[]>([])
   const [sessionStartTime, setSessionStartTime] = useState<number | null>(null)
   const [initialSessionSize, setInitialSessionSize] = useState(0)
-  const [attemptCount, setAttemptCount] = useState(0)
   const [correctAttempts, setCorrectAttempts] = useState(0)
   const [wrongAttempts, setWrongAttempts] = useState(0)
   const [plannedAttempts, setPlannedAttempts] = useState(0)
@@ -183,7 +182,6 @@ export function FilePracticePage() {
     setCompletedCards([])
     setSessionStartTime(Date.now())
     setInitialSessionSize(cards.length)
-    setAttemptCount(0)
     setCorrectAttempts(0)
     setWrongAttempts(0)
     setElapsedSec(0)
@@ -214,7 +212,6 @@ export function FilePracticePage() {
       const nextTotalWrong = card.totalWrong + 1
       const debtAdd = nextTotalWrong === 1 ? 3 : nextTotalWrong === 2 ? 2 : 1
       setPlannedAttempts((p) => p + debtAdd)
-      setAttemptCount((n) => n + 1)
       setWrongAttempts((n) => n + 1)
       setQueue((prev) => {
         const current = prev[0]
@@ -225,7 +222,6 @@ export function FilePracticePage() {
       return
     }
 
-    setAttemptCount((n) => n + 1)
     setCorrectAttempts((n) => n + 1)
     setFeedback({ correct: true })
   }
@@ -239,7 +235,6 @@ export function FilePracticePage() {
       const nextTotalWrong = card.totalWrong + 1
       const debtAdd = nextTotalWrong === 1 ? 3 : nextTotalWrong === 2 ? 2 : 1
       setPlannedAttempts((p) => p + debtAdd)
-      setAttemptCount((n) => n + 1)
       setWrongAttempts((n) => n + 1)
       setQueue((prev) => {
         const current = prev[0]
@@ -250,7 +245,6 @@ export function FilePracticePage() {
       return
     }
 
-    setAttemptCount((n) => n + 1)
     setCorrectAttempts((n) => n + 1)
     setFeedback({ correct: true })
   }
@@ -286,7 +280,6 @@ export function FilePracticePage() {
     setFeedback(null)
     setTypedAnswer('')
     setSelectedOption(null)
-    setAttemptCount(0)
     setCorrectAttempts(0)
     setWrongAttempts(0)
     setPlannedAttempts(0)
