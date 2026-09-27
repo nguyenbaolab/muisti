@@ -13,6 +13,8 @@ export function AdminPage() {
   const [rowErrors, setRowErrors] = useState<Record<string, string>>({})
   const [savingIds, setSavingIds] = useState<Set<string>>(new Set())
   const [search, setSearch] = useState('')
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null)
+  const [isSuperAdmin, setIsSuperAdmin] = useState(false)
 
   useEffect(() => {
     let cancelled = false
@@ -29,10 +31,27 @@ export function AdminPage() {
           setError('Không có phiên đăng nhập.')
           setRows([])
           setQuotaDrafts({})
+          setCurrentUserId(null)
+          setIsSuperAdmin(false)
           setLoading(false)
         }
         return
       }
+
+      const { data: me, error: meError } = await supabase
+        .from('profiles')
+        .select('is_super_admin')
+        .eq('id', user.id)
+        .maybeSingle()
+
+      if (cancelled) return
+
+      if (meError) {
+        setIsSuperAdmin(false)
+      } else {
+        setIsSuperAdmin(Boolean(me?.is_super_admin))
+      }
+      setCurrentUserId(user.id)
 
       const { data, error: fetchError } = await supabase
         .from('profiles')
@@ -94,6 +113,8 @@ export function AdminPage() {
   }
 
   async function saveQuota(row: AdminProfileRow) {
+    if (!isSuperAdmin) return
+
     const draft = quotaDrafts[row.id] ?? String(row.daily_exercise_quota)
     const trimmed = draft.trim()
     const parsed = Number(trimmed)
@@ -131,6 +152,7 @@ export function AdminPage() {
   }
 
   async function saveIsAdmin(row: AdminProfileRow, nextValue: boolean) {
+    if (!isSuperAdmin || row.id === currentUserId) return
     if (nextValue === row.is_admin) return
 
     const previous = row.is_admin
@@ -159,6 +181,11 @@ export function AdminPage() {
       <p className="mt-2 text-sm text-[var(--color-text-muted)] dark:text-[var(--color-text-muted-dark)]">
         Chỉnh hạn mức sinh bài mỗi ngày và quyền admin cho từng tài khoản.
       </p>
+      {!loading && !isSuperAdmin && rows.length > 0 ? (
+        <p className="mt-2 text-sm text-[var(--color-text-muted)] dark:text-[var(--color-text-muted-dark)]">
+          Chế độ chỉ xem — chỉ super admin mới chỉnh được quyền và quota.
+        </p>
+      ) : null}
 
       <div className="mt-6 max-w-sm">
         <Input
@@ -214,6 +241,7 @@ export function AdminPage() {
             <tbody>
               {filteredRows.map((row) => {
                 const saving = savingIds.has(row.id)
+                const isOwnRow = row.id === currentUserId
                 const rowError = rowErrors[row.id]
                 return (
                   <tr
@@ -237,7 +265,7 @@ export function AdminPage() {
                         min={0}
                         step={1}
                         inputMode="numeric"
-                        disabled={saving}
+                        disabled={saving || !isSuperAdmin}
                         value={quotaDrafts[row.id] ?? String(row.daily_exercise_quota)}
                         onChange={(e) => {
                           const value = e.target.value
@@ -256,7 +284,7 @@ export function AdminPage() {
                         <input
                           type="checkbox"
                           checked={row.is_admin}
-                          disabled={saving}
+                          disabled={saving || !isSuperAdmin || isOwnRow}
                           onChange={(e) => {
                             void saveIsAdmin(row, e.target.checked)
                           }}

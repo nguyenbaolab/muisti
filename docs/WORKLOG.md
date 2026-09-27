@@ -4,6 +4,13 @@ Nhật ký thay đổi có ý nghĩa. Entry mới ở **đầu file** (sau tiêu
 
 ---
 
+## Giai đoạn 1 — Admin UI theo super admin (migration 011)
+**Ngày:** 2026-09-28
+
+- `Profile.is_super_admin` trong types. `AdminPage`: đọc own-row `is_super_admin`; admin thường xem list (quota + checkbox disabled); super admin sửa được, trừ checkbox `is_admin` dòng mình. Guard client trên `saveQuota` / `saveIsAdmin`. `AdminRoute` không đổi (gate vẫn `is_admin`). `tsc --noEmit` pass.
+
+---
+
 ## Giai đoạn 1 — Task 5 bước 4/4: UI luyện tập Level 2
 **Ngày:** 2026-09-27
 

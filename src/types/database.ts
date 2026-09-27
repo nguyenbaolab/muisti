@@ -2,6 +2,7 @@ export interface Profile {
   id: string
   email: string
   is_admin: boolean
+  is_super_admin: boolean
   daily_exercise_quota: number
 }
 
