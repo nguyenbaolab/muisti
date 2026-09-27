@@ -6,19 +6,17 @@ import { Input } from '../components/Input'
 import { backLinkClassName } from '../components/linkClasses'
 import { VocabTable } from '../components/VocabTable'
 import { DECK_SESSION_LIMIT, MIX_SESSION_LIMIT } from '../lib/sessionLimits'
+import {
+  advanceSession,
+  applyWrong,
+  type SessionCard,
+} from '../lib/session'
 import { supabase } from '../lib/supabase'
 import { computeNextReview, todayLocalIsoDate } from '../lib/srs'
 import type { ReviewQueueItem, VocabItem } from '../types/database'
 
 type PageState = 'setup' | 'loading' | 'reviewing' | 'empty' | 'done' | 'error'
 type AskMode = 'type' | 'mcq'
-
-type SessionCard = ReviewQueueItem & {
-  wrongCount: number // frozen for SRS at first correct; do not change after persisted
-  totalWrong: number // total wrongs this session (debt tier 3/2/1)
-  repeatDebt: number // remaining re-presents this session (memory only)
-  persisted: boolean // SRS already written — block double persist
-}
 
 type ProgressJoinRow = {
   id: string
@@ -51,16 +49,6 @@ function shuffle<T>(items: T[]): T[] {
     next[j] = tmp
   }
   return next
-}
-
-function computeReinsertGap(initialSize: number): number {
-  const raw = Math.round(0.25 * initialSize)
-  return Math.min(8, Math.max(3, raw))
-}
-
-/** rest = queue without front card; insert at index `gap` (short rest → end). */
-function reinsertAtGap(rest: SessionCard[], card: SessionCard, gap: number): SessionCard[] {
-  return [...rest.slice(0, gap), card, ...rest.slice(gap)]
 }
 
 function normalizeAnswer(value: string): string {
@@ -500,19 +488,7 @@ export function ReviewPage() {
       setQueue((prev) => {
         const current = prev[0]
         if (!current) return prev
-        const nextTotalWrong = current.totalWrong + 1
-        // Debt tier by total wrongs: 1st → +3, 2nd → +2, 3rd+ → +1
-        const debtAdd = nextTotalWrong === 1 ? 3 : nextTotalWrong === 2 ? 2 : 1
-        return [
-          {
-            ...current,
-            totalWrong: nextTotalWrong,
-            repeatDebt: current.repeatDebt + debtAdd,
-            // wrongCount only before SRS freeze; repayment wrongs leave it alone
-            wrongCount: current.persisted ? current.wrongCount : current.wrongCount + 1,
-          },
-          ...prev.slice(1),
-        ]
+        return [applyWrong(current), ...prev.slice(1)]
       })
       setFeedback({ correct: false })
       return
@@ -585,45 +561,22 @@ export function ReviewPage() {
     const current = queue[0]
     if (!current) return
 
-    if (feedback.correct) {
-      if (current.repeatDebt === 0) {
-        setCompletedCards((prev) => [...prev, current])
-
-        const remaining = queue.slice(1)
-        setQueue(remaining)
-        if (remaining.length === 0) {
-          // Await so done screen never paints with remainingDue still null (deck flash).
-          // loadRemainingDue handles mix/extra by setting null quickly; guards errors as null.
-          try {
-            await loadRemainingDue()
-          } catch (err) {
-            console.error(err)
-            setRemainingDue(null)
-          }
-          setPageState('done')
-          return
-        }
-        presentCard(remaining, enabledModes, finnishPool)
-        return
+    const result = advanceSession(queue, completedCards, feedback.correct, initialSessionSize)
+    setQueue(result.queue)
+    setCompletedCards(result.completedCards)
+    if (result.done) {
+      // Await so done screen never paints with remainingDue still null (deck flash).
+      // loadRemainingDue handles mix/extra by setting null quickly; guards errors as null.
+      try {
+        await loadRemainingDue()
+      } catch (err) {
+        console.error(err)
+        setRemainingDue(null)
       }
-
-      // Still in debt: reinsert at gap; do not graduate (even if debt becomes 0 here).
-      const rest = queue.slice(1)
-      const updated = { ...current, repeatDebt: current.repeatDebt - 1 }
-      const gap = computeReinsertGap(initialSessionSize)
-      const remaining = reinsertAtGap(rest, updated, gap)
-      setQueue(remaining)
-      presentCard(remaining, enabledModes, finnishPool)
+      setPageState('done')
       return
     }
-
-    // Wrong: reinsert at gap (replace old push-to-end).
-    const rest = queue.slice(1)
-    const updated = { ...current, repeatDebt: current.repeatDebt - 1 }
-    const gap = computeReinsertGap(initialSessionSize)
-    const remaining = reinsertAtGap(rest, updated, gap)
-    setQueue(remaining)
-    presentCard(remaining, enabledModes, finnishPool)
+    presentCard(result.queue, enabledModes, finnishPool)
   }
 
   async function submitMcqChoice(chosen: string) {
@@ -635,19 +588,7 @@ export function ReviewPage() {
       setQueue((prev) => {
         const current = prev[0]
         if (!current) return prev
-        const nextTotalWrong = current.totalWrong + 1
-        // Debt tier by total wrongs: 1st → +3, 2nd → +2, 3rd+ → +1
-        const debtAdd = nextTotalWrong === 1 ? 3 : nextTotalWrong === 2 ? 2 : 1
-        return [
-          {
-            ...current,
-            totalWrong: nextTotalWrong,
-            repeatDebt: current.repeatDebt + debtAdd,
-            // wrongCount only before SRS freeze; repayment wrongs leave it alone
-            wrongCount: current.persisted ? current.wrongCount : current.wrongCount + 1,
-          },
-          ...prev.slice(1),
-        ]
+        return [applyWrong(current), ...prev.slice(1)]
       })
       setFeedback({ correct: false })
       return

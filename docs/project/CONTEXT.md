@@ -42,6 +42,7 @@ src/
   lib/
     supabase.ts         # Supabase client (createClient, requireEnv guard)
     srs.ts              # classifyAttempt + computeNextReview (SM-2 rút gọn)
+    session.ts          # thuần: SessionCard, applyWrong (debt 3/2/1), advanceSession (reinsert gap N / tốt nghiệp); không Supabase/React
     sessionLimits.ts    # DECK_SESSION_LIMIT (20) deck due/phiên; MIX_SESSION_LIMIT (30) mix due/phiên; PRACTICE_SESSION_LIMIT (20) Level 2 /practice; extra giữ .limit(20) inline
     deckParser.ts       # parseDeckFile — split `;`, trim, cắt dòng trống cuối, max 500 sau cắt
     deckLabels.ts       # languageLabel / visibilityLabel / sharerNameFromEmail
@@ -57,7 +58,7 @@ src/
     EditDeckPage.tsx    # /decks/:id/edit järvi; DeckForm; owner; Lưu/Hủy
     DeckPreviewPage.tsx # /decks/:id/preview järvi; đọc-only + Clone; dòng clone không copy tiến độ nếu !owned
     DeckDetailPage.tsx  # /decks/:id järvi; owner: ôn + Luyện tập + Ôn thêm + Sửa + «Học lại từ đầu» khi isGraduated; Tabs Từ vựng/Tổng kết; VocabTable
-    ReviewPage.tsx      # ôn SRS + extraMode; FocusLayout; repeatDebt + chèn cách N; wrongCount đóng băng sau persist 1 lần; done + Ôn tiếp khi còn due
+    ReviewPage.tsx      # ôn SRS + extraMode; FocusLayout; queue debt/reinsert qua lib/session; wrongCount đóng băng sau persist 1 lần; done + Ôn tiếp khi còn due
   types/
     database.ts         # Deck, VocabItem, UserVocabProgress, ReviewQueueItem, Profile (+is_admin/quota), GeneratedExercise (content typed), ExerciseQuotaUsage, FillBlankContent/McqContent
 public/                 # Vite copy nguyên vào dist/
@@ -164,4 +165,4 @@ Hướng đã chốt (2026-09-14, cột pool 2026-09-16, profiles 2026-09-17):
 - SRS queue 1 deck: cùng query + `vocab_items!inner(*)` + `.eq('vocab_items.deck_id', deckId)` + `.order('due_date' asc).order('id' asc).limit(DECK_SESSION_LIMIT)` (20) — `ReviewPage` `/review/:deckId`. Cắt trên DB (quá hạn trước; `id` hòa); leftover giữ `due_date`; session vẫn shuffle như mix/extra.
 - Remaining due (done, mọi mode khi hết queue): `loadRemainingDue` — extra: `null` ngay. Deck: `select('id, vocab_items!inner(deck_id)', { count: 'exact', head: true }).eq('user_id').eq('vocab_items.deck_id').lte('due_date', today)`. Mix: `select('id', { count: 'exact', head: true }).eq('user_id').lte('due_date', today)` — **không** lọc deck. Lỗi / reject → `remainingDue = null`, vẫn `setPageState('done')` sau await. Reset `null` lúc đầu `startReview`.
 - Extra queue 1 deck: cùng select `!inner` + `interval_days < 30` + `due_date > today`, `order due_date asc`, `limit 20` — `ReviewPage` `/review/:deckId/extra`. Không shuffle trước khi cắt 20 (cắt trên DB); session vẫn shuffle hàng đợi như mix/deck.
-- SRS update: persist **một lần** khi đúng lần đầu (`!persisted`); `wrongCount` đóng băng cho `computeNextReview`. Sai: `totalWrong` + debt 3/2/1, `handleNext` chèn cách N (`initialSessionSize`, clamp 3–8) và trừ `repeatDebt`; tốt nghiệp khi đúng và `repeatDebt === 0`. Extra **không** gọi `persistCard`. — `src/lib/srs.ts` + `ReviewPage`
+- SRS update: persist **một lần** khi đúng lần đầu (`!persisted`); `wrongCount` đóng băng cho `computeNextReview`. Sai: `applyWrong` (debt 3/2/1); `advanceSession` chèn cách N + trừ `repeatDebt` / tốt nghiệp khi đúng và `repeatDebt === 0`. Extra **không** gọi `persistCard`. — `src/lib/srs.ts` + `src/lib/session.ts` + `ReviewPage`

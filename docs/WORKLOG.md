@@ -4,6 +4,13 @@ Nhật ký thay đổi có ý nghĩa. Entry mới ở **đầu file** (sau tiêu
 
 ---
 
+## Giai đoạn 1 — Refactor: `lib/session.ts` (debt + reinsert thuần)
+**Ngày:** 2026-09-28
+
+- Rút `SessionCard`, `computeReinsertGap`, `reinsertAtGap`, `applyWrong`, `advanceSession` khỏi `ReviewPage` → `src/lib/session.ts` (không React/Supabase). ReviewPage gọi lại; enroll/persist/JSX không đổi. `tsc --noEmit` pass.
+
+---
+
 ## Giai đoạn 1 — ReviewPage: nợ lặp (repeatDebt) + chèn cách N
 **Ngày:** 2026-09-28
 
