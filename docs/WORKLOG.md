@@ -4,6 +4,13 @@ Nhật ký thay đổi có ý nghĩa. Entry mới ở **đầu file** (sau tiêu
 
 ---
 
+## Giai đoạn 1 — ReviewPage: nợ lặp (repeatDebt) + chèn cách N
+**Ngày:** 2026-09-28
+
+- `SessionCard`: `totalWrong`, `repeatDebt`, `persisted`; `wrongCount` đóng băng sau lần đúng đầu (SRS). Sai: +debt 3/2/1 theo totalWrong; đúng: persist một lần rồi skip. `handleNext` chèn lại cách N (`0.25 * initialSessionSize`, clamp 3–8) thay vì đẩy cuối; tốt nghiệp khi đúng và `repeatDebt === 0`. Không đổi `srs.ts` / `persistCard` body / `presentCard`. `tsc --noEmit` pass.
+
+---
+
 ## Giai đoạn 1 — Admin UI theo super admin (migration 011)
 **Ngày:** 2026-09-28
 
