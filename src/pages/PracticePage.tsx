@@ -40,6 +40,18 @@ type LoadedExercise = {
   content: ExerciseContent
 }
 
+type StruggledQuestion = {
+  prompt: string
+  expected: string
+}
+
+type StruggledWord = {
+  vocabItemId: string
+  finnishWord: string
+  translation: string
+  questions: StruggledQuestion[]
+}
+
 const mutedTextClassName =
   'text-[var(--color-text-muted)] dark:text-[var(--color-text-muted-dark)]'
 
@@ -160,8 +172,10 @@ export function PracticePage() {
   const [correctAnswers, setCorrectAnswers] = useState(0)
   const [totalAnswers, setTotalAnswers] = useState(0)
   const [sessionWordCount, setSessionWordCount] = useState(0)
+  const [struggledWords, setStruggledWords] = useState<StruggledWord[]>([])
 
   const typedInputRef = useRef<HTMLInputElement | null>(null)
+  const firstWrongQuestionRef = useRef<StruggledQuestion | null>(null)
 
   useEffect(() => {
     if (!deckId) {
@@ -248,6 +262,8 @@ export function PracticePage() {
     setError(null)
     setCorrectAnswers(0)
     setTotalAnswers(0)
+    setStruggledWords([])
+    firstWrongQuestionRef.current = null
     setWordIndex(0)
     setAttemptIndex(0)
     setExercise(null)
@@ -325,17 +341,48 @@ export function PracticePage() {
     if (!word) return
 
     if (feedback.correct) {
+      firstWrongQuestionRef.current = null
       await advanceToNextWord()
       return
     }
 
     // Wrong: one retry max (attemptIndex 0 → fetch again; attemptIndex 1 → next word)
     if (attemptIndex === 0) {
+      // Keep attempt-1 question before retry fetch clears exercise (for struggled table)
+      if (exercise) {
+        firstWrongQuestionRef.current = {
+          prompt: exercise.content.prompt,
+          expected: expectedAnswer(exercise),
+        }
+      }
       setAttemptIndex(1)
       await fetchExerciseForCurrent(word)
       return
     }
 
+    // Wrong both attempts: collect for end-of-session notice (attempt 1 from ref + attempt 2)
+    const questions: StruggledQuestion[] = []
+    if (firstWrongQuestionRef.current) {
+      questions.push(firstWrongQuestionRef.current)
+    }
+    if (exercise) {
+      questions.push({
+        prompt: exercise.content.prompt,
+        expected: expectedAnswer(exercise),
+      })
+    }
+    if (questions.length > 0) {
+      setStruggledWords((prev) => [
+        ...prev,
+        {
+          vocabItemId: word.vocabItemId,
+          finnishWord: word.finnishWord,
+          translation: word.translation,
+          questions,
+        },
+      ])
+    }
+    firstWrongQuestionRef.current = null
     await advanceToNextWord()
   }
 
@@ -533,6 +580,32 @@ export function PracticePage() {
         <p className={`mt-2 text-sm ${mutedTextClassName}`}>
           Tổng số câu gồm cả lần làm lại khi sai. Lịch ôn Level 1 không đổi.
         </p>
+        {struggledWords.length > 0 ? (
+          <div className="mt-8 border-t border-[var(--color-border)] pt-6 dark:border-[var(--color-border-dark)]">
+            <h2 className="text-lg font-medium text-[var(--color-text)] dark:text-[var(--color-text-dark)]">
+              Chú ý những từ này vì bạn sai 2 lần
+            </h2>
+            <ul className="mt-4 space-y-6">
+              {struggledWords.map((w) => (
+                <li key={w.vocabItemId}>
+                  <div className="font-medium text-[var(--color-text)] dark:text-[var(--color-text-dark)]">
+                    {w.finnishWord} — {w.translation}
+                  </div>
+                  <ul className={`mt-2 space-y-2 text-sm ${mutedTextClassName}`}>
+                    {w.questions.map((q, i) => (
+                      <li key={i}>
+                        <div>{q.prompt}</div>
+                        <div>
+                          Đáp án: <strong>{q.expected}</strong>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : null}
         <div className="mt-10 flex flex-wrap gap-3">
           <Button type="button" variant="primary" onClick={() => void startPractice()}>
             Luyện lại
@@ -711,7 +784,7 @@ export function PracticePage() {
                 >
                   {feedback.correct ? 'Đúng!' : 'Sai.'}
                 </div>
-                {!feedback.correct ? (
+                {!feedback.correct && attemptIndex === 1 ? (
                   <div className="mt-2 text-base text-[var(--color-text)] dark:text-[var(--color-text-dark)]">
                     <span className={mutedTextClassName}>Đáp án: </span>
                     <strong>{feedback.expected}</strong>
