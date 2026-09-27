@@ -304,6 +304,9 @@ export function DeckDetailPage() {
             <Link to={`/review/${id}`} className={`${buttonPrimaryClassName} no-underline`}>
               Bắt đầu ôn tập
             </Link>
+            <Link to={`/practice/${id}`} className={`${buttonSecondaryClassName} no-underline`}>
+              Luyện tập
+            </Link>
             {showExtraPractice ? (
               <Link to={`/review/${id}/extra`} className={`${buttonSecondaryClassName} no-underline`}>
                 Ôn thêm (không tính vào lịch)

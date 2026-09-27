@@ -47,12 +47,16 @@ export interface ReviewQueueItem {
 
 export type ExerciseType = 'fill_blank' | 'mcq'
 
-/** Stored as jsonb; exact keys TBD until Function/UI (Task 5 later steps). */
+export type FillBlankContent = { prompt: string; answer: string }
+export type McqContent = { prompt: string; options: string[]; correct: string }
+export type ExerciseContent = FillBlankContent | McqContent
+
+/** content jsonb: fill_blank → prompt/answer; mcq → prompt/options/correct (Worker + PracticePage). */
 export interface GeneratedExercise {
   id: string
   vocab_item_id: string
   exercise_type: ExerciseType
-  content: unknown
+  content: ExerciseContent
   times_shown: number
   cooldown_until: string | null
   created_at: string

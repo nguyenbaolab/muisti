@@ -4,6 +4,28 @@ Ghi theo thời gian, mới nhất ở trên. Mỗi entry: tên ngắn, ngày, q
 
 ---
 
+## Task 5 bước 4: Level 2 practice — 1 lần lặp khi sai; ưu tiên times_shown; không đụng SRS
+
+**Ngày:** 2026-09-27
+
+**Quyết định:**
+
+- Route `/practice/:deckId` ngoài `AppLayout`, bọc `FocusLayout`; owner check giống ReviewPage. Nút «Luyện tập» trên DeckDetail.
+- Chọn từ: `interval_days >= 3` trên deck; **ưu tiên** từ có tổng `times_shown` (mọi hàng `generated_exercises` của `vocab_item_id`) thấp nhất — tính client sau 2 query (progress join vocab, rồi exercises `.in(ids)`); cap `PRACTICE_SESSION_LIMIT` = 20 trong `sessionLimits.ts`.
+- Mỗi từ: random 50/50 `fill_blank`|`mcq`; gọi Worker; chấm ngay (trim + lower cho fill_blank).
+- **Sai ≠ ReviewPage:** tối đa **1** lần làm lại cùng `vocab_item_id` + cùng `exercise_type` (gọi lại API — Worker chọn câu pool khác). Sai lần 2 → sang từ tiếp, không rotate-until-correct.
+- Không UPDATE `user_vocab_progress` (SRS). Worker vẫn tăng `times_shown` mỗi lần gọi (kể cả lần lặp).
+- Lỗi API (429/503/401/khác): thông báo, Thử lại / Bỏ qua từ — không crash cả phiên.
+- Helper `generateExercise.ts` là chỗ SPA gọi `/api/*` đầu tiên.
+
+**Lý do:** Level 2 luyện sản xuất ngôn ngữ, không phải SRS; giới hạn 1 retry tránh kẹt vòng; ưu tiên times_shown thấp phân tán exposure bài tập.
+
+**Phạm vi:** `PracticePage`, `generateExercise.ts`, `sessionLimits.ts`, `App.tsx`, `DeckDetailPage`, types content, docs.
+
+**Không làm gì:** Không AuthContext; không đổi Worker/schema; không ghi SRS.
+
+---
+
 ## Task 5 bước 3: AdminRoute nested + AppLayout link; sửa quota/admin inline
 
 **Ngày:** 2026-09-27

@@ -11,7 +11,7 @@ Tài liệu kỹ thuật cho Cursor khi đọc/ghi code. Business: `REQUIREMENTS
 - **Data / Auth:** Supabase (Postgres + Auth), client gọi `supabase-js`, bảo vệ bằng RLS
 - **Auth model:** admin invite (`inviteUserByEmail`); không form đăng ký công khai
 - **Deploy:** Cloudflare Workers Static Assets qua Git integration (nhánh `main`, Worker `name` = `muisti`). SPA: `wrangler.jsonc` `assets.directory` = `./dist`, `binding` = `ASSETS`, `not_found_handling` = `single-page-application`, `run_worker_first` = `["/api/*"]`, `main` = `worker/index.ts`. Không `public/_redirects`. `public/_headers`. `.node-version` = 22. Wrangler không trong `package.json` scripts (Cloudflare chạy lúc deploy). Env **Build** (Vite): `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`. Env **Worker runtime**: `SUPABASE_URL`, `SUPABASE_ANON_KEY`, secrets `SUPABASE_SERVICE_ROLE_KEY` + `ANTHROPIC_API_KEY` (wrangler secret put — không Build vars).
-- **AI content:** Task 5 bước 3 — UI admin `/admin` chỉnh `daily_exercise_quota` / `is_admin`. Worker `POST /api/generate-exercise` đã có; SPA luyện tập Level 2 chưa gọi endpoint. Schema bước 1 đã có.
+- **AI content:** Task 5 bước 4 — UI `/practice/:deckId` gọi `POST /api/generate-exercise`. Admin `/admin` + Worker + schema bước 1 đã có.
 - **Phân công:** Claude thiết kế + prompt; Cursor thực thi code/data; chủ dự án test và quyết định cuối
 
 ---
@@ -42,22 +42,24 @@ src/
   lib/
     supabase.ts         # Supabase client (createClient, requireEnv guard)
     srs.ts              # classifyAttempt + computeNextReview (SM-2 rút gọn)
-    sessionLimits.ts    # DECK_SESSION_LIMIT (20) deck due/phiên; MIX_SESSION_LIMIT (30) mix due/phiên; extra giữ .limit(20) inline
+    sessionLimits.ts    # DECK_SESSION_LIMIT (20) deck due/phiên; MIX_SESSION_LIMIT (30) mix due/phiên; PRACTICE_SESSION_LIMIT (20) Level 2 /practice; extra giữ .limit(20) inline
     deckParser.ts       # parseDeckFile — split `;`, trim, cắt dòng trống cuối, max 500 sau cắt
     deckLabels.ts       # languageLabel / visibilityLabel / sharerNameFromEmail
     useTheme.ts         # override | system; chỉ ghi localStorage khi toggle (KI-012 Closed)
+    generateExercise.ts # SPA → POST /api/generate-exercise (Bearer access_token); parse content; map lỗi Worker
   pages/
     LoginPage.tsx       # järvi; signInWithPassword; lỗi Việt hóa; ngoài AppLayout
     HomePage.tsx        # `/` — Việc hôm nay (todo deck sở hữu) + lưới 6 số; empty tạo deck; không nút Ôn tập
     AdminPage.tsx       # `/admin` — danh sách profiles; sửa daily_exercise_quota (blur) + is_admin (checkbox); filter email client
+    PracticePage.tsx    # `/practice/:deckId` Level 2; FocusLayout; owner; interval>=3 ưu tiên times_shown thấp; sai tối đa 1 lần lặp API; không ghi SRS
     DecksPage.tsx       # /decks järvi; dòng nhịp học; Tabs Cá nhân/Public; `?tab=public` chỉ set tab ban đầu; Public có dòng clone; hàng hairline; own → /:id; khác → /preview
     CreateDeckPage.tsx  # /decks/new järvi; DeckForm + FileField + Xem trước; Lưu deck
     EditDeckPage.tsx    # /decks/:id/edit järvi; DeckForm; owner; Lưu/Hủy
     DeckPreviewPage.tsx # /decks/:id/preview järvi; đọc-only + Clone; dòng clone không copy tiến độ nếu !owned
-    DeckDetailPage.tsx  # /decks/:id järvi; owner: ôn + Ôn thêm + Sửa + «Học lại từ đầu» khi isGraduated; Tabs Từ vựng/Tổng kết; VocabTable
+    DeckDetailPage.tsx  # /decks/:id järvi; owner: ôn + Luyện tập + Ôn thêm + Sửa + «Học lại từ đầu» khi isGraduated; Tabs Từ vựng/Tổng kết; VocabTable
     ReviewPage.tsx      # ôn SRS + extraMode `/review/:deckId/extra` (không ghi DB); ngoài AppLayout; FocusLayout; setup mô tả mix vs deck vs extra + phím sm+; empty/error/done Đợt A; reviewing Đợt B; deck/mix due cap; done + Ôn tiếp khi còn due (extra: không nhắc lịch)
   types/
-    database.ts         # Deck, VocabItem, UserVocabProgress, ReviewQueueItem, Profile (+is_admin/quota), GeneratedExercise, ExerciseQuotaUsage
+    database.ts         # Deck, VocabItem, UserVocabProgress, ReviewQueueItem, Profile (+is_admin/quota), GeneratedExercise (content typed), ExerciseQuotaUsage, FillBlankContent/McqContent
 public/                 # Vite copy nguyên vào dist/
   _headers              # nosniff / referrer / DENY / Permissions-Policy; /assets/* immutable
   favicon.svg
@@ -100,7 +102,8 @@ schema.sql v0.3.0 (2026-09-26): profiles (+ is_admin, daily_exercise_quota), dec
 - `/review` — `ReviewPage` mix; **ngoài** `AppLayout`; tự khung `FocusLayout` (← Trang chủ + ThemeToggle, `max-w-xl`); guest → `/login`
 - `/review/:deckId` — `ReviewPage` chỉ owner: check `owner_id` rồi enroll Active Pool rồi ôn due; **ngoài** `AppLayout`, cùng `FocusLayout`; non-owner bị chặn (nhắn sang preview)
 - `/review/:deckId/extra` — cùng `ReviewPage`, `extraMode` (`useMatch`); owner check + scope deck như `/review/:deckId`; **không** enroll; fetch từ đang học chưa đến hạn; **không** ghi progress; ngoài `AppLayout`, cùng `FocusLayout`
-- Layout session: `AppLayout` bọc `/`, `/decks`, `/decks/new`, `/decks/:id`, `/decks/:id/edit`, `/decks/:id/preview`, `/admin` (qua `AdminRoute`). Header: Muisti → `/`, Decks, Ôn tập → `/review`, link **Admin** → `/admin` chỉ khi `profiles.is_admin` (fetch 1 lần lúc mount AppLayout), `ThemeToggle`, Đăng xuất. Không hiện email. `/review`, `/review/:deckId`, `/review/:deckId/extra` đứng ngoài layout.
+- `/practice/:deckId` — `PracticePage` Level 2; **ngoài** `AppLayout`, `FocusLayout`; chỉ owner; lọc `interval_days >= 3`, ưu tiên tổng `times_shown` thấp, cap `PRACTICE_SESSION_LIMIT` (20); gọi Worker; **không** ghi SRS
+- Layout session: `AppLayout` bọc `/`, `/decks`, `/decks/new`, `/decks/:id`, `/decks/:id/edit`, `/decks/:id/preview`, `/admin` (qua `AdminRoute`). Header: Muisti → `/`, Decks, Ôn tập → `/review`, link **Admin** → `/admin` chỉ khi `profiles.is_admin` (fetch 1 lần lúc mount AppLayout), `ThemeToggle`, Đăng xuất. Không hiện email. `/review`, `/review/:deckId`, `/review/:deckId/extra`, `/practice/:deckId` đứng ngoài layout.
 - Session: `getSession` + `onAuthStateChange` trong `App.tsx`; lần đầu hiện `Loading...`
 - Chi tiết UI nghiệp vụ ở `REQUIREMENTS.md`.
 
@@ -135,7 +138,7 @@ Hướng đã chốt (2026-09-14, cột pool 2026-09-16, profiles 2026-09-17):
 ## §6 Store/API index
 
 - `src/lib/supabase.ts`: `export const supabase` — Supabase client dùng chung toàn app; khởi tạo từ `VITE_SUPABASE_URL` + `VITE_SUPABASE_ANON_KEY`
-- Worker API: `POST /api/generate-exercise` — `worker/index.ts`. Bearer access token → verify `/auth/v1/user` → secrets → validate body → pool (`times_shown`, cooldown ≥5 → +10 ngày) hoặc Claude (quota Hướng B) → `{ exercise: { id, exercise_type, content } }`. Lỗi JSON: `unauthorized` | `server_misconfigured` | `invalid_request` | `quota_exceeded` | `vocab_item_not_found` | `generation_failed` | `generation_unavailable` | `internal_error` | `not_found`. Cùng origin với SPA → không CORS đặc biệt.
+- Worker API: `POST /api/generate-exercise` — `worker/index.ts`. SPA gọi qua `src/lib/generateExercise.ts` (Bearer access token). Verify `/auth/v1/user` → secrets → validate body → pool (`times_shown`, cooldown ≥5 → +10 ngày) hoặc Claude (quota Hướng B) → `{ exercise: { id, exercise_type, content } }`. Lỗi JSON: `unauthorized` | `server_misconfigured` | `invalid_request` | `quota_exceeded` | `vocab_item_not_found` | `generation_failed` | `generation_unavailable` | `internal_error` | `not_found`. Cùng origin với SPA → không CORS đặc biệt.
 - Parse deck file: `parseDeckFile(content)` — `src/lib/deckParser.ts` (cắt dòng trống cuối; cap 500 sau cắt; dòng trống giữa file vẫn lỗi)
 - List decks: `decks.select('*, vocab_items(count)')` — RLS lọc own + public — `DecksPage`; filter client `activeTab` `'mine' | 'public'`; initial `activeTab` từ `?tab=public` (Public) hoặc khác/không có (Cá nhân), không ghi lại URL; click own → `/decks/:id`, click không phải mình → `/decks/:id/preview`. UI järvi: `Tabs` (`idPrefix="decks"`, aria-label «Loại deck») + `TabPanel`; hàng đầu `h1` + `<Link>` «Tạo deck mới» + dòng nhịp học; tab Public dòng clone (không lúc loading); hàng deck hairline; nhãn từ `src/lib/deckLabels.ts` (DecksPage tự thêm «Nghĩa: » khi render). Sửa `<Link>` `/edit`; Xóa `window.confirm` cũ. Lỗi `profiles` → `console.error`.
 - Owner email (tên chia sẻ): query 2 — `profiles.select('id, email').in('id', ownerIds)` trên `DecksPage`; `profiles.select('email').eq('id', owner_id)` trên `DeckPreviewPage` nếu `!owned`. Không embed từ `decks`. `sharerNameFromEmail` trong `deckLabels.ts`. Preview lỗi profiles → `console.error`, fallback «Ẩn danh».
@@ -144,7 +147,8 @@ Hướng đã chốt (2026-09-14, cột pool 2026-09-16, profiles 2026-09-17):
 - Home todo due: `user_vocab_progress.select('id, vocab_item_id, vocab_items!inner(deck_id)').eq('user_id').lte('due_date', todayLocalIsoDate())` — paged `.order('id').range(from, from+999)` đến trang < 1000 hàng; group `deck_id` client, bỏ deck không sở hữu
 - Home todo reviewed-today: cùng select + `.gte('last_reviewed_at', localMidnightIso)` với `localMidnightIso = new Date(y, m, d, 0, 0, 0, 0).toISOString()` (nửa đêm local → ISO); paged như due
 - Home suggestion (chỉ khi tổng `dueCount` ≤ `LOW_WORK_THRESHOLD` 10): lần lượt deck sở hữu `created_at` tăng, `vocab_items` count > 0, `user_vocab_progress.select('id, vocab_items!inner(deck_id)').eq('user_id').eq('vocab_items.deck_id', deckId).limit(1)` — match đầu (0 hàng = chưa bắt đầu) → `/decks/:id`; không thì `/decks?tab=public`
-- Deck detail (owner): `decks.select('*')` rồi `vocab_items.select(...).eq('deck_id').order('created_at')` + `fetchDeckProgress` (`user_vocab_progress` join `vocab_items!inner`) — `DeckDetailPage`; UI `DeckHeader` + dòng Bắt đầu ôn tập + `Tabs` («Nội dung deck») + chú giải trạng thái / lưới Tổng kết + dòng Đã học/quá hạn; actions Link ôn + Link extra (khi `dueTodayCount === 0` và `extraCandidatesCount > 0`) + Link Sửa `/edit` + Button «Học lại từ đầu» khi `isGraduated` (`totalWords > 0 && notEnrolledCount === 0 && graduatedCount === totalWords`). Reset: `window.confirm` → DELETE `.eq('user_id').in('vocab_item_id', words.map(id))` → refetch `fetchDeckProgress` + `wordsWithProgress`; `actionError` / `resetting` (Button `loading`). Không đụng `vocab_items` / `active_pool_size`. Non-owner: `forbidden`, không bảng. Ngày «hôm nay» = `todayLocalIsoDate()`
+- Deck detail (owner): `decks.select('*')` rồi `vocab_items.select(...).eq('deck_id').order('created_at')` + `fetchDeckProgress` (`user_vocab_progress` join `vocab_items!inner`) — `DeckDetailPage`; UI `DeckHeader` + dòng Bắt đầu ôn tập + Link secondary **Luyện tập** → `/practice/:id` + `Tabs` («Nội dung deck») + chú giải trạng thái / lưới Tổng kết + dòng Đã học/quá hạn; actions Link ôn + Link practice + Link extra (khi `dueTodayCount === 0` và `extraCandidatesCount > 0`) + Link Sửa `/edit` + Button «Học lại từ đầu» khi `isGraduated` (`totalWords > 0 && notEnrolledCount === 0 && graduatedCount === totalWords`). Reset: `window.confirm` → DELETE `.eq('user_id').in('vocab_item_id', words.map(id))` → refetch `fetchDeckProgress` + `wordsWithProgress`; `actionError` / `resetting` (Button `loading`). Không đụng `vocab_items` / `active_pool_size`. Non-owner: `forbidden`, không bảng. Ngày «hôm nay» = `todayLocalIsoDate()`
+- Level 2 practice: `loadPracticeWords` — `user_vocab_progress` + `vocab_items!inner(*)` + `.eq('vocab_items.deck_id')` + `.gte('interval_days', 3)`; rồi `generated_exercises.select('vocab_item_id, times_shown').in(ids)` → cộng `times_shown` client, sort tăng dần, `.slice(0, PRACTICE_SESSION_LIMIT)`; mỗi từ random `fill_blank`|`mcq`; `generateExercise()` (`src/lib/generateExercise.ts`) Bearer token → Worker. Sai lần 1 → gọi lại API cùng type (1 lần); sai lần 2 → sang từ tiếp. Không UPDATE progress. — `PracticePage`
 - Create deck: `decks.insert({ owner_id, name, meaning_language, description, visibility, active_pool_size }).select('id').single()` rồi `vocab_items.insert([...])` — `CreateDeckPage` (`DeckForm` + `FileField` + Xem trước; rollback nếu vocab lỗi; lỗi insert UI cố định + `console.error`). `canSave` không đổi (mọi lỗi parse kể cả dòng trống khóa Lưu).
 - Update deck metadata: `decks.update({ name, meaning_language, description, visibility, active_pool_size }).eq('id')` — `EditDeckPage` (`DeckForm`; không còn guard public→private; lỗi lưu UI cố định + `console.error`)
 - Preview deck: `decks.select('*, vocab_items(id, finnish_word, translation, created_at)').eq('id').single()` rồi sort client `created_at` tăng dần — `DeckPreviewPage`; UI `DeckHeader` + `VocabTable`; Clone `Button loading`; owner thấy visibility + Link ôn + «Đây là deck của bạn.»; `!owned` `sharedBy` không visibility + dòng Clone không copy tiến độ

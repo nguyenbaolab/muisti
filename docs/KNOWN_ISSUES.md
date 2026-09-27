@@ -13,6 +13,21 @@ Lỗi / sai lệch đã biết. Đánh số từ **KI-001**. Entry mới ở đ�
 
 ---
 
+## KI-034 — Ưu tiên times_shown Level 2 có thể lệch nếu >1000 hàng generated_exercises cho tập từ eligible
+
+**Mức độ:** Low  
+**File liên quan:** `src/pages/PracticePage.tsx` (`loadPracticeWords`)
+
+**Mô tả:** Tổng `times_shown` tính client từ `generated_exercises.select('vocab_item_id, times_shown').in(vocab_ids)`. PostgREST cắt im ~1000 hàng/request. Deck lớn + nhiều bài sinh → tổng thiếu → thứ tự ưu tiên có thể sai (vẫn lấy đủ từ `interval_days >= 3`, chỉ lệch sort).
+
+**Cách tái hiện:** Nhiều hơn ~1000 hàng `generated_exercises` thuộc các `vocab_item_id` eligible của một deck.
+
+**Hướng fix:** Aggregate RPC/`sum` group by trên DB, hoặc page `.range` đến hết rồi cộng.
+
+**Trạng thái:** Open (2026-09-27)
+
+---
+
 ## KI-033 — Admin có thể tự tắt `is_admin` của chính mình
 
 **Mức độ:** Low  

@@ -4,6 +4,14 @@ Nhật ký thay đổi có ý nghĩa. Entry mới ở **đầu file** (sau tiêu
 
 ---
 
+## Giai đoạn 1 — Task 5 bước 4/4: UI luyện tập Level 2
+**Ngày:** 2026-09-27
+
+- `/practice/:deckId` (`PracticePage` + `FocusLayout`): owner; `interval_days >= 3`; ưu tiên tổng `times_shown` thấp (2 query + sort client); `PRACTICE_SESSION_LIMIT` 20; random type → Worker; sai tối đa 1 lần gọi lại API; không ghi SRS. Helper `generateExercise.ts`. Nút «Luyện tập» trên DeckDetail.
+- Docs: CONTEXT, REQUIREMENTS v0.3.3, DECISIONS, KI-034. `tsc --noEmit` + `tsc -b` pass. Task 5 hoàn tất trên repo.
+
+---
+
 ## Giai đoạn 1 — Task 5 bước 3/4: UI admin quota + is_admin
 **Ngày:** 2026-09-27
 
