@@ -82,10 +82,11 @@ supabase/
     20260908_006_user_vocab_progress_delete_policy.sql
     20260914_007_deck_based_schema.sql   # wipe units/exercises → decks
     20260916_008_deck_active_pool_size.sql  # decks.active_pool_size 10–30 default 20
-    20260916_009_profiles.sql               # profiles + trigger auth.users — CHƯA APPLY (owner SQL Editor)
-    20260926_010_exercise_generation.sql    # Task 5 bước 1: is_admin/quota + exercise tables — CHƯA APPLY
+    20260916_009_profiles.sql               # profiles + trigger auth.users (applied)
+    20260926_010_exercise_generation.sql    # Task 5 bước 1: is_admin/quota + exercise tables (applied)
+    20260928_011_rls_and_super_admin.sql    # siết RLS profiles SELECT + is_super_admin + index generated_exercises (applied)
 
-schema.sql v0.3.0 (2026-09-26): profiles (+ is_admin, daily_exercise_quota), decks, vocab_items, user_vocab_progress, exercise_quota_usage, generated_exercises; `public.is_admin()` SECURITY DEFINER.
+schema.sql v0.4.0 (2026-09-28): profiles (+ is_admin, is_super_admin, daily_exercise_quota), decks, vocab_items, user_vocab_progress, exercise_quota_usage, generated_exercises; `public.is_admin()` + `public.is_super_admin()` SECURITY DEFINER; RLS profiles SELECT siết (own/admin/public-deck-owner), UPDATE chỉ super admin; index generated_exercises (vocab_item_id, exercise_type, times_shown).
 .env.example            # VITE_* Build; SUPABASE_URL/ANON_KEY + SERVICE_ROLE + ANTHROPIC Worker runtime
 ```
 
@@ -121,7 +122,7 @@ Hướng đã chốt (2026-09-14, cột pool 2026-09-16, profiles 2026-09-17):
 - `decks`: SELECT nếu `visibility = 'public'` hoặc `owner_id = auth.uid()`; INSERT/UPDATE/DELETE chỉ owner. Cột `active_pool_size` integer 10–30, default 20.
 - `vocab_items`: SELECT theo quyền SELECT của deck cha; INSERT/UPDATE/DELETE chỉ owner deck (client upload được)
 - `user_vocab_progress`: RLS own-rows `user_id = auth.uid()` — không đổi cấu trúc cột
-- `profiles`: `id` = `auth.users.id`, `email`, `is_admin` (default false), `daily_exercise_quota` (default 10); SELECT mọi authenticated (`USING (true)`); UPDATE chỉ admin qua `public.is_admin()` (SECURITY DEFINER — tránh recursion RLS). Trigger `on_auth_user_created` INSERT khi có user mới. **009 / 010 chưa apply trên DB cho đến khi owner chạy SQL Editor.**
+- `profiles`: `id` = `auth.users.id`, `email`, `is_admin` (default false), `is_super_admin` (default false), `daily_exercise_quota` (default 10); SELECT siết — own row HOẶC `public.is_admin()` HOẶC owner của deck `visibility = 'public'`; UPDATE chỉ super admin qua `public.is_super_admin()` (cùng SECURITY DEFINER với `is_admin()` — tránh recursion RLS, 011). Trigger `on_auth_user_created` INSERT khi có user mới. **009 / 010 / 011 đã apply (owner, SQL Editor).**
 - `exercise_quota_usage`: PK `(user_id, usage_date)`; đếm lần sinh bài trong ngày; RLS own-rows SELECT/INSERT/UPDATE. Mục đích: enforce quota client/Function.
 - `generated_exercises`: bài Level 2 gắn `vocab_item_id`; `exercise_type` `fill_blank`|`mcq`; `content` jsonb; `times_shown` / `cooldown_until`. SELECT nếu deck visible; INSERT/UPDATE chỉ owner deck.
 

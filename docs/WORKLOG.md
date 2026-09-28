@@ -4,6 +4,17 @@ Nhật ký thay đổi có ý nghĩa. Entry mới ở **đầu file** (sau tiêu
 
 ---
 
+## Apply DB: migration 009 + 010 + 011 + set super admin
+**Ngày:** 2026-09-28
+**Trạng thái:** Done
+
+- Owner apply `20260916_009_profiles.sql`, `20260926_010_exercise_generation.sql`, `20260928_011_rls_and_super_admin.sql` trên Supabase SQL Editor.
+- Set tài khoản owner: `UPDATE profiles SET is_super_admin = true, is_admin = true` — 1 super admin duy nhất.
+- Sau 011: RLS profiles SELECT siết (own / admin / owner deck public); UPDATE chỉ super admin; cột `is_super_admin`; `public.is_super_admin()` SECURITY DEFINER; index `generated_exercises` (`vocab_item_id`, `exercise_type`, `times_shown`). `schema.sql` v0.4.0.
+- Docs: CONTEXT §2 migration tree + §4 profiles RLS đồng bộ (009/010/011 applied).
+
+---
+
 ## Giai đoạn 1 — HUD + MCQ hai chiều + AppLayout nav + Decks CTA
 **Ngày:** 2026-09-28
 
