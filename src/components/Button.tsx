@@ -1,6 +1,6 @@
 import type { ButtonHTMLAttributes } from 'react'
 
-type ButtonVariant = 'primary' | 'secondary' | 'danger'
+type ButtonVariant = 'primary' | 'secondary' | 'danger' | 'success'
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: ButtonVariant
@@ -14,11 +14,15 @@ const variantClasses: Record<ButtonVariant, string> = {
     'border border-[var(--color-border)] text-[var(--color-text)] hover:bg-[var(--color-surface)] dark:border-[var(--color-border-dark)] dark:text-[var(--color-text-dark)]',
   danger:
     'bg-[var(--color-danger)] text-white hover:opacity-90 dark:bg-[var(--color-danger-dark)]',
+  success:
+    'bg-[var(--color-success)] text-white hover:opacity-90 dark:bg-[var(--color-success-dark)]',
 }
 
 export const buttonPrimaryClassName = `rounded-base px-4 py-2 text-sm font-medium transition-colors ${variantClasses.primary}`
 
 export const buttonSecondaryClassName = `rounded-base px-4 py-2 text-sm font-medium transition-colors ${variantClasses.secondary}`
+
+export const buttonSuccessClassName = `rounded-base px-4 py-2 text-sm font-medium transition-colors ${variantClasses.success}`
 
 export function Button({
   variant = 'primary',
