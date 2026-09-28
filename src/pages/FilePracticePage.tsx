@@ -2,7 +2,6 @@ import { useEffect, useRef, useState, type ChangeEvent, type FormEvent } from 'r
 import { Link } from 'react-router-dom'
 import { Button, buttonSecondaryClassName } from '../components/Button'
 import { FileField } from '../components/FileField'
-import { FocusLayout } from '../components/FocusLayout'
 import { Input } from '../components/Input'
 import { parseDeckFile, type ValidLine } from '../lib/deckParser'
 import {
@@ -394,7 +393,7 @@ export function FilePracticePage() {
 
   if (pageState === 'upload') {
     return (
-      <FocusLayout>
+      <div className="mx-auto w-full max-w-xl">
         <h1>Luyện file tự do</h1>
         <p className={`mt-2 text-sm ${mutedTextClassName}`}>
           Upload file từ vựng để luyện nhanh trong phiên này. Không lưu vào deck hay lịch ôn.
@@ -433,14 +432,14 @@ export function FilePracticePage() {
             Về Decks
           </Link>
         </div>
-      </FocusLayout>
+      </div>
     )
   }
 
   if (pageState === 'setup') {
     const startDisabled = enabledForms.length === 0
     return (
-      <FocusLayout>
+      <div className="mx-auto w-full max-w-xl">
         <h1>Luyện file tự do</h1>
         <p className={`mt-2 text-sm ${mutedTextClassName}`}>
           {fileName ? `File: ${fileName}` : 'File đã tải'} — {validLines.length} từ hợp lệ. Không
@@ -550,7 +549,7 @@ export function FilePracticePage() {
             Chọn ít nhất một hình thức hỏi.
           </div>
         ) : null}
-      </FocusLayout>
+      </div>
     )
   }
 
@@ -563,7 +562,7 @@ export function FilePracticePage() {
     const elapsedLabel = `${elapsedMinutes}:${elapsedSeconds.toString().padStart(2, '0')}`
 
     return (
-      <FocusLayout>
+      <div className="mx-auto w-full max-w-xl">
         <h1>Hoàn thành!</h1>
         <div className="font-medium text-[var(--color-text)] dark:text-[var(--color-text-dark)]">
           Đã luyện {initialSessionSize} từ trong {elapsedLabel}.
@@ -628,7 +627,7 @@ export function FilePracticePage() {
             Về Decks
           </Link>
         </div>
-      </FocusLayout>
+      </div>
     )
   }
 
@@ -636,11 +635,11 @@ export function FilePracticePage() {
   const card = queue[0]
   if (!card) {
     return (
-      <FocusLayout>
+      <div className="mx-auto w-full max-w-xl">
         <div className={mutedTextClassName} role="status">
           Đang chuẩn bị…
         </div>
-      </FocusLayout>
+      </div>
     )
   }
 
@@ -655,7 +654,7 @@ export function FilePracticePage() {
     askMode === 'mcq' && mcqDirection === 'meaning' ? card.translation : card.finnishWord
 
   return (
-    <FocusLayout>
+    <div className="mx-auto w-full max-w-xl">
       <div className="flex flex-col gap-6">
         <h1 className="sr-only">Luyện file tự do</h1>
 
@@ -806,6 +805,6 @@ export function FilePracticePage() {
           </div>
         </form>
       </div>
-    </FocusLayout>
+    </div>
   )
 }

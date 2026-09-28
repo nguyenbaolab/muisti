@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { Link, useMatch, useParams } from 'react-router-dom'
 import { Button, buttonPrimaryClassName, buttonSecondaryClassName } from '../components/Button'
-import { FocusLayout } from '../components/FocusLayout'
 import { Input } from '../components/Input'
 import { backLinkClassName } from '../components/linkClasses'
 import { VocabTable } from '../components/VocabTable'
@@ -730,7 +729,7 @@ export function ReviewPage() {
         : 'Tất cả từ đang đến hạn'
 
     return (
-      <FocusLayout>
+      <div className="mx-auto w-full max-w-xl">
         <h1>Ôn tập hôm nay</h1>
         {extraMode ? <div className={`mt-2 ${extraBadgeClassName}`}>{EXTRA_MODE_LABEL}</div> : null}
         <div className={`${extraMode ? 'mt-2 ' : ''}${mutedTextClassName}`}>{scopeLine}</div>
@@ -826,23 +825,23 @@ export function ReviewPage() {
             </div>
           ) : null}
         </div>
-      </FocusLayout>
+      </div>
     )
   }
 
   if (pageState === 'loading') {
     return (
-      <FocusLayout>
+      <div className="mx-auto w-full max-w-xl">
         <div className={mutedTextClassName} role="status">
           Đang chuẩn bị phiên ôn tập…
         </div>
-      </FocusLayout>
+      </div>
     )
   }
 
   if (pageState === 'error') {
     return (
-      <FocusLayout>
+      <div className="mx-auto w-full max-w-xl">
         <div
           className="text-[var(--color-danger)] dark:text-[var(--color-danger-dark)]"
           role="alert"
@@ -859,13 +858,13 @@ export function ReviewPage() {
             Decks
           </Link>
         </div>
-      </FocusLayout>
+      </div>
     )
   }
 
   if (pageState === 'empty') {
     return (
-      <FocusLayout>
+      <div className="mx-auto w-full max-w-xl">
         {extraMode ? (
           <div className="font-medium text-[var(--color-text)] dark:text-[var(--color-text-dark)]">
             Không còn từ nào để ôn thêm.
@@ -892,7 +891,7 @@ export function ReviewPage() {
             Decks
           </Link>
         </div>
-      </FocusLayout>
+      </div>
     )
   }
 
@@ -916,7 +915,7 @@ export function ReviewPage() {
       ]
 
     return (
-      <FocusLayout>
+      <div className="mx-auto w-full max-w-xl">
         <h1>Hoàn thành!</h1>
         <div className="font-medium text-[var(--color-text)] dark:text-[var(--color-text-dark)]">
           {remainingDue !== null && remainingDue > 0
@@ -998,17 +997,17 @@ export function ReviewPage() {
             Xem decks
           </Link>
         </div>
-      </FocusLayout>
+      </div>
     )
   }
 
   if (!card) {
     return (
-      <FocusLayout>
+      <div className="mx-auto w-full max-w-xl">
         <div className={mutedTextClassName} role="status">
           Đang chuẩn bị phiên ôn tập…
         </div>
-      </FocusLayout>
+      </div>
     )
   }
 
@@ -1027,7 +1026,7 @@ export function ReviewPage() {
     askMode === 'mcq' && mcqDirection === 'meaning' ? card.translation : card.finnishWord
 
   return (
-    <FocusLayout>
+    <div className="mx-auto w-full max-w-xl">
       <div className="flex flex-col gap-6">
         <h1 className="sr-only">Ôn tập hôm nay</h1>
         {extraMode ? <div className={extraBadgeClassName}>{EXTRA_MODE_LABEL}</div> : null}
@@ -1191,6 +1190,6 @@ export function ReviewPage() {
           </div>
         </form>
       </div>
-    </FocusLayout>
+    </div>
   )
 }

@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { Button, buttonSecondaryClassName } from '../components/Button'
-import { FocusLayout } from '../components/FocusLayout'
 import { Input } from '../components/Input'
 import { backLinkClassName } from '../components/linkClasses'
 import {
@@ -484,7 +483,7 @@ export function PracticePage() {
 
   if (pageState === 'setup') {
     return (
-      <FocusLayout>
+      <div className="mx-auto w-full max-w-xl">
         <h1>Luyện tập Level 2</h1>
         <div className={`mt-2 ${mutedTextClassName}`}>
           {deckName ? `Deck: ${deckName}` : 'Đang kiểm tra deck…'}
@@ -511,23 +510,23 @@ export function PracticePage() {
             </div>
           ) : null}
         </div>
-      </FocusLayout>
+      </div>
     )
   }
 
   if (pageState === 'loading') {
     return (
-      <FocusLayout>
+      <div className="mx-auto w-full max-w-xl">
         <div className={mutedTextClassName} role="status">
           Đang chuẩn bị phiên luyện tập…
         </div>
-      </FocusLayout>
+      </div>
     )
   }
 
   if (pageState === 'error') {
     return (
-      <FocusLayout>
+      <div className="mx-auto w-full max-w-xl">
         <div
           className="text-[var(--color-danger)] dark:text-[var(--color-danger-dark)]"
           role="alert"
@@ -544,13 +543,13 @@ export function PracticePage() {
             Decks
           </Link>
         </div>
-      </FocusLayout>
+      </div>
     )
   }
 
   if (pageState === 'empty') {
     return (
-      <FocusLayout>
+      <div className="mx-auto w-full max-w-xl">
         <div className="font-medium text-[var(--color-text)] dark:text-[var(--color-text-dark)]">
           {EMPTY_COPY}
         </div>
@@ -566,13 +565,13 @@ export function PracticePage() {
             </Link>
           ) : null}
         </div>
-      </FocusLayout>
+      </div>
     )
   }
 
   if (pageState === 'done') {
     return (
-      <FocusLayout>
+      <div className="mx-auto w-full max-w-xl">
         <h1>Hoàn thành!</h1>
         <div className="font-medium text-[var(--color-text)] dark:text-[var(--color-text-dark)]">
           Đúng {correctAnswers} / {totalAnswers} câu trong phiên này.
@@ -619,7 +618,7 @@ export function PracticePage() {
             Về trang chủ
           </Link>
         </div>
-      </FocusLayout>
+      </div>
     )
   }
 
@@ -628,7 +627,7 @@ export function PracticePage() {
     sessionWordCount > 0 ? `${Math.min(wordIndex + 1, sessionWordCount)} / ${sessionWordCount} từ` : null
 
   return (
-    <FocusLayout>
+    <div className="mx-auto w-full max-w-xl">
       <div className="flex flex-col gap-6">
         <h1 className="sr-only">Luyện tập Level 2</h1>
 
@@ -813,6 +812,6 @@ export function PracticePage() {
           </form>
         ) : null}
       </div>
-    </FocusLayout>
+    </div>
   )
 }

@@ -56,15 +56,15 @@ function AuthRoutes() {
           <Route path="/decks/:id/preview" element={<DeckPreviewPage />} />
           <Route path="/decks/:id" element={<DeckDetailPage />} />
           <Route path="/decks" element={<DecksPage />} />
+          <Route path="/review" element={<ReviewPage />} />
+          <Route path="/review/:deckId/extra" element={<ReviewPage />} />
+          <Route path="/review/:deckId" element={<ReviewPage />} />
+          <Route path="/practice/:deckId" element={<PracticePage />} />
+          <Route path="/practice-file" element={<FilePracticePage />} />
           <Route element={<AdminRoute />}>
             <Route path="/admin" element={<AdminPage />} />
           </Route>
         </Route>
-        <Route path="/review" element={<ReviewPage />} />
-        <Route path="/review/:deckId/extra" element={<ReviewPage />} />
-        <Route path="/review/:deckId" element={<ReviewPage />} />
-        <Route path="/practice/:deckId" element={<PracticePage />} />
-        <Route path="/practice-file" element={<FilePracticePage />} />
         <Route path="/login" element={<Navigate to="/" replace />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
