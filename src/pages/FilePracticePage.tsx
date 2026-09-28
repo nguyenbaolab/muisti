@@ -88,7 +88,7 @@ export function FilePracticePage() {
   const [mcqOptions, setMcqOptions] = useState<string[]>([])
   const [typedAnswer, setTypedAnswer] = useState('')
   const [selectedOption, setSelectedOption] = useState<string | null>(null)
-  const [feedback, setFeedback] = useState<{ correct: boolean } | null>(null)
+  const [feedback, setFeedback] = useState<{ correct: boolean; debtAdd: number } | null>(null)
   const [finnishPool, setFinnishPool] = useState<string[]>([])
   const [completedCards, setCompletedCards] = useState<SessionCard[]>([])
   const [sessionStartTime, setSessionStartTime] = useState<number | null>(null)
@@ -211,19 +211,16 @@ export function FilePracticePage() {
     if (!correct) {
       const nextTotalWrong = card.totalWrong + 1
       const debtAdd = nextTotalWrong === 1 ? 3 : nextTotalWrong === 2 ? 2 : 1
-      setPlannedAttempts((p) => p + debtAdd)
-      setWrongAttempts((n) => n + 1)
       setQueue((prev) => {
         const current = prev[0]
         if (!current) return prev
         return [applyWrong(current), ...prev.slice(1)]
       })
-      setFeedback({ correct: false })
+      setFeedback({ correct: false, debtAdd })
       return
     }
 
-    setCorrectAttempts((n) => n + 1)
-    setFeedback({ correct: true })
+    setFeedback({ correct: true, debtAdd: 0 })
   }
 
   function submitMcqChoice(chosen: string) {
@@ -234,19 +231,16 @@ export function FilePracticePage() {
     if (!correct) {
       const nextTotalWrong = card.totalWrong + 1
       const debtAdd = nextTotalWrong === 1 ? 3 : nextTotalWrong === 2 ? 2 : 1
-      setPlannedAttempts((p) => p + debtAdd)
-      setWrongAttempts((n) => n + 1)
       setQueue((prev) => {
         const current = prev[0]
         if (!current) return prev
         return [applyWrong(current), ...prev.slice(1)]
       })
-      setFeedback({ correct: false })
+      setFeedback({ correct: false, debtAdd })
       return
     }
 
-    setCorrectAttempts((n) => n + 1)
-    setFeedback({ correct: true })
+    setFeedback({ correct: true, debtAdd: 0 })
   }
 
   function handleNext() {
@@ -254,6 +248,13 @@ export function FilePracticePage() {
 
     const current = queue[0]
     if (!current) return
+
+    if (feedback.correct) {
+      setCorrectAttempts((n) => n + 1)
+    } else {
+      setWrongAttempts((n) => n + 1)
+      setPlannedAttempts((p) => p + feedback.debtAdd)
+    }
 
     const result = advanceSession(queue, completedCards, feedback.correct, initialSessionSize)
     setQueue(result.queue)

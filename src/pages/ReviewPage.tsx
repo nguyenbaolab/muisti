@@ -203,7 +203,7 @@ export function ReviewPage() {
   const [mcqOptions, setMcqOptions] = useState<string[]>([])
   const [typedAnswer, setTypedAnswer] = useState('')
   const [selectedOption, setSelectedOption] = useState<string | null>(null)
-  const [feedback, setFeedback] = useState<{ correct: boolean } | null>(null)
+  const [feedback, setFeedback] = useState<{ correct: boolean; debtAdd: number } | null>(null)
   const [saving, setSaving] = useState(false)
   const [finnishPool, setFinnishPool] = useState<string[]>([])
   const [completedCards, setCompletedCards] = useState<SessionCard[]>([])
@@ -498,20 +498,17 @@ export function ReviewPage() {
     if (!correct) {
       const nextTotalWrong = card.totalWrong + 1
       const debtAdd = nextTotalWrong === 1 ? 3 : nextTotalWrong === 2 ? 2 : 1
-      setPlannedAttempts((p) => p + debtAdd)
-      setWrongAttempts((n) => n + 1)
       setQueue((prev) => {
         const current = prev[0]
         if (!current) return prev
         return [applyWrong(current), ...prev.slice(1)]
       })
-      setFeedback({ correct: false })
+      setFeedback({ correct: false, debtAdd })
       return
     }
 
     if (extraMode) {
-      setCorrectAttempts((n) => n + 1)
-      setFeedback({ correct: true })
+      setFeedback({ correct: true, debtAdd: 0 })
       return
     }
 
@@ -529,8 +526,7 @@ export function ReviewPage() {
         return [{ ...current, persisted: true }, ...prev.slice(1)]
       })
     }
-    setCorrectAttempts((n) => n + 1)
-    setFeedback({ correct: true })
+    setFeedback({ correct: true, debtAdd: 0 })
   }
 
   async function loadRemainingDue() {
@@ -578,6 +574,13 @@ export function ReviewPage() {
     const current = queue[0]
     if (!current) return
 
+    if (feedback.correct) {
+      setCorrectAttempts((n) => n + 1)
+    } else {
+      setWrongAttempts((n) => n + 1)
+      setPlannedAttempts((p) => p + feedback.debtAdd)
+    }
+
     const result = advanceSession(queue, completedCards, feedback.correct, initialSessionSize)
     setQueue(result.queue)
     setCompletedCards(result.completedCards)
@@ -604,20 +607,17 @@ export function ReviewPage() {
     if (!correct) {
       const nextTotalWrong = card.totalWrong + 1
       const debtAdd = nextTotalWrong === 1 ? 3 : nextTotalWrong === 2 ? 2 : 1
-      setPlannedAttempts((p) => p + debtAdd)
-      setWrongAttempts((n) => n + 1)
       setQueue((prev) => {
         const current = prev[0]
         if (!current) return prev
         return [applyWrong(current), ...prev.slice(1)]
       })
-      setFeedback({ correct: false })
+      setFeedback({ correct: false, debtAdd })
       return
     }
 
     if (extraMode) {
-      setCorrectAttempts((n) => n + 1)
-      setFeedback({ correct: true })
+      setFeedback({ correct: true, debtAdd: 0 })
       return
     }
 
@@ -635,8 +635,7 @@ export function ReviewPage() {
         return [{ ...current, persisted: true }, ...prev.slice(1)]
       })
     }
-    setCorrectAttempts((n) => n + 1)
-    setFeedback({ correct: true })
+    setFeedback({ correct: true, debtAdd: 0 })
   }
 
   useEffect(() => {
