@@ -490,7 +490,7 @@ Lỗi / sai lệch đã biết. Đánh số từ **KI-001**. Entry mới ở đ�
 3. Vì không lưu DB, không có SRS liên-ngày cho các từ này — session này có tính là "ôn tập" theo nghĩa SRS không, hay chỉ là "luyện tập tự do" một lần?
 4. Validate file input: xử lý file sai format, file rỗng, file quá lớn ra sao?
 
-**Trạng thái:** Open — ý tưởng ghi nhận, **không** đưa vào Phase 1 (MVP). Nằm ngoài `REQUIREMENTS.md` hiện tại, cần thêm feature ID mới nếu làm (vd F-07) và REQUIREMENTS riêng.
+**Trạng thái:** Resolved (2026-09-28) — hiện thực thành tính năng Tự luyện file tự do (F-07), `FilePracticePage` + `lib/session.ts`, route `/practice-file`. Xem REQUIREMENTS v0.3.4.
 
 ---
 
@@ -574,7 +574,7 @@ Lỗi / sai lệch đã biết. Đánh số từ **KI-001**. Entry mới ở đ�
 
 **Hướng xử lý dự kiến (chưa chốt, chưa cấp bách):** Đổi sang random ở phía database thay vì tải hết về client — ví dụ dùng RPC/SQL function kiểu `ORDER BY random() LIMIT 3` (loại trừ đáp án đúng) qua Supabase, thay vì `select('finnish_word')` rồi shuffle trong JS. Cần đánh giá lại nếu/khi vocab user thấy tăng đáng kể.
 
-**Trạng thái:** Open — không cấp bách. Ghi nhận để theo dõi khi pool MCQ (theo deck user đang thấy) lớn hơn nhiều so với vài trăm từ.
+**Trạng thái:** Open — không cấp bách. Ghi nhận để theo dõi khi pool MCQ (theo deck user đang thấy) lớn hơn nhiều so với vài trăm từ. MCQ hai chiều (2026-09-28) thêm `meaningPool` (cùng SELECT `translation`) — cùng mô hình tải pool về client; hướng RPC random vẫn áp dụng nếu pool lớn.
 
 ---
 

@@ -4,9 +4,43 @@ Ghi theo thời gian, mới nhất ở trên. Mỗi entry: tên ngắn, ngày, q
 
 ---
 
+## Review + Practice + FilePractice trong AppLayout; form max-w-xl
+
+**Ngày:** 2026-09-28
+
+**Quyết định:** `/review`, `/review/:deckId`, `/review/:deckId/extra`, `/practice/:deckId`, `/practice-file` là children của `<Route element={<AppLayout/>}>` (nav Muisti / Decks / Ôn tập + ThemeToggle + Đăng xuất giống Decks). Bỏ wrapper `FocusLayout` trên ba page; mỗi nhánh return bọc `<div className="mx-auto w-full max-w-xl">` để form không kéo rộng trong main `max-w-3xl`. `FocusLayout.tsx` giữ file (hiện không page import).
+
+**Lý do:** Tránh trang ôn/làm bài “lạc” thiếu nav; vẫn giữ độ rộng form cũ.
+
+**Phạm vi:** `App.tsx`, `ReviewPage.tsx`, `FilePracticePage.tsx`, `PracticePage.tsx`. Không đổi session/SRS/HUD logic.
+
+**Không làm gì:** Không xóa `FocusLayout.tsx`. Không đổi auth gate.
+
+**Thay thế:** entry «Tách AppLayout / HomePage; Review ngoài layout…», phần layout Focus của «ReviewPage Đợt A», và bullet FocusLayout trong «Task 5 bước 4» — đánh dấu Superseded bên dưới.
+
+---
+
+## MCQ hai chiều: askMode + mcqDirection; trọng số gõ=2
+
+**Ngày:** 2026-09-28
+
+**Quyết định:** Giữ `AskMode = 'type' | 'mcq'`; thêm `McqDirection = 'meaning' | 'word'`. Ba tick setup → `Form` / `pickForm` (gõ weight 2, mỗi MCQ weight 1 → ~50/25/25). `presentCard` chọn pool (`finnishPool` / `meaningPool`); chấm so `finnishWord` hoặc `translation` theo chiều. Áp `ReviewPage` (mix/deck/extra) và `FilePracticePage`. Review: `vocab_items.select('finnish_word, translation')`.
+
+**Lý do:** Luyện nhận diện hai chiều (từ↔nghĩa) mà không đổi SRS/persist; Cách 2 tránh nhân ba nhánh JSX `askMode`.
+
+**Phạm vi:** `ReviewPage.tsx`, `FilePracticePage.tsx`. Không đổi `session.ts` / `persistCard`.
+
+**Không làm gì:** Không đổi Level 2 Worker MCQ. Không hardcode hex.
+
+**Thay thế:** mô tả MCQ một chiều trong «ReviewPage Đợt B» (và REQUIREMENTS Level 1 cũ) — đánh dấu Superseded bên dưới cho phần hình thức hỏi.
+
+---
+
 ## Task 5 bước 4: Level 2 practice — 1 lần lặp khi sai; ưu tiên times_shown; không đụng SRS
 
 **Ngày:** 2026-09-27
+
+**[SUPERSEDED (layout) 2026-09-28]** bởi «Review + Practice + FilePractice trong AppLayout…». Route practice giờ trong `AppLayout` (form `max-w-xl`), không còn `FocusLayout` ngoài layout. Phần còn đúng: ưu tiên times_shown, 1 lần lặp khi sai, không ghi SRS, Worker `times_shown`.
 
 **Quyết định:**
 
@@ -315,6 +349,8 @@ Ghi theo thời gian, mới nhất ở trên. Mỗi entry: tên ngắn, ngày, q
 
 **Ngày:** 2026-09-19
 
+**[SUPERSEDED (hình thức MCQ một chiều) 2026-09-28]** bởi «MCQ hai chiều: askMode + mcqDirection…». Tiến độ từ / HUD / Typing / Radio tự dựng vẫn đúng; MCQ giờ có hai chiều + trọng số.
+
 **Quyết định:**
 - Tiến độ `{x} / {y} từ` derived: `x = completedCards.length`, `y = completedCards.length + queue.length`. Không state mới. Thanh `role="progressbar"`, fill `width` inline phần trăm; y = 0 không render.
 - h1 «Ôn tập hôm nay» giữ, `sr-only` trên màn học (tập trung vào thẻ).
@@ -335,6 +371,8 @@ Ghi theo thời gian, mới nhất ở trên. Mỗi entry: tên ngắn, ngày, q
 ## ReviewPage Đợt A: khung tập trung + setup/empty/error/done
 
 **Ngày:** 2026-09-19
+
+**[SUPERSEDED (FocusLayout ngoài AppLayout) 2026-09-28]** bởi «Review + Practice + FilePractice trong AppLayout…». Copy setup/empty/error/done và `ownerChecked` vẫn đúng; khung giờ là AppLayout + `max-w-xl`.
 
 **Quyết định:**
 - Review ngoài `AppLayout` dùng `FocusLayout`: một `<main>` `max-w-xl`, thanh trên «← Trang chủ» + `ThemeToggle`, không hairline, không wordmark. `useTheme` chỉ `setItem` khi bấm toggle — mount trên trang này không tự ghi storage.
@@ -431,6 +469,8 @@ Ghi theo thời gian, mới nhất ở trên. Mỗi entry: tên ngắn, ngày, q
 ## Tách AppLayout / HomePage; Review ngoài layout; dọn chrome #root
 
 **Ngày:** 2026-09-19
+
+**[SUPERSEDED (Review ngoài layout) 2026-09-28]** bởi «Review + Practice + FilePractice trong AppLayout…». Phần còn đúng: tách `AppLayout` / `HomePage`, header Decks/Ôn tập/ThemeToggle/Đăng xuất, dọn chrome `#root`.
 
 **Quyết định:** `AppShell` tách thành `AppLayout` (header + `Outlet`) và `HomePage` (Tổng kết Tổng). Route session: layout bọc `/` + mọi `/decks*`. `ReviewPage` (`/review`, `/review/:deckId`) đứng ngoài layout — ôn tập toàn màn hình, không header. Header: wordmark, Decks, Ôn tập, `ThemeToggle`, Đăng xuất (`signOut` không confirm). Không hiện email/tên. `#root` bỏ `text-align: center`, `border-inline`, `width: 1126px`; `h1`/`h2` về cỡ base (1.5rem / 1.125rem). Alias CSS cũ (`--text`, `--bg`, `--border`…) giữ **(đã dọn 2026-09-19 — xem entry «Dọn alias CSS cũ»)**.
 

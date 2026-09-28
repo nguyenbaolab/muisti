@@ -4,10 +4,21 @@ Nhật ký thay đổi có ý nghĩa. Entry mới ở **đầu file** (sau tiêu
 
 ---
 
+## Giai đoạn 1 — HUD + MCQ hai chiều + AppLayout nav + Decks CTA
+**Ngày:** 2026-09-28
+
+- HUD màn làm bài (Review mix/deck/extra + FilePractice): Câu X/Y + đúng/sai + đồng hồ; X = `questionNumber` (tăng mỗi present kể cả reinsert); Y = `plannedAttempts` (init số từ, += debt 3/2/1 khi sai); cập nhật lúc Tiếp (đóng băng feedback). Thuần hiển thị.
+- Fix HUD: bỏ `attemptCount+1` (X vượt Y) → `questionNumber`; xóa `attemptCount` thừa (TS6133 / `npm run build`).
+- MCQ hai chiều: tick Gõ / Chọn nghĩa / Chọn từ; `askMode` + `mcqDirection`; `pickForm` trọng số gõ=2 / MCQ=1 (~50/25/25); `meaningPool`. Cả Review lẫn FilePractice.
+- Nav: `/review*`, `/practice/:deckId`, `/practice-file` vào `AppLayout`; bỏ `FocusLayout` (form `max-w-xl`). `FocusLayout.tsx` mồ côi — giữ file.
+- Decks: nút success «Luyện file tự do» (`buttonSuccessClassName`) cạnh «Tạo deck mới»; mô tả dưới dòng nhịp học.
+
+---
+
 ## Giai đoạn 1 — F-07: luyện file tự do `/practice-file`
 **Ngày:** 2026-09-28
 
-- `FilePracticePage`: upload (`FileField` + `parseDeckFile`), setup (số từ + type/MCQ), reviewing dùng `applyWrong`/`advanceSession` từ `lib/session` (không Supabase). Done: đúng lần đầu / từng sai / danh sách sai. Route ngoài AppLayout; link trên Decks. `tsc --noEmit` pass. ReviewPage không sửa.
+- `FilePracticePage`: upload (`FileField` + `parseDeckFile`), setup (số từ + type/MCQ), reviewing dùng `applyWrong`/`advanceSession` từ `lib/session` (không Supabase). Done: đúng lần đầu / từng sai / danh sách sai. Route trong `AppLayout`; vào từ Decks. `tsc --noEmit` pass. ReviewPage không sửa (lúc ship F-07).
 
 ---
 
