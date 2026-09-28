@@ -13,6 +13,8 @@ import {
 
 type PageState = 'upload' | 'setup' | 'reviewing' | 'done'
 type AskMode = 'type' | 'mcq'
+type McqDirection = 'meaning' | 'word'
+type Form = 'type' | 'mcq_meaning' | 'mcq_word'
 
 const mutedTextClassName =
   'text-[var(--color-text-muted)] dark:text-[var(--color-text-muted-dark)]'
@@ -35,8 +37,18 @@ function normalizeAnswer(value: string): string {
   return value.trim().toLowerCase()
 }
 
-function pickMode(enabled: AskMode[]): AskMode {
-  return enabled[Math.floor(Math.random() * enabled.length)]
+function weightOf(form: Form): number {
+  return form === 'type' ? 2 : 1
+}
+
+function pickForm(forms: Form[]): Form {
+  const total = forms.reduce((s, f) => s + weightOf(f), 0)
+  let r = Math.random() * total
+  for (const f of forms) {
+    r -= weightOf(f)
+    if (r < 0) return f
+  }
+  return forms[forms.length - 1]
 }
 
 function pickMcqOptions(correct: string, pool: string[]): string[] | null {
@@ -80,16 +92,19 @@ export function FilePracticePage() {
   const [validLines, setValidLines] = useState<ValidLine[]>([])
 
   const [typeEnabled, setTypeEnabled] = useState(true)
-  const [mcqEnabled, setMcqEnabled] = useState(true)
+  const [mcqMeaningEnabled, setMcqMeaningEnabled] = useState(true)
+  const [mcqWordEnabled, setMcqWordEnabled] = useState(true)
   const [chosenCount, setChosenCount] = useState(0)
 
   const [queue, setQueue] = useState<SessionCard[]>([])
   const [askMode, setAskMode] = useState<AskMode>('type')
+  const [mcqDirection, setMcqDirection] = useState<McqDirection>('word')
   const [mcqOptions, setMcqOptions] = useState<string[]>([])
   const [typedAnswer, setTypedAnswer] = useState('')
   const [selectedOption, setSelectedOption] = useState<string | null>(null)
   const [feedback, setFeedback] = useState<{ correct: boolean; debtAdd: number } | null>(null)
   const [finnishPool, setFinnishPool] = useState<string[]>([])
+  const [meaningPool, setMeaningPool] = useState<string[]>([])
   const [completedCards, setCompletedCards] = useState<SessionCard[]>([])
   const [sessionStartTime, setSessionStartTime] = useState<number | null>(null)
   const [initialSessionSize, setInitialSessionSize] = useState(0)
@@ -101,26 +116,44 @@ export function FilePracticePage() {
 
   const typedInputRef = useRef<HTMLInputElement | null>(null)
 
-  const enabledModes: AskMode[] = [
+  const enabledForms: Form[] = [
     ...(typeEnabled ? (['type'] as const) : []),
-    ...(mcqEnabled ? (['mcq'] as const) : []),
+    ...(mcqMeaningEnabled ? (['mcq_meaning'] as const) : []),
+    ...(mcqWordEnabled ? (['mcq_word'] as const) : []),
   ]
 
-  function presentCard(nextQueue: SessionCard[], modes: AskMode[], pool: string[]) {
+  function presentCard(
+    nextQueue: SessionCard[],
+    forms: Form[],
+    finnishWords: string[],
+    meanings: string[],
+  ) {
     const card = nextQueue[0]
     if (!card) return
     setQuestionNumber((n) => n + 1)
-    let mode = pickMode(modes)
+    let form = pickForm(forms)
     let options: string[] = []
-    if (mode === 'mcq') {
-      const mcq = pickMcqOptions(card.finnishWord, pool)
+    if (form === 'mcq_word') {
+      const mcq = pickMcqOptions(card.finnishWord, finnishWords)
       if (mcq) {
         options = mcq
       } else {
-        mode = 'type'
+        form = 'type'
+      }
+    } else if (form === 'mcq_meaning') {
+      const mcq = pickMcqOptions(card.translation, meanings)
+      if (mcq) {
+        options = mcq
+      } else {
+        form = 'type'
       }
     }
-    setAskMode(mode)
+    if (form === 'type') {
+      setAskMode('type')
+    } else {
+      setAskMode('mcq')
+      setMcqDirection(form === 'mcq_meaning' ? 'meaning' : 'word')
+    }
     setMcqOptions(options)
     setTypedAnswer('')
     setSelectedOption(null)
@@ -170,14 +203,15 @@ export function FilePracticePage() {
   }
 
   function startFilePractice() {
-    if (enabledModes.length === 0 || validLines.length === 0) return
+    if (enabledForms.length === 0 || validLines.length === 0) return
 
     const max = validLines.length
     const count = Math.min(max, Math.max(1, Math.floor(chosenCount) || 1))
     setChosenCount(count)
 
     const cards = shuffle(validLines.map(lineToSessionCard)).slice(0, count)
-    const pool = cards.map((c) => c.finnishWord)
+    const finnishWords = cards.map((c) => c.finnishWord)
+    const meanings = cards.map((c) => c.translation)
 
     setCompletedCards([])
     setSessionStartTime(Date.now())
@@ -187,9 +221,10 @@ export function FilePracticePage() {
     setElapsedSec(0)
     setQuestionNumber(0)
     setPlannedAttempts(cards.length)
-    setFinnishPool(pool)
+    setFinnishPool(finnishWords)
+    setMeaningPool(meanings)
     setQueue(cards)
-    presentCard(cards, enabledModes, pool)
+    presentCard(cards, enabledForms, finnishWords, meanings)
     setPageState('reviewing')
   }
 
@@ -197,7 +232,8 @@ export function FilePracticePage() {
     if (askMode === 'type') {
       return normalizeAnswer(typedAnswer) === normalizeAnswer(card.finnishWord)
     }
-    return selectedOption !== null && selectedOption === card.finnishWord
+    const correctValue = mcqDirection === 'meaning' ? card.translation : card.finnishWord
+    return selectedOption !== null && selectedOption === correctValue
   }
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -227,7 +263,8 @@ export function FilePracticePage() {
     const card = queue[0]
     if (!card || feedback) return
 
-    const correct = chosen === card.finnishWord
+    const correctValue = mcqDirection === 'meaning' ? card.translation : card.finnishWord
+    const correct = chosen === correctValue
     if (!correct) {
       const nextTotalWrong = card.totalWrong + 1
       const debtAdd = nextTotalWrong === 1 ? 3 : nextTotalWrong === 2 ? 2 : 1
@@ -263,7 +300,7 @@ export function FilePracticePage() {
       setPageState('done')
       return
     }
-    presentCard(result.queue, enabledModes, finnishPool)
+    presentCard(result.queue, enabledForms, finnishPool, meaningPool)
   }
 
   function resetToUpload() {
@@ -274,6 +311,7 @@ export function FilePracticePage() {
     setSessionStartTime(null)
     setInitialSessionSize(0)
     setFinnishPool([])
+    setMeaningPool([])
     setFileName(null)
     setParseErrorCount(0)
     setUploadMessage(null)
@@ -324,7 +362,19 @@ export function FilePracticePage() {
 
     document.addEventListener('keydown', onKeyDown)
     return () => document.removeEventListener('keydown', onKeyDown)
-  }, [pageState, feedback, askMode, mcqOptions, queue, completedCards, initialSessionSize, finnishPool, enabledModes])
+  }, [
+    pageState,
+    feedback,
+    askMode,
+    mcqDirection,
+    mcqOptions,
+    queue,
+    completedCards,
+    initialSessionSize,
+    finnishPool,
+    meaningPool,
+    enabledForms,
+  ])
 
   useEffect(() => {
     if (pageState !== 'reviewing') return
@@ -388,7 +438,7 @@ export function FilePracticePage() {
   }
 
   if (pageState === 'setup') {
-    const startDisabled = enabledModes.length === 0
+    const startDisabled = enabledForms.length === 0
     return (
       <FocusLayout>
         <h1>Luyện file tự do</h1>
@@ -436,23 +486,39 @@ export function FilePracticePage() {
                   Gõ chữ
                 </span>
                 <span className={`mt-0.5 block text-xs ${mutedTextClassName}`}>
-                  Nhập từ tiếng Phần Lan theo nghĩa.
+                  Hiện nghĩa → gõ từ Phần
                 </span>
               </span>
             </label>
             <label className="flex cursor-pointer items-start gap-2.5">
               <input
                 type="checkbox"
-                checked={mcqEnabled}
-                onChange={(e) => setMcqEnabled(e.target.checked)}
+                checked={mcqMeaningEnabled}
+                onChange={(e) => setMcqMeaningEnabled(e.target.checked)}
                 className={checkboxClassName}
               />
               <span>
                 <span className="block text-sm font-medium text-[var(--color-text)] dark:text-[var(--color-text-dark)]">
-                  Trắc nghiệm
+                  Trắc nghiệm chọn nghĩa
                 </span>
                 <span className={`mt-0.5 block text-xs ${mutedTextClassName}`}>
-                  Chọn một trong bốn đáp án.
+                  Hiện từ Phần → chọn nghĩa
+                </span>
+              </span>
+            </label>
+            <label className="flex cursor-pointer items-start gap-2.5">
+              <input
+                type="checkbox"
+                checked={mcqWordEnabled}
+                onChange={(e) => setMcqWordEnabled(e.target.checked)}
+                className={checkboxClassName}
+              />
+              <span>
+                <span className="block text-sm font-medium text-[var(--color-text)] dark:text-[var(--color-text-dark)]">
+                  Trắc nghiệm chọn từ
+                </span>
+                <span className={`mt-0.5 block text-xs ${mutedTextClassName}`}>
+                  Hiện nghĩa → chọn từ Phần
                 </span>
               </span>
             </label>
@@ -460,7 +526,7 @@ export function FilePracticePage() {
         </fieldset>
 
         <p className={`mt-3 text-sm ${mutedTextClassName}`}>
-          Chọn cả hai để mỗi từ được hỏi ngẫu nhiên theo một hình thức.
+          Chọn ít nhất một hình thức. Gõ chữ được ưu tiên khoảng 2× mỗi loại trắc nghiệm.
         </p>
         <p className={`mt-2 hidden text-sm sm:block ${mutedTextClassName}`} aria-hidden="true">
           Gõ chữ: Enter để trả lời. Trắc nghiệm: nhấn A, B, C hoặc D.
@@ -584,6 +650,9 @@ export function FilePracticePage() {
   const hudMinutes = Math.floor(elapsedSec / 60)
   const hudSeconds = String(elapsedSec % 60).padStart(2, '0')
   const hudTime = `${hudMinutes}:${hudSeconds}`
+  const showMeaningPrompt = !(askMode === 'mcq' && mcqDirection === 'meaning')
+  const feedbackAnswer =
+    askMode === 'mcq' && mcqDirection === 'meaning' ? card.translation : card.finnishWord
 
   return (
     <FocusLayout>
@@ -622,9 +691,11 @@ export function FilePracticePage() {
         ) : null}
 
         <div>
-          <div className={`text-xs ${mutedTextClassName}`}>Nghĩa</div>
+          <div className={`text-xs ${mutedTextClassName}`}>
+            {showMeaningPrompt ? 'Nghĩa' : 'Tiếng Phần'}
+          </div>
           <div className="mt-1 break-words text-2xl font-medium leading-snug text-[var(--color-text)] dark:text-[var(--color-text-dark)]">
-            {card.translation}
+            {showMeaningPrompt ? card.translation : card.finnishWord}
           </div>
         </div>
 
@@ -646,7 +717,7 @@ export function FilePracticePage() {
           ) : (
             <fieldset disabled={Boolean(feedback)} className="w-full border-0 p-0 disabled:opacity-60">
               <legend className={`mb-2 block text-xs ${mutedTextClassName}`}>
-                Chọn từ tiếng Phần Lan
+                {mcqDirection === 'meaning' ? 'Chọn nghĩa' : 'Chọn từ tiếng Phần Lan'}
               </legend>
               <div>
                 {mcqOptions.map((option, index) => {
@@ -711,7 +782,7 @@ export function FilePracticePage() {
               </div>
               <div className="mt-2 text-base text-[var(--color-text)] dark:text-[var(--color-text-dark)]">
                 <span className={mutedTextClassName}>Đáp án: </span>
-                <strong>{card.finnishWord}</strong>
+                <strong>{feedbackAnswer}</strong>
               </div>
               <div className="mt-6">
                 <Button
