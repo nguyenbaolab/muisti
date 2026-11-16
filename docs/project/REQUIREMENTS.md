@@ -1,7 +1,9 @@
 # REQUIREMENTS — Muisti (Finnish Learning App)
 
-**Phiên bản:** v0.3.4  
-**Cập nhật:** 2026-09-28
+**Phiên bản:** v0.3.5  
+**Cập nhật:** 2026-11-16
+
+**Changelog v0.3.5:** Practice Level 2 dùng nợ 3/2/1 như Level 1, luật loại câu (`fill_blank` trong mẻ lần sai), hiện đáp án sau mọi lần sai, `exclude_ids` trên `POST /api/generate-exercise`.
 
 **Changelog v0.3.4:** F-07 tự luyện file `/practice-file`; MCQ hai chiều (chọn nghĩa / chọn từ) + trọng số gõ=2; HUD màn làm bài; Review / Practice / FilePractice trong `AppLayout`.
 
@@ -95,11 +97,11 @@ Recall chủ động + bài tập sinh AI (`fill_blank`, `mcq`) gắn `vocab_ite
 
 **Task 5 bước 1/4 (schema only, 2026-09-26):** Done trên repo — migration `20260926_010_exercise_generation.sql` + `schema.sql` v0.3.0. Thêm `profiles.is_admin`, `profiles.daily_exercise_quota`; bảng `exercise_quota_usage` (quota sinh bài theo ngày); bảng `generated_exercises` (`fill_blank` | `mcq`, `content` jsonb, `times_shown`, `cooldown_until`). Types trong `src/types/database.ts`. migration applied trên Supabase.
 
-**Task 5 bước 2/4 (Worker API, 2026-09-26):** Done trên repo — `worker/index.ts` + `wrangler.jsonc` `main` + `ASSETS` / `run_worker_first: ["/api/*"]`. `POST /api/generate-exercise` (Bearer Supabase access token): verify user → check secrets → validate → lấy bài từ pool (tăng `times_shown`, cooldown sau 5 lần) hoặc sinh Claude (quota Hướng B) → `{ exercise: { id, exercise_type, content } }`. Mã lỗi: `unauthorized`, `server_misconfigured`, `invalid_request`, `quota_exceeded`, `vocab_item_not_found`, `generation_failed`, `generation_unavailable`, `internal_error`, `not_found`. Owner set secrets (`wrangler secret put`) rồi test curl trước khi UI luyện tập.
+**Task 5 bước 2/4 (Worker API, 2026-09-26; `exclude_ids` 2026-11-16):** Done trên repo — `worker/index.ts` + `wrangler.jsonc` `main` + `ASSETS` / `run_worker_first: ["/api/*"]`. `POST /api/generate-exercise` (Bearer Supabase access token): verify user → check secrets → validate → lấy bài từ pool (tăng `times_shown`, cooldown sau 5 lần) hoặc sinh Claude (quota Hướng B) → `{ exercise: { id, exercise_type, content } }`. Body có thể kèm `exclude_ids` (tối đa 50 UUID; rỗng hoặc không gửi = như cũ). Khi có danh sách: pool trừ các id đó; hết câu thì sinh mới; không sinh được (hết quota, Claude lỗi/billing, insert fail) thì dùng lại một id trong danh sách, cùng từ + loại, `times_shown` thấp nhất, bỏ cooldown lúc chọn, vẫn bump. Mã lỗi: `unauthorized`, `server_misconfigured`, `invalid_request`, `quota_exceeded`, `vocab_item_not_found`, `generation_failed`, `generation_unavailable`, `internal_error`, `not_found`. Owner set secrets (`wrangler secret put`) rồi test curl trước khi UI luyện tập.
 
 **Task 5 bước 3/4 (UI admin, 2026-09-27):** Done trên repo — `AdminRoute` + `AdminPage` tại `/admin` (trong `AppLayout`). Admin thấy link «Admin» trên nav. Bảng mọi `profiles`: email, `daily_exercise_quota` (sửa inline, lưu khi blur, validate ≥ 0), `is_admin` (checkbox inline). Tìm kiếm email client-side. Non-admin gõ URL → redirect `/`. RLS UPDATE profiles vẫn chỉ `public.is_admin()`.
 
-**Task 5 bước 4/4 (UI luyện tập Level 2, 2026-09-27; layout AppLayout 2026-09-28):** Done trên repo — `/practice/:deckId` (`PracticePage` trong `AppLayout`, form `max-w-xl`). Owner-only. Chọn từ: `interval_days >= 3`, ưu tiên tổng `times_shown` (mọi `generated_exercises` của từ) thấp nhất, cap `PRACTICE_SESSION_LIMIT` (20). Mỗi từ random `fill_blank`|`mcq` → `POST /api/generate-exercise`. Chấm ngay; sai lần 1 → gọi lại API cùng type (1 lần); sai lần 2 → sang từ tiếp theo. Không ghi SRS. Empty copy khi 0 từ đủ điều kiện. Nút «Luyện tập» trên `DeckDetailPage`. Helper `src/lib/generateExercise.ts`. **Task 5 hoàn tất trên repo** (010 applied; secrets Worker do owner cấu hình runtime).
+**Task 5 bước 4/4 (UI luyện tập Level 2, 2026-09-27; layout AppLayout 2026-09-28; nợ + loại câu 2026-11-16):** Done trên repo — `/practice/:deckId` (`PracticePage` trong `AppLayout`, form `max-w-xl`). Owner-only. Chọn từ: `interval_days >= 3`, ưu tiên tổng `times_shown` (mọi `generated_exercises` của từ) thấp nhất, cap `PRACTICE_SESSION_LIMIT` (20). Lần đầu mỗi từ random `fill_blank`|`mcq`. Sai thì nợ 3/2/1 như Level 1 (`src/lib/practiceSession.ts`, gap lấy `computeReinsertGap`), mẻ loại câu của lần sai có `fill_blank` (lần 3+ chỉ `fill_blank`); hiện đáp án sau mọi lần sai. Hết nợ và đúng thì sang từ khác. Không ghi SRS. Tiến độ đếm từ đã xong / số từ ban đầu. Từ khó: `totalWrong >= 2`. Empty copy khi 0 từ đủ điều kiện. Nút «Luyện tập» trên `DeckDetailPage`. Helper `src/lib/generateExercise.ts` (gửi `exclude_ids` các câu đã hiện trong phiên). **Task 5 hoàn tất trên repo** (010 applied; secrets Worker do owner cấu hình runtime).
 
 ### Level 3 (tương lai — không build giai đoạn này)
 

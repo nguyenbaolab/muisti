@@ -4,6 +4,16 @@ Nhật ký thay đổi có ý nghĩa. Entry mới ở **đầu file** (sau tiêu
 
 ---
 
+## Practice Level 2: nợ 3/2/1 + luật loại câu + exclude_ids
+**Ngày:** 2026-11-16
+**Trạng thái:** Done
+
+- Bỏ retry một lần cùng type trên `/practice/:deckId`. `src/lib/practiceSession.ts`: `repeatDebt` 3/2/1, nhét lại qua `computeReinsertGap` (import từ `session.ts`, không sửa file đó). Mẻ loại câu lần sai 1 và 2 có ít nhất một `fill_blank`; lần 3+ chỉ `fill_blank`. Hiện đáp án sau mọi lần sai. Từ khó = `totalWrong >= 2`. Không ghi SRS.
+- `generateExercise` gửi `exclude_ids` (tối đa 50 id mới nhất). Worker: pool trừ id đó; hết thì sinh mới; không sinh được thì dùng lại câu trong danh sách, bỏ cooldown lúc chọn, vẫn bump `times_shown`.
+- Docs: DECISIONS, REQUIREMENTS v0.3.5, CONTEXT, KI-037. `tsc --noEmit` + `tsc -b` pass.
+
+---
+
 ## Apply DB: migration 009 + 010 + 011 + set super admin
 **Ngày:** 2026-09-28
 **Trạng thái:** Done

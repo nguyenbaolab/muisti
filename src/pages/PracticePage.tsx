@@ -8,15 +8,16 @@ import {
   messageForGenerateError,
   type GenerateExerciseErr,
 } from '../lib/generateExercise'
+import {
+  advancePracticeSession,
+  createPracticeCard,
+  currentExerciseType,
+  gradePracticeCard,
+  type PracticeCard,
+} from '../lib/practiceSession'
 import { PRACTICE_SESSION_LIMIT } from '../lib/sessionLimits'
 import { supabase } from '../lib/supabase'
-import type {
-  ExerciseContent,
-  ExerciseType,
-  FillBlankContent,
-  McqContent,
-  VocabItem,
-} from '../types/database'
+import type { ExerciseContent, FillBlankContent, McqContent, VocabItem } from '../types/database'
 
 type PageState = 'setup' | 'loading' | 'practicing' | 'empty' | 'done' | 'error'
 
@@ -26,29 +27,10 @@ type ProgressJoinRow = {
   vocab_items: VocabItem | VocabItem[] | null
 }
 
-type PracticeWord = {
-  vocabItemId: string
-  finnishWord: string
-  translation: string
-  exerciseType: ExerciseType
-}
-
 type LoadedExercise = {
   id: string
-  exerciseType: ExerciseType
+  exerciseType: PracticeCard['firstType']
   content: ExerciseContent
-}
-
-type StruggledQuestion = {
-  prompt: string
-  expected: string
-}
-
-type StruggledWord = {
-  vocabItemId: string
-  finnishWord: string
-  translation: string
-  questions: StruggledQuestion[]
 }
 
 const mutedTextClassName =
@@ -59,10 +41,6 @@ const EMPTY_COPY =
 
 function normalizeAnswer(value: string): string {
   return value.trim().toLowerCase()
-}
-
-function pickExerciseType(): ExerciseType {
-  return Math.random() < 0.5 ? 'fill_blank' : 'mcq'
 }
 
 function vocabFromJoin(row: ProgressJoinRow): VocabItem | null {
@@ -84,7 +62,7 @@ function expectedAnswer(exercise: LoadedExercise): string {
 async function loadPracticeWords(
   userId: string,
   deckId: string,
-): Promise<{ words: PracticeWord[]; fatalError: string | null }> {
+): Promise<{ words: PracticeCard[]; fatalError: string | null }> {
   const { data, error } = await supabase
     .from('user_vocab_progress')
     .select('vocab_item_id, interval_days, vocab_items!inner(*)')
@@ -140,10 +118,9 @@ async function loadPracticeWords(
   })
 
   const selected = candidates.slice(0, PRACTICE_SESSION_LIMIT)
-  const words: PracticeWord[] = selected.map((c) => ({
-    ...c,
-    exerciseType: pickExerciseType(),
-  }))
+  const words = selected.map((c) =>
+    createPracticeCard(c.vocabItemId, c.finnishWord, c.translation),
+  )
 
   return { words, fatalError: null }
 }
@@ -157,9 +134,8 @@ export function PracticePage() {
   const [deckName, setDeckName] = useState<string | null>(null)
   const [ownerChecked, setOwnerChecked] = useState(false)
 
-  const [queue, setQueue] = useState<PracticeWord[]>([])
-  const [wordIndex, setWordIndex] = useState(0)
-  const [attemptIndex, setAttemptIndex] = useState(0)
+  const [queue, setQueue] = useState<PracticeCard[]>([])
+  const [completedCards, setCompletedCards] = useState<PracticeCard[]>([])
   const [exercise, setExercise] = useState<LoadedExercise | null>(null)
   const [loadingExercise, setLoadingExercise] = useState(false)
   const [exerciseError, setExerciseError] = useState<string | null>(null)
@@ -171,10 +147,10 @@ export function PracticePage() {
   const [correctAnswers, setCorrectAnswers] = useState(0)
   const [totalAnswers, setTotalAnswers] = useState(0)
   const [sessionWordCount, setSessionWordCount] = useState(0)
-  const [struggledWords, setStruggledWords] = useState<StruggledWord[]>([])
+  const [wordsDone, setWordsDone] = useState(0)
 
   const typedInputRef = useRef<HTMLInputElement | null>(null)
-  const firstWrongQuestionRef = useRef<StruggledQuestion | null>(null)
+  const shownIdsRef = useRef<Map<string, string[]>>(new Map())
 
   useEffect(() => {
     if (!deckId) {
@@ -228,8 +204,13 @@ export function PracticePage() {
     }
   }, [deckId])
 
-  async function fetchExerciseForCurrent(
-    word: PracticeWord,
+  function rememberShown(vocabItemId: string, exerciseId: string) {
+    const prev = shownIdsRef.current.get(vocabItemId) ?? []
+    shownIdsRef.current.set(vocabItemId, [...prev, exerciseId])
+  }
+
+  async function fetchExerciseForCard(
+    card: PracticeCard,
   ): Promise<{ ok: true } | { ok: false; err: GenerateExerciseErr }> {
     setLoadingExercise(true)
     setExerciseError(null)
@@ -238,7 +219,12 @@ export function PracticePage() {
     setTypedAnswer('')
     setSelectedOption(null)
 
-    const result = await generateExercise(word.vocabItemId, word.exerciseType)
+    const excludeIds = shownIdsRef.current.get(card.vocabItemId) ?? []
+    const result = await generateExercise(
+      card.vocabItemId,
+      currentExerciseType(card),
+      excludeIds,
+    )
     setLoadingExercise(false)
 
     if (!result.ok) {
@@ -246,6 +232,7 @@ export function PracticePage() {
       return { ok: false, err: result }
     }
 
+    rememberShown(card.vocabItemId, result.exercise.id)
     setExercise({
       id: result.exercise.id,
       exerciseType: result.exercise.exercise_type,
@@ -261,10 +248,9 @@ export function PracticePage() {
     setError(null)
     setCorrectAnswers(0)
     setTotalAnswers(0)
-    setStruggledWords([])
-    firstWrongQuestionRef.current = null
-    setWordIndex(0)
-    setAttemptIndex(0)
+    setWordsDone(0)
+    setCompletedCards([])
+    shownIdsRef.current = new Map()
     setExercise(null)
     setFeedback(null)
     setExerciseError(null)
@@ -313,7 +299,7 @@ export function PracticePage() {
     setQueue(words)
     setSessionWordCount(words.length)
     setPageState('practicing')
-    await fetchExerciseForCurrent(words[0])
+    await fetchExerciseForCard(words[0])
   }
 
   function finishSession() {
@@ -323,76 +309,55 @@ export function PracticePage() {
     setExerciseError(null)
   }
 
-  async function advanceToNextWord() {
-    const nextIndex = wordIndex + 1
-    if (nextIndex >= queue.length) {
+  async function handleNextAfterFeedback() {
+    if (!feedback) return
+    const card = queue[0]
+    if (!card) return
+
+    const result = advancePracticeSession(queue, completedCards, feedback.correct, sessionWordCount)
+    setQueue(result.queue)
+    setCompletedCards(result.completedCards)
+    if (result.completedCards.length > completedCards.length) {
+      setWordsDone((n) => n + 1)
+    }
+    if (result.done) {
       finishSession()
       return
     }
-    setWordIndex(nextIndex)
-    setAttemptIndex(0)
-    await fetchExerciseForCurrent(queue[nextIndex])
-  }
-
-  async function handleNextAfterFeedback() {
-    if (!feedback) return
-    const word = queue[wordIndex]
-    if (!word) return
-
-    if (feedback.correct) {
-      firstWrongQuestionRef.current = null
-      await advanceToNextWord()
+    const next = result.queue[0]
+    if (!next) {
+      finishSession()
       return
     }
-
-    // Wrong: one retry max (attemptIndex 0 → fetch again; attemptIndex 1 → next word)
-    if (attemptIndex === 0) {
-      // Keep attempt-1 question before retry fetch clears exercise (for struggled table)
-      if (exercise) {
-        firstWrongQuestionRef.current = {
-          prompt: exercise.content.prompt,
-          expected: expectedAnswer(exercise),
-        }
-      }
-      setAttemptIndex(1)
-      await fetchExerciseForCurrent(word)
-      return
-    }
-
-    // Wrong both attempts: collect for end-of-session notice (attempt 1 from ref + attempt 2)
-    const questions: StruggledQuestion[] = []
-    if (firstWrongQuestionRef.current) {
-      questions.push(firstWrongQuestionRef.current)
-    }
-    if (exercise) {
-      questions.push({
-        prompt: exercise.content.prompt,
-        expected: expectedAnswer(exercise),
-      })
-    }
-    if (questions.length > 0) {
-      setStruggledWords((prev) => [
-        ...prev,
-        {
-          vocabItemId: word.vocabItemId,
-          finnishWord: word.finnishWord,
-          translation: word.translation,
-          questions,
-        },
-      ])
-    }
-    firstWrongQuestionRef.current = null
-    await advanceToNextWord()
+    await fetchExerciseForCard(next)
   }
 
   async function skipCurrentWord() {
-    await advanceToNextWord()
+    const rest = queue.slice(1)
+    setWordsDone((n) => n + 1)
+    setQueue(rest)
+    setFeedback(null)
+    setExercise(null)
+    setExerciseError(null)
+    if (rest.length === 0) {
+      finishSession()
+      return
+    }
+    await fetchExerciseForCard(rest[0])
   }
 
   async function retryLoadExercise() {
-    const word = queue[wordIndex]
-    if (!word) return
-    await fetchExerciseForCurrent(word)
+    const card = queue[0]
+    if (!card) return
+    await fetchExerciseForCard(card)
+  }
+
+  function gradeFront(correct: boolean) {
+    setQueue((prev) => {
+      const current = prev[0]
+      if (!current) return prev
+      return [gradePracticeCard(current, correct), ...prev.slice(1)]
+    })
   }
 
   function checkAnswer(loaded: LoadedExercise): boolean {
@@ -418,6 +383,7 @@ export function PracticePage() {
     if (loaded.exerciseType === 'mcq' && selectedOption === null) return
 
     const correct = checkAnswer(loaded)
+    gradeFront(correct)
     recordAnswer(correct, expectedAnswer(loaded))
   }
 
@@ -427,6 +393,7 @@ export function PracticePage() {
     setSelectedOption(chosen)
     const content = loaded.content as McqContent
     const correct = chosen === content.correct
+    gradeFront(correct)
     recordAnswer(correct, content.correct)
   }
 
@@ -463,9 +430,9 @@ export function PracticePage() {
     exerciseError,
     loadingExercise,
     exercise,
-    wordIndex,
-    attemptIndex,
     queue,
+    completedCards,
+    sessionWordCount,
   ])
 
   useEffect(() => {
@@ -477,9 +444,10 @@ export function PracticePage() {
     ) {
       typedInputRef.current?.focus()
     }
-  }, [pageState, exercise, feedback, loadingExercise, wordIndex, attemptIndex])
+  }, [pageState, exercise, feedback, loadingExercise])
 
-  const currentWord = queue[wordIndex] ?? null
+  const currentWord = queue[0] ?? null
+  const hardWords = completedCards.filter((card) => card.totalWrong >= 2)
 
   if (pageState === 'setup') {
     return (
@@ -579,27 +547,18 @@ export function PracticePage() {
         <p className={`mt-2 text-sm ${mutedTextClassName}`}>
           Tổng số câu gồm cả lần làm lại khi sai. Lịch ôn Level 1 không đổi.
         </p>
-        {struggledWords.length > 0 ? (
+        {hardWords.length > 0 ? (
           <div className="mt-8 border-t border-[var(--color-border)] pt-6 dark:border-[var(--color-border-dark)]">
             <h2 className="text-lg font-medium text-[var(--color-text)] dark:text-[var(--color-text-dark)]">
-              Chú ý những từ này vì bạn sai 2 lần
+              Chú ý những từ này vì bạn sai từ 2 lần trở lên
             </h2>
-            <ul className="mt-4 space-y-6">
-              {struggledWords.map((w) => (
+            <ul className="mt-4 space-y-4">
+              {hardWords.map((w) => (
                 <li key={w.vocabItemId}>
                   <div className="font-medium text-[var(--color-text)] dark:text-[var(--color-text-dark)]">
                     {w.finnishWord} — {w.translation}
                   </div>
-                  <ul className={`mt-2 space-y-2 text-sm ${mutedTextClassName}`}>
-                    {w.questions.map((q, i) => (
-                      <li key={i}>
-                        <div>{q.prompt}</div>
-                        <div>
-                          Đáp án: <strong>{q.expected}</strong>
-                        </div>
-                      </li>
-                    ))}
-                  </ul>
+                  <div className={`mt-1 text-sm ${mutedTextClassName}`}>Sai {w.totalWrong} lần</div>
                 </li>
               ))}
             </ul>
@@ -624,7 +583,7 @@ export function PracticePage() {
 
   // practicing
   const progressLabel =
-    sessionWordCount > 0 ? `${Math.min(wordIndex + 1, sessionWordCount)} / ${sessionWordCount} từ` : null
+    sessionWordCount > 0 ? `${wordsDone} / ${sessionWordCount} từ` : null
 
   return (
     <div className="mx-auto w-full max-w-xl">
@@ -634,21 +593,21 @@ export function PracticePage() {
         {progressLabel ? (
           <div>
             <div className={`text-xs ${mutedTextClassName}`}>{progressLabel}</div>
-            {attemptIndex === 1 ? (
-              <div className={`mt-1 text-xs ${mutedTextClassName}`}>Lần làm lại</div>
+            {currentWord && currentWord.totalWrong > 0 ? (
+              <div className={`mt-1 text-xs ${mutedTextClassName}`}>Làm lại</div>
             ) : null}
             <div
               role="progressbar"
               aria-valuemin={0}
               aria-valuemax={sessionWordCount}
-              aria-valuenow={wordIndex}
+              aria-valuenow={wordsDone}
               aria-label="Tiến độ phiên luyện tập"
               className="mt-2 h-0.5 w-full overflow-hidden rounded-base bg-[var(--color-border)] dark:bg-[var(--color-border-dark)]"
             >
               <div
                 className="h-full rounded-base bg-[var(--color-accent)] dark:bg-[var(--color-accent-dark)]"
                 style={{
-                  width: `${sessionWordCount > 0 ? (wordIndex / sessionWordCount) * 100 : 0}%`,
+                  width: `${sessionWordCount > 0 ? (wordsDone / sessionWordCount) * 100 : 0}%`,
                 }}
               />
             </div>
@@ -783,7 +742,7 @@ export function PracticePage() {
                 >
                   {feedback.correct ? 'Đúng!' : 'Sai.'}
                 </div>
-                {!feedback.correct && attemptIndex === 1 ? (
+                {!feedback.correct ? (
                   <div className="mt-2 text-base text-[var(--color-text)] dark:text-[var(--color-text-dark)]">
                     <span className={mutedTextClassName}>Đáp án: </span>
                     <strong>{feedback.expected}</strong>

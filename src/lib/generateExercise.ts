@@ -39,13 +39,24 @@ function parseContent(exerciseType: ExerciseType, raw: unknown): ExerciseContent
   return isMcq(raw) ? raw : null
 }
 
+/** Worker rejects exclude_ids longer than this. Keep the newest ids, oldest-first. */
+const MAX_EXCLUDE_IDS = 50
+
+function excludeIdsForRequest(excludeIds: readonly string[] | undefined): string[] {
+  if (!excludeIds || excludeIds.length === 0) return []
+  if (excludeIds.length <= MAX_EXCLUDE_IDS) return [...excludeIds]
+  return excludeIds.slice(excludeIds.length - MAX_EXCLUDE_IDS)
+}
+
 /**
  * POST /api/generate-exercise with the current Supabase access token.
  * Same-origin Worker; no CORS helpers needed.
+ * Omit exclude_ids when the list is empty (first show of a word).
  */
 export async function generateExercise(
   vocabItemId: string,
   exerciseType: ExerciseType,
+  excludeIds?: readonly string[],
 ): Promise<GenerateExerciseResult> {
   const {
     data: { session },
@@ -55,6 +66,13 @@ export async function generateExercise(
     return { ok: false, status: 401, error: 'unauthorized', detail: 'Không có phiên đăng nhập.' }
   }
 
+  const excludeForRequest = excludeIdsForRequest(excludeIds)
+  const payload: { vocab_item_id: string; exercise_type: ExerciseType; exclude_ids?: string[] } = {
+    vocab_item_id: vocabItemId,
+    exercise_type: exerciseType,
+  }
+  if (excludeForRequest.length > 0) payload.exclude_ids = excludeForRequest
+
   let response: Response
   try {
     response = await fetch('/api/generate-exercise', {
@@ -63,10 +81,7 @@ export async function generateExercise(
         Authorization: `Bearer ${token}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        vocab_item_id: vocabItemId,
-        exercise_type: exerciseType,
-      }),
+      body: JSON.stringify(payload),
     })
   } catch {
     return {

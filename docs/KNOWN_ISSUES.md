@@ -13,6 +13,25 @@ Lỗi / sai lệch đã biết. Đánh số từ **KI-001**. Entry mới ở đ�
 
 ---
 
+## KI-037 — Practice Level 2: không trần lần lặp, F5 mất phiên, lần lặp có thể tốn quota hoặc lặp câu
+
+**Mức độ:** Low  
+**File liên quan:** `src/lib/practiceSession.ts`, `src/pages/PracticePage.tsx`, `worker/index.ts` (`findPoolExercise`, `findFallbackExercise`, `generateFreshExercise`)
+
+**Mô tả:**
+
+- (a) Không có trần số lần lặp. `repeatDebt` cộng 3/2/1 rồi lúc Tiếp trừ 1; từ lần sai thứ 3 trở đi nợ sau Tiếp không giảm nếu vẫn sai. Từ sai mãi thì không rời queue, phiên không kết thúc. Cùng tính chất với Level 1 (`advanceSession`).
+- (b) Queue, `repeatDebt`, `pendingTypes` và danh sách `exclude_ids` chỉ nằm trong memory. F5 hoặc đóng tab lúc `practicing` mất phiên (về setup), không ghi `user_vocab_progress`.
+- (c) Mỗi lần hiện gọi `POST /api/generate-exercise`. Pool không còn câu ngoài `exclude_ids` thì Worker sinh câu mới và tăng `generations_used` (Hướng B). Hết quota, Claude lỗi/billing, hoặc insert fail thì dùng lại một câu trong `exclude_ids` (bỏ cooldown lúc chọn, vẫn bump `times_shown`) nếu còn hàng; không còn hàng thì trả lỗi như cũ.
+
+**Cách tái hiện:** (a) Cứ trả lời sai một từ. (b) F5 giữa phiên. (c) Luyện một từ đến khi mọi câu `fill_blank` của từ đó nằm trong `exclude_ids` hoặc đang cooldown, rồi sai tiếp đến khi chạm `daily_exercise_quota`.
+
+**Hướng fix:** Chưa làm. Trần lặp hoặc nút bỏ từ giữa câu là quyết định sản phẩm. Resume phiên cần lưu state ngoài memory. Quota: chấp nhận dự phòng câu cũ; không đổi Hướng B.
+
+**Trạng thái:** Open (2026-11-16)
+
+---
+
 ## KI-036 — Worker insertExercise fail sau khi Claude đã sinh xong → tốn 1 lần gọi Claude, không lưu câu
 
 **Mức độ:** Low  

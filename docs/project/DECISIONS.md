@@ -4,6 +4,28 @@ Ghi theo thời gian, mới nhất ở trên. Mỗi entry: tên ngắn, ngày, q
 
 ---
 
+## Practice Level 2: nợ giống Level 1 + luật loại câu
+
+**Ngày:** 2026-11-16
+
+**Quyết định:**
+
+- `/practice/:deckId` bỏ retry một lần cùng `exercise_type`. Queue rút/chèn như Level 1: `repeatDebt` cộng 3 / 2 / 1 theo lần sai thứ 1 / 2 / 3+ của từ trong phiên (`totalWrong`), lúc Tiếp trừ 1 và nhét lại một lần tại `computeReinsertGap(initialSessionSize)` (import từ `src/lib/session.ts`, không sửa file đó). Đúng và `repeatDebt === 0` thì từ rời queue. Không trần số lần lặp.
+- Loại câu («câu viết» = `fill_blank`): lần đầu là `firstType` bốc 50/50 lúc load. Mỗi lần sai nối thêm một mẻ dài đúng bằng số nợ vừa cộng. Mẻ lần sai 1 (3 phần tử) và lần 2 (2 phần tử) có ít nhất một `fill_blank` ở vị trí ngẫu nhiên, phần còn lại 50/50 lúc tạo mẻ. Lần sai 3 trở đi: một `fill_blank`. Phần `pendingTypes` còn lại từ các lần sai trước giữ nguyên loại.
+- Hiện đáp án đúng sau mọi lần sai, kể cả lần đầu (MCQ hiện option đúng).
+- Từ khó trên màn xong: `totalWrong >= 2`. Chỉ báo «Làm lại» khi `totalWrong > 0`. Tiến độ vẫn đếm từ đã xong / số từ ban đầu (cap 20), không tăng vì lần lặp. Không ghi `user_vocab_progress`.
+- `POST /api/generate-exercise` nhận `exclude_ids` tùy chọn (bỏ qua hoặc `[]` = hành vi cũ; nếu có thì mảng tối đa 50 UUID, sai thì 400). Khi có danh sách: pool cùng từ + loại, không cooldown, `times_shown` thấp nhất, trừ các id đó, rồi bump. Hết pool thì sinh mới (quota Hướng B). Không sinh được (hết quota, Claude lỗi/billing, insert fail) thì dùng lại một id trong `exclude_ids` của đúng từ + loại, `times_shown` thấp nhất, bỏ qua cooldown lúc chọn, vẫn bump. Không còn hàng thì trả lỗi như cũ. Response shape không đổi.
+
+**Lý do:** Luyện lại từ sai theo cùng nhịp nợ với Level 1, và ép câu viết vào các lần lặp. `exclude_ids` giảm việc đụng đúng câu vừa hiện; hết pool hoặc hết quota vẫn có câu để luyện.
+
+**Phạm vi:** `src/lib/practiceSession.ts`, `PracticePage.tsx`, `src/lib/generateExercise.ts`, `worker/index.ts`, docs. Không sửa `src/lib/session.ts`, `ReviewPage`, `FilePracticePage`, không DDL.
+
+**Không làm gì:** Không trần vòng lặp. Không persist phiên qua F5. Không đổi SRS.
+
+**Thay thế:** phần «tối đa 1 lần làm lại cùng type, sai lần 2 sang từ tiếp» trong «Task 5 bước 4» — đánh dấu Superseded bên dưới.
+
+---
+
 ## Review + Practice + FilePractice trong AppLayout; form max-w-xl
 
 **Ngày:** 2026-09-28
@@ -40,7 +62,9 @@ Ghi theo thời gian, mới nhất ở trên. Mỗi entry: tên ngắn, ngày, q
 
 **Ngày:** 2026-09-27
 
-**[SUPERSEDED (layout) 2026-09-28]** bởi «Review + Practice + FilePractice trong AppLayout…». Route practice giờ trong `AppLayout` (form `max-w-xl`), không còn `FocusLayout` ngoài layout. Phần còn đúng: ưu tiên times_shown, 1 lần lặp khi sai, không ghi SRS, Worker `times_shown`.
+**[SUPERSEDED (layout) 2026-09-28]** bởi «Review + Practice + FilePractice trong AppLayout…». Route practice giờ trong `AppLayout` (form `max-w-xl`), không còn `FocusLayout` ngoài layout.
+
+**[SUPERSEDED (retry) 2026-11-16]** bởi «Practice Level 2: nợ giống Level 1 + luật loại câu». Không còn đúng: tối đa 1 lần làm lại cùng `exercise_type`, sai lần 2 sang từ tiếp. Phần còn đúng: ưu tiên `times_shown`, cap 20, owner-only, không ghi SRS, Worker vẫn tăng `times_shown`.
 
 **Quyết định:**
 

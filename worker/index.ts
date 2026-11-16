@@ -132,29 +132,87 @@ function supabaseHeaders(serviceRoleKey: string): HeadersInit {
   }
 }
 
+const MAX_EXCLUDE_IDS = 50
+
+function exerciseResponse(id: string, exerciseType: ExerciseType, content: ExerciseContent): Response {
+  return json(
+    {
+      exercise: {
+        id,
+        exercise_type: exerciseType,
+        content,
+      },
+    },
+    200,
+  )
+}
+
+/** Absent or empty → []. Present but not a list of at most 50 UUIDs → null. */
+function parseExcludeIds(value: unknown): string[] | null {
+  if (value === undefined) return []
+  if (!Array.isArray(value)) return null
+  if (value.length === 0) return []
+  if (value.length > MAX_EXCLUDE_IDS) return null
+  const ids: string[] = []
+  for (const item of value) {
+    if (typeof item !== 'string' || !UUID_RE.test(item)) return null
+    ids.push(item)
+  }
+  return ids
+}
+
+async function queryExercises(
+  env: Env,
+  params: URLSearchParams,
+  logLabel: string,
+): Promise<GeneratedRow[]> {
+  const res = await fetch(`${env.SUPABASE_URL}/rest/v1/generated_exercises?${params}`, {
+    method: 'GET',
+    headers: supabaseHeaders(env.SUPABASE_SERVICE_ROLE_KEY),
+  })
+  if (!res.ok) {
+    console.error(logLabel, res.status)
+    throw new Error('pool_query_failed')
+  }
+  return (await res.json()) as GeneratedRow[]
+}
+
 async function findPoolExercise(
   env: Env,
   vocabItemId: string,
   exerciseType: ExerciseType,
   today: string,
+  excludeIds: string[],
 ): Promise<GeneratedRow | null> {
   const params = new URLSearchParams()
   params.set('select', 'id,exercise_type,content,times_shown,cooldown_until')
   params.set('vocab_item_id', `eq.${vocabItemId}`)
   params.set('exercise_type', `eq.${exerciseType}`)
   params.set('or', `(cooldown_until.is.null,cooldown_until.lte.${today})`)
+  if (excludeIds.length > 0) params.set('id', `not.in.(${excludeIds.join(',')})`)
   params.set('order', 'times_shown.asc')
   params.set('limit', '1')
 
-  const res = await fetch(`${env.SUPABASE_URL}/rest/v1/generated_exercises?${params}`, {
-    method: 'GET',
-    headers: supabaseHeaders(env.SUPABASE_SERVICE_ROLE_KEY),
-  })
-  if (!res.ok) {
-    console.error('pool query failed', res.status)
-    throw new Error('pool_query_failed')
-  }
-  const rows = (await res.json()) as GeneratedRow[]
+  const rows = await queryExercises(env, params, 'pool query failed')
+  return rows[0] ?? null
+}
+
+/** Lowest times_shown among exclude_ids for this word and type. Cooldown is not applied. */
+async function findFallbackExercise(
+  env: Env,
+  vocabItemId: string,
+  exerciseType: ExerciseType,
+  excludeIds: string[],
+): Promise<GeneratedRow | null> {
+  const params = new URLSearchParams()
+  params.set('select', 'id,exercise_type,content,times_shown,cooldown_until')
+  params.set('vocab_item_id', `eq.${vocabItemId}`)
+  params.set('exercise_type', `eq.${exerciseType}`)
+  params.set('id', `in.(${excludeIds.join(',')})`)
+  params.set('order', 'times_shown.asc')
+  params.set('limit', '1')
+
+  const rows = await queryExercises(env, params, 'fallback query failed')
   return rows[0] ?? null
 }
 
@@ -405,6 +463,78 @@ async function insertExercise(
   return id ? { id } : null
 }
 
+type FreshExercise =
+  | { status: 'created'; id: string; content: ExerciseContent }
+  | { status: 'error'; response: Response; allowFallback: boolean }
+
+/** New Claude exercise. Quota increments only after a successful insert (Hướng B). */
+async function generateFreshExercise(
+  env: Env,
+  userId: string,
+  vocabItemId: string,
+  exerciseType: ExerciseType,
+  today: string,
+): Promise<FreshExercise> {
+  await ensureQuotaRow(env, userId, today)
+  const { used, limit } = await readQuota(env, userId, today)
+  if (used >= limit) {
+    return {
+      status: 'error',
+      allowFallback: true,
+      response: json(
+        {
+          error: 'quota_exceeded',
+          detail: 'Đã hết lượt sinh bài tập hôm nay, chưa có câu nào sẵn sàng cho từ này.',
+        },
+        429,
+      ),
+    }
+  }
+
+  const vocab = await loadOwnedVocab(env, userId, vocabItemId)
+  if (!vocab) {
+    return {
+      status: 'error',
+      allowFallback: false,
+      response: json({ error: 'vocab_item_not_found' }, 404),
+    }
+  }
+
+  const claude = await callClaude(env, exerciseType, vocab.finnish_word, vocab.translation)
+  if (claude.kind === 'unavailable') {
+    return {
+      status: 'error',
+      allowFallback: true,
+      response: json(
+        {
+          error: 'generation_unavailable',
+          detail: 'Tính năng sinh bài tập mới tạm ngưng. Bạn vẫn luyện được các từ đã có bài tập.',
+        },
+        503,
+      ),
+    }
+  }
+  if (claude.kind === 'failed') {
+    return {
+      status: 'error',
+      allowFallback: true,
+      response: json({ error: 'generation_failed' }, 502),
+    }
+  }
+
+  const inserted = await insertExercise(env, vocabItemId, exerciseType, claude.content)
+  if (!inserted) {
+    return {
+      status: 'error',
+      allowFallback: true,
+      response: json({ error: 'internal_error' }, 500),
+    }
+  }
+
+  await incrementQuota(env, userId, today, used)
+  return { status: 'created', id: inserted.id, content: claude.content }
+}
+
 async function handleGenerateExercise(request: Request, env: Env): Promise<Response> {
   const accessToken = bearerToken(request)
   if (!accessToken) {
@@ -448,84 +578,47 @@ async function handleGenerateExercise(request: Request, env: Env): Promise<Respo
   if (!body || typeof body !== 'object') {
     return json({ error: 'invalid_request' }, 400)
   }
-  const { vocab_item_id: vocabItemId, exercise_type: exerciseType } = body as {
+  const record = body as {
     vocab_item_id?: unknown
     exercise_type?: unknown
+    exclude_ids?: unknown
   }
+  const vocabItemId = record.vocab_item_id
+  const exerciseType = record.exercise_type
   if (typeof vocabItemId !== 'string' || !UUID_RE.test(vocabItemId)) {
     return json({ error: 'invalid_request' }, 400)
   }
   if (exerciseType !== 'fill_blank' && exerciseType !== 'mcq') {
     return json({ error: 'invalid_request' }, 400)
   }
+  const excludeIds = parseExcludeIds(record.exclude_ids)
+  if (!excludeIds) {
+    return json({ error: 'invalid_request' }, 400)
+  }
 
   const today = todayIsoDate()
 
   try {
-    const pooled = await findPoolExercise(env, vocabItemId, exerciseType, today)
+    const pooled = await findPoolExercise(env, vocabItemId, exerciseType, today, excludeIds)
     if (pooled) {
       await bumpPoolExercise(env, pooled, today)
-      return json(
-        {
-          exercise: {
-            id: pooled.id,
-            exercise_type: pooled.exercise_type,
-            content: pooled.content,
-          },
-        },
-        200,
-      )
+      return exerciseResponse(pooled.id, pooled.exercise_type, pooled.content)
     }
 
-    await ensureQuotaRow(env, user.id, today)
-    const { used, limit } = await readQuota(env, user.id, today)
-    if (used >= limit) {
-      return json(
-        {
-          error: 'quota_exceeded',
-          detail: 'Đã hết lượt sinh bài tập hôm nay, chưa có câu nào sẵn sàng cho từ này.',
-        },
-        429,
-      )
+    const fresh = await generateFreshExercise(env, user.id, vocabItemId, exerciseType, today)
+    if (fresh.status === 'created') {
+      return exerciseResponse(fresh.id, exerciseType, fresh.content)
     }
 
-    const vocab = await loadOwnedVocab(env, user.id, vocabItemId)
-    if (!vocab) {
-      return json({ error: 'vocab_item_not_found' }, 404)
+    if (fresh.allowFallback && excludeIds.length > 0) {
+      const fallback = await findFallbackExercise(env, vocabItemId, exerciseType, excludeIds)
+      if (fallback) {
+        await bumpPoolExercise(env, fallback, today)
+        return exerciseResponse(fallback.id, fallback.exercise_type, fallback.content)
+      }
     }
 
-    const claude = await callClaude(env, exerciseType, vocab.finnish_word, vocab.translation)
-    if (claude.kind === 'unavailable') {
-      return json(
-        {
-          error: 'generation_unavailable',
-          detail:
-            'Tính năng sinh bài tập mới tạm ngưng. Bạn vẫn luyện được các từ đã có bài tập.',
-        },
-        503,
-      )
-    }
-    if (claude.kind === 'failed') {
-      return json({ error: 'generation_failed' }, 502)
-    }
-
-    const inserted = await insertExercise(env, vocabItemId, exerciseType, claude.content)
-    if (!inserted) {
-      return json({ error: 'internal_error' }, 500)
-    }
-
-    await incrementQuota(env, user.id, today, used)
-
-    return json(
-      {
-        exercise: {
-          id: inserted.id,
-          exercise_type: exerciseType,
-          content: claude.content,
-        },
-      },
-      200,
-    )
+    return fresh.response
   } catch {
     console.error('generate-exercise unexpected failure')
     return json({ error: 'internal_error' }, 500)
