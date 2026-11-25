@@ -4,6 +4,20 @@ Ghi theo thời gian, mới nhất ở trên. Mỗi entry: tên ngắn, ngày, q
 
 ---
 
+## Parser bỏ qua dòng trống ở mọi vị trí; báo lỗi upload chỉ rõ cách sửa
+
+**Ngày:** 2026-11-25
+
+**Quyết định:** `parseDeckFile` bỏ qua mọi dòng `trim() === ''` (đầu, giữa, cuối), không ghi lỗi và không cảnh báo số dòng bị bỏ. Tách dòng bằng `\r\n` | `\r` | `\n` (vẫn bỏ BOM đầu file). Số dòng báo lỗi là số dòng gốc trong file. Giới hạn 500 đếm trên dòng không trống; vượt thì `validLines` rỗng và một lỗi `File có N dòng, tối đa 500 dòng`. Câu lỗi thiếu `;`, thiếu từ, thiếu nghĩa, trùng từ nói cách sửa. `ParseErrorList` dùng chung; `/practice-file` hiện danh sách lỗi, tối đa 20 lỗi đầu. File rỗng hoặc chỉ dòng trống vẫn ra `validLines` và `errors` rỗng.
+
+**Lý do:** Dòng trống không chứa dữ liệu; chặn nó chỉ gây phiền (khóa Lưu khi file có dòng trống giữa các từ). Xuống dòng `\r` đơn trước đó dính nghĩa của dòng sau mà không báo. Trang luyện file chỉ đếm lỗi, không chỉ dòng cần sửa.
+
+**Phạm vi:** `src/lib/deckParser.ts`, `src/components/ParseErrorList.tsx`, `src/pages/CreateDeckPage.tsx`, `src/pages/FilePracticePage.tsx`. KI-038 Closed.
+
+**Không làm gì:** Không cảnh báo «đã bỏ qua N dòng trống». Không nới `canSave`. Không đổi giới hạn 500 (chỉ đổi cách đếm) và không đổi cách so trùng.
+
+---
+
 ## Practice Level 2: nợ giống Level 1 + luật loại câu
 
 **Ngày:** 2026-11-16
@@ -325,6 +339,8 @@ Ghi theo thời gian, mới nhất ở trên. Mỗi entry: tên ngắn, ngày, q
 ---
 
 ## Parser bỏ qua dòng trống cuối file
+
+**[SUPERSEDED 2026-11-25]** bởi «Parser bỏ qua dòng trống ở mọi vị trí; báo lỗi upload chỉ rõ cách sửa». Dòng trống giữa file và đầu file không còn là lỗi. Phần còn đúng: file rỗng hoặc chỉ dòng trống ra `validLines` và `errors` rỗng; `canSave` không nới.
 
 **Ngày:** 2026-09-19
 

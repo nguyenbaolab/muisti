@@ -1,7 +1,9 @@
 # REQUIREMENTS — Muisti (Finnish Learning App)
 
-**Phiên bản:** v0.3.5  
-**Cập nhật:** 2026-11-16
+**Phiên bản:** v0.3.6  
+**Cập nhật:** 2026-11-25
+
+**Changelog v0.3.6:** Parser bỏ qua dòng trống mọi vị trí (kể cả xuống dòng `\r` đơn); tối đa 500 dòng không trống; câu lỗi upload chỉ cách sửa; `/practice-file` hiện danh sách lỗi (tối đa 20 lỗi đầu).
 
 **Changelog v0.3.5:** Practice Level 2 dùng nợ 3/2/1 như Level 1, luật loại câu (`fill_blank` trong mẻ lần sai), hiện đáp án sau mọi lần sai, `exclude_ids` trên `POST /api/generate-exercise`.
 
@@ -55,8 +57,8 @@ Khai thác nội dung SM2 sâu hơn (bài tập ngữ pháp, vận dụng) là m
 - **Sửa metadata deck:** Done (2026-09-16). Owner sửa `name` / `meaning_language` / `description` / `visibility` / `active_pool_size` tại `/decks/:id/edit`. Không sửa danh sách `vocab_items` (thêm/xóa/sửa từng từ) ở slice này. Public → private không còn guard (học viên dùng bản clone độc lập). Hạ `active_pool_size` dưới active_count hiện tại: cho phép (không trục xuất từ đã enroll).
 - **Deck public người khác:** Done (verify 2026-09-16, tài khoản B). Xem-trước đọc-only tại `/decks/:id/preview` + **Clone** về deck riêng (`name` + ` (Copy)`, `visibility = private`, `active_pool_size = 20`, copy `vocab_items`, không copy progress). Clone + enroll Active Pool trên bản copy đã verify end-to-end. Không học trực tiếp trên deck gốc. Deck của chính mình (public hay private) vẫn ôn `/review/:deckId` như cũ.
 - **Tên người chia sẻ:** Done (code 2026-09-17; 009 applied). Deck không phải của mình trên `/decks` và `/decks/:id/preview` hiện «Chia sẻ bởi {phần trước @}» (không dấu hai chấm). Deck của mình không hiện dòng này. Không hiện email đầy đủ.
-- Input: file `.txt` / `.csv`, mỗi dòng `từ_phần_lan;nghĩa`. Parse thuần code (`src/lib/deckParser.ts`) — **không** dùng AI. Tối đa 500 dòng (đếm sau khi cắt dòng trống cuối); dòng trống giữa file vẫn là lỗi; dòng lỗi chặn lưu.
-- Sau parse: preview xác nhận «Xem trước» (bảng lỗi trước, rồi từ hợp lệ; mobile lỗi xếp chồng). **Không** sửa từng dòng trong preview ở slice này — file phải sạch mới Lưu được (mọi lỗi parse, kể cả dòng trống giữa file, khóa nút). Newline / dòng trống cuối file không còn là lỗi (KI-016 Closed).
+- Input: file `.txt` / `.csv`, mỗi dòng `từ_phần_lan;nghĩa`. Parse thuần code (`src/lib/deckParser.ts`) — **không** dùng AI. Tối đa 500 dòng không trống (dòng trống mọi vị trí bị bỏ qua, không báo); dòng lỗi chặn lưu.
+- Sau parse: preview xác nhận «Xem trước» (bảng lỗi trước, rồi từ hợp lệ; mobile lỗi xếp chồng). **Không** sửa từng dòng trong preview ở slice này — file phải sạch mới Lưu được (mọi lỗi parse khóa nút). Dòng trống không còn là lỗi.
 - Cùng mặt chữ ở hai deck = hai `vocab_items` độc lập, hai dòng `user_vocab_progress` độc lập — không gộp, không chặn trùng.
 - UI: `/decks` 2 tab **Cá nhân** / **Public** (state `activeTab`; `?tab=public` mở Public lúc mount, mọi giá trị khác / không có param mở Cá nhân; không sync tab lại URL; tablist ARIA + roving tabindex). Click own → `/decks/:id`; click không phải mình → `/decks/:id/preview`; header: nút success «Luyện file tự do» (`/practice-file`) + `<Link>` giả dạng Button primary «Tạo deck mới» (`/decks/new`); `/decks/:id/edit` sửa metadata (owner, `<Link>` Sửa trên list và trên trang chi tiết); xóa deck (owner) CASCADE vocab + progress, `window.confirm` cũ. Ôn tập vẫn `/review/:deckId` (link trên trang chi tiết). List owned hiện visibility Việt hóa «Công khai» / «Riêng tư» (chỉ hiển thị; giá trị DB `public`/`private` không đổi).
 - **Nhịp học khuyến nghị (copy UI 2026-09-19):** mỗi ngày vào một hoặc vài deck bấm «Bắt đầu ôn tập» (ôn từ đến hạn của deck đó và thêm từ mới cho đủ số từ học cùng lúc), sau đó vào «Ôn tập» chung `/review` để ôn thêm một lượt các từ đến hạn của mọi deck. Mix **không** thêm từ mới. Nav `title`: Decks «Xem và học các deck của bạn»; Ôn tập «Ôn các từ đến hạn trong mọi deck».
@@ -85,7 +87,7 @@ Chính là thuật toán đã chốt và implement ở T1.5 — **không thiết
 - Điều kiện “sẵn sàng lên Level 2” (3 lần đúng liên tiếp trong SRS): **chưa triển khai / roadmap** — không có cột hay logic trong code.
 - Ba hình thức hỏi (setup tick, ít nhất một): **Gõ chữ** (hiện nghĩa → gõ từ Phần); **Trắc nghiệm chọn nghĩa** (hiện từ Phần → 4 đáp án nghĩa); **Trắc nghiệm chọn từ** (hiện nghĩa → 4 đáp án từ Phần). Trọng số chọn hình thức: gõ = 2, mỗi loại MCQ = 1 (cả ba bật → ~50/25/25; chuẩn hóa theo tick bật). Fallback về gõ chữ khi không đủ 3 distractor (`pickMcqOptions` trả `null`).
 - **HUD màn làm bài** (Review mix/deck/extra và FilePractice): «Câu X / Y» (X = số lần present, kể cả reinsert; Y = plannedAttempts — khởi tạo = số từ phiên, tăng theo debt 3/2/1 khi sai), số đúng, số sai, đồng hồ live. Cập nhật lúc bấm Tiếp (đóng băng khi xem feedback); thuần hiển thị — không đụng SRS/persist.
-- **Tự luyện file tự do (F-07):** Done (2026-09-28). Route `/practice-file` (`FilePracticePage` trong `AppLayout`). Upload file `từ_phần;nghĩa` (`parseDeckFile`), chọn số từ, luyện tạm với cùng hỏi/đáp + D1 (`lib/session`) — **không** ghi `decks` / `vocab_items` / `user_vocab_progress`. Nút success «Luyện file tự do» trên header `/decks`.
+- **Tự luyện file tự do (F-07):** Done (2026-09-28). Route `/practice-file` (`FilePracticePage` trong `AppLayout`). Upload file `từ_phần;nghĩa` (`parseDeckFile`), chọn số từ, luyện tạm với cùng hỏi/đáp + D1 (`lib/session`) — **không** ghi `decks` / `vocab_items` / `user_vocab_progress`. Nút success «Luyện file tự do» trên header `/decks`. Lỗi parse hiện danh sách có số dòng, tối đa 20 lỗi đầu.
 - **Màn học (UI järvi Đợt B 2026-09-19; HUD 2026-09-28):** tiến độ `{đã xong} / {tổng phiên} từ` derived (`completedCards.length` và `queue.length`) cạnh HUD lượt. Gợi ý phím (chỉ `sm+`, `aria-hidden`): Enter để trả lời / A–D / Enter để tiếp tục — không đổi logic phím.
 - **Phím tắt lúc ôn** (`pageState === 'reviewing'`): Gõ chữ — Enter submit form (lần 1), Enter lần 2 (đã có feedback) → câu tiếp. MCQ — A/B/C/D chọn + submit ngay; Enter sau feedback → câu tiếp. Chuột (radio / Trả lời / Tiếp theo) vẫn dùng được. Không áp dụng ở setup/done/error/empty.
 

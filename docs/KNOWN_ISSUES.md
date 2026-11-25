@@ -13,6 +13,25 @@ Lỗi / sai lệch đã biết. Đánh số từ **KI-001**. Entry mới ở đ�
 
 ---
 
+## KI-038 — Dòng trống giữa file khóa Lưu, `\r` đơn parse sai, `/practice-file` không chỉ dòng lỗi
+
+**Mức độ:** Medium  
+**File liên quan:** `src/lib/deckParser.ts`, `src/pages/CreateDeckPage.tsx`, `src/pages/FilePracticePage.tsx`, `src/components/ParseErrorList.tsx`
+
+**Mô tả:** Ba vấn đề:
+
+1. Dòng trống giữa file và ở đầu file bị coi là lỗi «Dòng trống» và khóa Lưu. Dòng trống không chứa từ, nên chặn nó không bảo vệ dữ liệu. KI-016 và KI-010 chỉ xử lý dòng trống cuối file.
+2. `split(/\r?\n/)` không tách xuống dòng kiểu `\r` đơn. File `kissa;mèo\rkoira;chó` ra 1 từ hợp lệ với nghĩa sai `mèo\rkoira;chó` (parse sai im lặng).
+3. `/practice-file` chỉ hiện «File có N dòng lỗi», không cho biết dòng nào và lỗi gì. `CreateDeckPage` đã có danh sách lỗi nhưng component nằm cục bộ.
+
+**Cách tái hiện:** (1) File có một dòng trống giữa hai từ hợp lệ → preview báo «Dòng trống», nút Lưu khóa. (2) File chỉ dùng `\r` giữa hai dòng `từ;nghĩa` → một từ, nghĩa dính cả dòng sau. (3) Upload file thiếu `;` trên `/practice-file` → chỉ thấy số lỗi.
+
+**Hướng fix (đã làm 2026-11-25):** Bỏ qua mọi dòng `trim() === ''` (không báo); tách `\r\n` / `\r` / `\n`; đếm 500 trên dòng không trống; câu lỗi chỉ cách sửa. `ParseErrorList` dùng chung; `/practice-file` hiện tối đa 20 lỗi đầu. Không đổi `canSave`.
+
+**Trạng thái:** Closed (2026-11-25)
+
+---
+
 ## KI-037 — Practice Level 2: không trần lần lặp, F5 mất phiên, lần lặp có thể tốn quota hoặc lặp câu
 
 **Mức độ:** Low  

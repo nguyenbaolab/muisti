@@ -4,6 +4,16 @@ Nhật ký thay đổi có ý nghĩa. Entry mới ở **đầu file** (sau tiêu
 
 ---
 
+## Parser bỏ qua dòng trống mọi vị trí; báo lỗi upload rõ
+**Ngày:** 2026-11-25
+**Trạng thái:** Done
+
+- `parseDeckFile` bỏ qua dòng trống ở mọi vị trí (im lặng), tách cả xuống dòng `\r` đơn, đếm tối đa 500 trên số dòng không trống. Câu lỗi chỉ cách sửa (thiếu `;`, thiếu từ, thiếu nghĩa, trùng từ).
+- `ParseErrorList` chuyển ra `src/components/ParseErrorList.tsx` (dùng chung). `/decks/new` hiện mọi lỗi như cũ. `/practice-file` hiện danh sách lỗi, tối đa 20 lỗi đầu.
+- `canSave` không đổi. File chỉ toàn dòng trống vẫn ra 0 từ hợp lệ và 0 lỗi → «File không có dòng hợp lệ nào.»
+
+---
+
 ## Practice Level 2: nợ 3/2/1 + luật loại câu + exclude_ids
 **Ngày:** 2026-11-16
 **Trạng thái:** Done

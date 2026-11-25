@@ -10,18 +10,29 @@ export interface ParseError {
   reason: string
 }
 
+const MAX_NON_BLANK_LINES = 500
+
 export function parseDeckFile(content: string): { validLines: ValidLine[]; errors: ParseError[] } {
   const text = content.replace(/^\uFEFF/, '')
-  const lines = text.split(/\r?\n/)
+  // Split CR, LF, and CRLF. A lone \r is a line break, not part of the word.
+  const lines = text.split(/\r\n|\r|\n/)
 
-  while (lines.length > 0 && lines[lines.length - 1].trim() === '') {
-    lines.pop()
+  let nonBlankCount = 0
+  for (const line of lines) {
+    if (line.trim() !== '') nonBlankCount++
   }
 
-  if (lines.length > 500) {
+  // Cap counts non-blank lines only. Over the cap, return that single error.
+  if (nonBlankCount > MAX_NON_BLANK_LINES) {
     return {
       validLines: [],
-      errors: [{ lineNumber: null, rawLine: '', reason: 'File vượt quá 500 dòng' }],
+      errors: [
+        {
+          lineNumber: null,
+          rawLine: '',
+          reason: `File có ${nonBlankCount} dòng, tối đa ${MAX_NON_BLANK_LINES} dòng`,
+        },
+      ],
     }
   }
 
@@ -31,16 +42,19 @@ export function parseDeckFile(content: string): { validLines: ValidLine[]; error
 
   for (let i = 0; i < lines.length; i++) {
     const rawLine = lines[i]
+    // Original file line (1-based), including blank lines skipped above this one.
     const lineNumber = i + 1
 
-    if (rawLine.trim() === '') {
-      errors.push({ lineNumber, rawLine, reason: 'Dòng trống' })
-      continue
-    }
+    // Blank lines carry no word. Skip them quietly at any position.
+    if (rawLine.trim() === '') continue
 
     const sep = rawLine.indexOf(';')
     if (sep === -1) {
-      errors.push({ lineNumber, rawLine, reason: 'Thiếu dấu phân cách ;' })
+      errors.push({
+        lineNumber,
+        rawLine,
+        reason: 'Thiếu dấu ; giữa từ và nghĩa. Dạng đúng: từ;nghĩa',
+      })
       continue
     }
 
@@ -48,19 +62,23 @@ export function parseDeckFile(content: string): { validLines: ValidLine[]; error
     const translation = rawLine.slice(sep + 1).trim()
 
     if (!finnishWord) {
-      errors.push({ lineNumber, rawLine, reason: 'Thiếu từ tiếng Phần Lan' })
+      errors.push({ lineNumber, rawLine, reason: 'Thiếu từ tiếng Phần Lan trước dấu ;' })
       continue
     }
 
     if (!translation) {
-      errors.push({ lineNumber, rawLine, reason: 'Thiếu nghĩa' })
+      errors.push({ lineNumber, rawLine, reason: 'Thiếu nghĩa sau dấu ;' })
       continue
     }
 
     const key = finnishWord.toLowerCase()
     const firstLine = seen.get(key)
     if (firstLine !== undefined) {
-      errors.push({ lineNumber, rawLine, reason: `Trùng với dòng ${firstLine}` })
+      errors.push({
+        lineNumber,
+        rawLine,
+        reason: `Từ «${finnishWord}» đã có ở dòng ${firstLine}`,
+      })
       continue
     }
 

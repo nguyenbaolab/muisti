@@ -3,7 +3,8 @@ import { Link } from 'react-router-dom'
 import { Button, buttonSecondaryClassName } from '../components/Button'
 import { FileField } from '../components/FileField'
 import { Input } from '../components/Input'
-import { parseDeckFile, type ValidLine } from '../lib/deckParser'
+import { ParseErrorList } from '../components/ParseErrorList'
+import { parseDeckFile, type ParseError, type ValidLine } from '../lib/deckParser'
 import {
   advanceSession,
   applyWrong,
@@ -86,7 +87,7 @@ function lineToSessionCard(line: ValidLine, index: number): SessionCard {
 export function FilePracticePage() {
   const [pageState, setPageState] = useState<PageState>('upload')
   const [fileName, setFileName] = useState<string | null>(null)
-  const [parseErrorCount, setParseErrorCount] = useState(0)
+  const [parseErrors, setParseErrors] = useState<ParseError[]>([])
   const [uploadMessage, setUploadMessage] = useState<string | null>(null)
   const [validLines, setValidLines] = useState<ValidLine[]>([])
 
@@ -162,7 +163,7 @@ export function FilePracticePage() {
   function handleFileChange(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0]
     setUploadMessage(null)
-    setParseErrorCount(0)
+    setParseErrors([])
     setFileName(null)
 
     if (!file) return
@@ -174,20 +175,20 @@ export function FilePracticePage() {
       setFileName(file.name)
 
       if (result.errors.length > 0) {
-        setParseErrorCount(result.errors.length)
+        setParseErrors(result.errors)
         setValidLines([])
         setUploadMessage(null)
         return
       }
 
       if (result.validLines.length === 0) {
-        setParseErrorCount(0)
+        setParseErrors([])
         setValidLines([])
         setUploadMessage('File không có từ nào hợp lệ.')
         return
       }
 
-      setParseErrorCount(0)
+      setParseErrors([])
       setUploadMessage(null)
       setValidLines(result.validLines)
       setChosenCount(result.validLines.length)
@@ -195,7 +196,7 @@ export function FilePracticePage() {
     }
     reader.onerror = () => {
       setUploadMessage('Không đọc được file.')
-      setParseErrorCount(0)
+      setParseErrors([])
       setValidLines([])
     }
     reader.readAsText(file)
@@ -312,7 +313,7 @@ export function FilePracticePage() {
     setFinnishPool([])
     setMeaningPool([])
     setFileName(null)
-    setParseErrorCount(0)
+    setParseErrors([])
     setUploadMessage(null)
     setChosenCount(0)
     setFeedback(null)
@@ -410,14 +411,19 @@ export function FilePracticePage() {
             hint="Cùng định dạng với file tạo deck."
           />
         </div>
-        {parseErrorCount > 0 ? (
-          <p
-            role="alert"
-            className="mt-4 text-sm text-[var(--color-danger)] dark:text-[var(--color-danger-dark)]"
-          >
-            File có {parseErrorCount} dòng lỗi. Sửa file rồi thử lại.
-            {fileName ? ` (${fileName})` : ''}
-          </p>
+        {parseErrors.length > 0 ? (
+          <>
+            <p
+              role="alert"
+              className="mt-4 text-sm text-[var(--color-danger)] dark:text-[var(--color-danger-dark)]"
+            >
+              File có {parseErrors.length} lỗi. Sửa file rồi chọn lại file.
+              {fileName ? ` (${fileName})` : ''}
+            </p>
+            <div className="mt-4">
+              <ParseErrorList errors={parseErrors} maxVisible={20} />
+            </div>
+          </>
         ) : null}
         {uploadMessage ? (
           <p
